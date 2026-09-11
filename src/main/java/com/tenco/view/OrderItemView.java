@@ -1,0 +1,123 @@
+package com.tenco.view;
+
+import com.tenco.Service.*;
+import com.tenco.dto.OrderItem;
+import com.tenco.util.util;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Scanner;
+
+public class OrderItemView {
+    private final OrderItemService orderItemService = new OrderItemService();
+
+    private final Scanner scanner = new Scanner(System.in);
+
+    // 처리순서
+    // 1. 메뉴 출력
+    // 2. 번호 입력
+    // 3. 번호에 맞는 메서드 호출
+    // 4. 호출 중 SQLException 이 나면 에러 메세지를 출력하고 다시 1번으로 돌아간다.
+    // 5. 0번을 입력하면 프로그램 종료 또는 return 루프 탈출
+    public void start(){
+        System.out.println("===== 무인편의점 재고 관리 시스템 =====");
+        while(true){
+            printMenu();
+            int choice = readInt("선택: ");
+
+            try {
+                switch (choice){
+                    case 1: addOrderItem(); break;
+                    case 2: selectOrderItem(); break;
+                    case 3: allOrderItem(); break;
+                    case 4: updateOrderItem(); break;
+                    case 5: deleteOrderItem(); break;
+                    case 6: sumOrderItem(); break;
+                    case 0:
+                        System.out.println("프로그램을 종료합니다.");
+                        util.close();
+                        scanner.close();
+                        return;
+                    default:
+                        System.out.println("1~6 사이의 숫자를 입력하세요.");
+                }
+            } catch (Exception e) {
+                System.out.println("오류: " + e.getMessage());
+            }
+        }
+    }
+
+    private void addOrderItem() throws SQLException {
+        System.out.print("");
+        int orderId = scanner.nextInt();
+        System.out.print("");
+        int productId = scanner.nextInt();
+        System.out.print("");
+        int quantity = scanner.nextInt();
+        System.out.print("");
+        int orderPrice = scanner.nextInt();
+
+        OrderItem orderItem = OrderItem.builder()
+                .orderId(orderId)
+                .productId(productId)
+                .quantity(quantity)
+                .orderPrice(orderPrice)
+                .build();
+        orderItemService.addOrderItem(orderItem);
+    }
+
+    private void selectOrderItem() throws SQLException {
+        System.out.println("특정 주문 상품 검색 : ");
+        int orderId = scanner.nextInt();
+        List<OrderItem> orderItemList = orderItemService.selectOrderItem(orderId);
+        for(OrderItem o : orderItemList){
+            System.out.printf("%d | %d | %d | %s | %d | %d\n ",
+                    o.getOrderItemId(), o.getOrderId(), o.getProductId(),
+                    o.getProductName(), o.getQuantity(), o.getOrderPrice());
+        }
+    }
+
+    private void allOrderItem(){
+        System.out.println("특정 주문 상품 검색 : ");
+        List<OrderItem> orderItemList = orderItemService.allOrderItem();
+        for(OrderItem o : orderItemList){
+            System.out.printf("%d | %d | %d | %s | %d | %d\n ",
+                    o.getOrderItemId(), o.getOrderId(), o.getProductId(),
+                    o.getProductName(), o.getQuantity(), o.getOrderPrice());
+        }
+    }
+
+    private void updateOrderItem(){
+
+    }
+
+    private void deleteOrderItem(){
+
+    }
+
+    private void sumOrderItem(){
+
+    }
+
+    private void printMenu() {
+        System.out.println("[메뉴]");
+        System.out.println("1.  주문 상품 등록");
+        System.out.println("2.  특정 상품 조회");
+        System.out.println("3.  주문 전체 조회");
+        System.out.println("4.  주문 상품 수량 수정");
+        System.out.println("5.  주문 상품 삭제");
+        System.out.println("6.  주문별 총 금액 계산");
+        System.out.println("0. 종료");
+    }
+
+    private int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("숫자를 입력해주세요.");
+            }
+        }
+    }
+}
