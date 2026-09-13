@@ -13,10 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PurchaseDAO {
-        private boolean hasProduct = true; // 발주 목록에 이미 상품이 존재하는지 판단할 변수.
 
     // 기능 A. 발주 가능한 상품 전체 조회.
-    public List<PurchaseDto> getAllPurchases() {
+    public List<PurchaseDto> getAllPurchases() throws SQLException {
         List<PurchaseDto> purchaseList = new ArrayList<>();
         try (Connection conn = Util.getConnection()) {
             String existSql = """
@@ -37,8 +36,6 @@ public class PurchaseDAO {
                     return purchaseList;
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -65,13 +62,13 @@ public class PurchaseDAO {
                                 .totlaPrice(rs.getInt("total_price"))
                                 .build();
                         System.out.println(purchaseDto.toString());
-                        hasProduct = true;
+                    }
+                    else  {
+                        System.out.print("id가 " + id + "인 상품은 발주목록에 없습니다." );
                     }
                     return purchaseDto;
                 }
             }
-        } catch (SQLException e) {
-            throw new SQLException(e);
         }
     }
 
@@ -79,14 +76,16 @@ public class PurchaseDAO {
     // 기능 C. 이 상품을 몇개 발주할지 + 총 발주 가격? + 실제 존재하는 발주 상품인지. -- 발주 신청.
     public void purcahseProduct(int id, int quantity) throws SQLException {
         int price = 0;
-
+        PurchaseDto purchaseDto = existList(id);
+        System.out.println(" 그러므로 발주 목록에 새로 등록됩니다.");
         // 실제 발주 가능한 상품인지 -->  몇개 발주할지 (발주,총 발주 가격 수정)
         // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
 
         try (Connection conn = Util.getConnection()) {
             // 1 - 1. 발주 목록에 없는 새로 발주할 상품이라면. insert로 purchase테이블에 등록.
+
             // 2 - 1. product테이블의 price를 가져와야하므로 select로 먼저 price저장.
-            if(!hasProduct) {
+            if(purchaseDto == null) {
                     String priceSql = """
                         select price from product 
                         where product_id = ?
@@ -110,7 +109,7 @@ public class PurchaseDAO {
                         newPurchasePstmt.setInt(4 , quantity * price);
                         int i = newPurchasePstmt.executeUpdate();
                         if (i <= 0) throw new SQLException("발주에 실패하였습니다.");
-                        else System.out.println(i + "건이 새로 발주 목록에 추가되었습니다.");
+                        else System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
                     }
             }
 
@@ -145,8 +144,25 @@ public class PurchaseDAO {
                             rs.getInt("quantity"), rs.getInt("total_price"));
                 }
 
-    } catch (SQLException e) {
-            throw new SQLException(e);
+    }
+    }
+
+    // 기능 D. id로 발주 목록에서 제거.(발주 취소)
+    public int deletePurchase(int id) throws SQLException {
+        try (Connection conn = Util.getConnection()) {
+            String deleteSql = """
+                    delete from purchase
+                    where product_id = ?
+                    """;
+
+            try (PreparedStatement deletePstmt = conn.prepareStatement(deleteSql)) {
+                    deletePstmt.setInt(1 , id);
+                    int i = deletePstmt.executeUpdate();
+
+                    if(i <= 0) throw new SQLException("id가 " + id + "인 상품은 발주목록에 없습니다.");
+                    else System.out.println(i + "건이 발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  id : " + id);
+                return i;
+            }
         }
     }
 }
