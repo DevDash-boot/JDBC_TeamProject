@@ -1,5 +1,4 @@
 package com.tenco.Service;
 
-public class OrderService {
-
+public class ProductService {
 }

@@ -1,4 +1,4 @@
 package com.tenco.dao;
 
-public class OrderDAO {
+public class AdminDAO {
 }
