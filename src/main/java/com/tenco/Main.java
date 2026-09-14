@@ -1,6 +1,7 @@
 package com.tenco;
 
 import com.tenco.view.OrderItemSwing;
+import com.tenco.view.ProductSwing;
 import com.tenco.view.PurchaseSwing;
 import com.tenco.view.StoreInfoSwing;
 
@@ -55,9 +56,12 @@ public class Main extends JFrame {
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         JButton productButton = createMenuButton("상품관리");
+//        productButton.addActionListener(e -> {
+//            if (!checkAdmin()) return;
+//            showMessage("상품관리 화면은 아직 준비 중입니다.");
+//        });
         productButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
-            showMessage("상품관리 화면은 아직 준비 중입니다.");
+            showPanel(new ProductSwing());
         });
         menu.add(productButton);
         menu.add(Box.createVerticalStrut(10));
@@ -76,8 +80,11 @@ public class Main extends JFrame {
         menu.add(Box.createVerticalStrut(10));
 
         JButton purchaseButton = createMenuButton("발주 / 입고");
+//        purchaseButton.addActionListener(e -> {
+//            if (!checkAdmin()) return;
+//            showPanel(new PurchaseSwing());
+//        });
         purchaseButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
