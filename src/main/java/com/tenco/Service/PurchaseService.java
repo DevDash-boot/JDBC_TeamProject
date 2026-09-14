@@ -69,6 +69,7 @@ public class PurchaseService {
     }
 
 
+
     // 기능 E. 상품 ID로 발주 수량 차감.
     public void substractPurchase(int id , int quantity) throws SQLException {
         if(id <= 0 || quantity <= 0) {

@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderItem {
 
-    private int orderItemId;    // 주문상품 ID
-    private int orderId;        // 주문 ID
+    private int orderItemId;    // 주문 ID
+    private int orderId;        // 주문자 ID
     private int productId;      // 상품 ID
     private int quantity;       // 주문 수량
     private int orderPrice;     // 주문 당시 가격

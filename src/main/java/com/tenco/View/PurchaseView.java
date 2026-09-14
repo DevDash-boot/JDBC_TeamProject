@@ -1,11 +1,9 @@
-package com.tenco.View;
+package com.tenco.view;
 
 import com.tenco.Service.PurchaseService;
 import com.tenco.dto.PurchaseDto;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class PurchaseView {
