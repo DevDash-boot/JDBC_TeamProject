@@ -254,6 +254,24 @@ public class ProductDAO {
         return rows;
     }
 
+    // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
+    public void addAmount(int id , int quantity) throws SQLException {
+        String addSql = """
+                update product set stock = stock + ?
+                where product_id = ?
+                """;
+
+        try (Connection conn = util.getConnection()) {
+            try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
+                addPstmt.setInt(1 , quantity);
+                addPstmt.setInt(2 , id);
+
+                int i = addPstmt.executeUpdate();
+                if(i <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+            }
+        }
+    }
+
 
     private Product createProduct(ResultSet rs) throws SQLException {
         Product product = Product.builder()

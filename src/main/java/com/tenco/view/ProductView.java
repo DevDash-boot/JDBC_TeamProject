@@ -1,4 +1,4 @@
-package com.tenco.View;
+package com.tenco.view;
 
 import com.tenco.Service.ProductService;
 import com.tenco.dto.Product;

@@ -18,7 +18,7 @@ public class PurchaseView {
                 System.out.println("------------------ 관리자 : " + "------------------");
                 System.out.println("====== 발주/입고 관리기능 ======.");
                 System.out.print("1.발주 목록 전체 조회 \t2.상품 ID로 발주 조회.\t3.발주 신청\t4.발주목록에서 제거(발주 취소)\t" +
-                        " 5.발주 수량 차감(발주 수정) \t6.메인 화면\n입력 : ");
+                        "  \t5.메인 화면\n입력 : ");
                 int menu = scanner.nextInt();
 
                 switch (menu) {
@@ -46,15 +46,15 @@ public class PurchaseView {
                         purchaseService.deletePurchase(deleteId);
                         break;
 
-                    case 5:
-                        System.out.print("차감시킬 상품 ID : ");
-                        int subId = scanner.nextInt();
-                        System.out.print("차감시킬 수량 : ");
-                        int amount = scanner.nextInt();
-                        purchaseService.substractPurchase(subId , amount);
-                        break;
+//                    case :
+//                        System.out.print("차감시킬 상품 ID : ");
+//                        int subId = scanner.nextInt();
+//                        System.out.print("차감시킬 수량 : ");
+//                        int amount = scanner.nextInt();
+//                        purchaseService.substractPurchase(subId , amount);
+//                        break;
 
-                    case 6:
+                    case 5:
                         // TODO 메인화면 view 메서드.
                         break;
 

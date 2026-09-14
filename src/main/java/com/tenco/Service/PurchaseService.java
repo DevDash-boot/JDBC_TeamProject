@@ -1,5 +1,6 @@
 package com.tenco.Service;
 
+import com.tenco.dao.ProductDAO;
 import com.tenco.dao.PurchaseDAO;
 import com.tenco.dto.PurchaseDto;
 import com.tenco.util.util;
@@ -13,6 +14,7 @@ import java.util.List;
 // purcahseProduct  void
 public class PurchaseService {
     PurchaseDAO purchaseDAO = new PurchaseDAO();
+    ProductDAO productDAO = new ProductDAO();
 
     // 기능 A. 발주상품 전체 조회.
     public List<PurchaseDto> getAllPurchases() throws SQLException {
@@ -41,7 +43,8 @@ public class PurchaseService {
             conn = util.getConnection();
             conn.setAutoCommit(false); // 트랜잭션 시작.
 
-            purchaseDAO.purcahseProduct(id , quantity);
+            purchaseDAO.purchaseProduct(id , quantity);
+            productDAO.addAmount(id , quantity);
             // TODO 상품 테이블에서 설계한 상품 수량 추가 기능 작성.
             conn.commit();
 

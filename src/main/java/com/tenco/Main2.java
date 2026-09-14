@@ -1,6 +1,7 @@
 package com.tenco;
 
 
+import com.tenco.view.PurchaseView;
 import com.tenco.view.OrderItemView;
 import com.tenco.view.StoreInfoView;
 
@@ -11,7 +12,7 @@ public class Main2 {
 
     public static void main(String[] args) {
         System.out.println("===== 무인편의점 재고 관리 시스템 =====");
-        boolean isAdmin = false;
+        boolean isAdmin = true;
 
         while(true){
             printMenu();
@@ -43,7 +44,7 @@ public class Main2 {
                         }
                         if (isAdmin) {
                             System.out.println("발주/입고 메뉴로 이동합니다.\n");
-                            // PurchaseView 실행
+                            new PurchaseView().purchaseView();
                         }
                         break;
                     case 5:
