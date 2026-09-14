@@ -1,7 +1,7 @@
 package com.tenco;
 
 import com.tenco.view.OrderItemSwing;
-import com.tenco.view.OrderItemView;
+import com.tenco.view.PurchaseSwing;
 import com.tenco.view.StoreInfoSwing;
 
 import javax.swing.*;
@@ -78,7 +78,7 @@ public class Main extends JFrame {
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
             if (!checkAdmin()) return;
-            showMessage("발주 / 입고 화면은 아직 준비 중입니다.");
+            showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
         menu.add(Box.createVerticalStrut(10));
