@@ -19,7 +19,7 @@ public class PurchaseDAO {
         List<PurchaseDto> purchaseList = new ArrayList<>();
         try (Connection conn = Util.getConnection()) {
             String existSql = """
-                    select p.product_id ,  pr.product_name  , p.quantity , p.unit_price
+                    select p.product_id ,  pr.product_name  , p.quantity , p.unit_price , p.total_price
                     from purchase p join product pr on p.product_id = pr.product_id;                
                     """;
             try (PreparedStatement existPstmt = conn.prepareStatement(existSql)) {
@@ -30,9 +30,10 @@ public class PurchaseDAO {
                                 .name(rs.getString("product_name"))
                                 .qauntity(rs.getInt("quantity"))
                                 .unitPrice(rs.getInt("unit_price"))
+                                .totlaPrice(rs.getInt("total_price"))
                                 .build());
                     }
-                    for (PurchaseDto p : purchaseList) System.out.println(p);
+//                    for (PurchaseDto p : purchaseList) System.out.println(p);
                     return purchaseList;
                 }
             }
@@ -54,17 +55,12 @@ public class PurchaseDAO {
                 try (ResultSet rs = alreadyPstmt.executeQuery()) {
                     if (rs.next()) {
                         purchaseDto = PurchaseDto.builder()
-                                .purchaseId(rs.getInt("purchase_id"))
                                 .product_id(rs.getInt("product_id"))
                                 .name(rs.getString("product_name"))
                                 .qauntity(rs.getInt("quantity"))
                                 .unitPrice(rs.getInt("unit_price"))
                                 .totlaPrice(rs.getInt("total_price"))
                                 .build();
-                        System.out.println(purchaseDto.toString());
-                    }
-                    else  {
-                        System.out.print("id가 " + id + "인 상품은 발주목록에 없습니다." );
                     }
                     return purchaseDto;
                 }
@@ -76,9 +72,7 @@ public class PurchaseDAO {
     // 기능 C. 이 상품을 몇개 발주할지 + 총 발주 가격? + 실제 존재하는 발주 상품인지. -- 발주 신청.
     public void purcahseProduct(int id, int quantity) throws SQLException {
         int price = 0;
-        PurchaseDto purchaseDto = existList(id);
-        System.out.println(" 그러므로 발주 목록에 새로 등록됩니다.");
-        // 실제 발주 가능한 상품인지 -->  몇개 발주할지 (발주,총 발주 가격 수정)
+        PurchaseDto purchaseDto = existList(id); // 실제 발주 가능한 상품인지 -->  몇개 발주할지 (발주,총 발주 가격 수정)
         // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
 
         try (Connection conn = Util.getConnection()) {
@@ -102,14 +96,26 @@ public class PurchaseDAO {
                             insert into purchase(product_id , quantity , unit_price , total_price)
                             values(? , ? , ? , ?);
                             """;
+
+                    String checkproductSql = """
+                            select product_id from product
+                            where product_id = ?
+                            """;
+
+                    try (PreparedStatement checkPstmt = conn.prepareStatement(checkproductSql)) {
+                        checkPstmt.setInt(1 , id);
+                        try (ResultSet rs = checkPstmt.executeQuery()) {
+                           if(!rs.next()) throw new SQLException("상품이 아예 존재하지 않습니다.");
+                        }
+                    }
+
                     try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
                         newPurchasePstmt.setInt(1 , id);
                         newPurchasePstmt.setInt(2 , quantity);
                         newPurchasePstmt.setInt(3 , price);
                         newPurchasePstmt.setInt(4 , quantity * price);
                         int i = newPurchasePstmt.executeUpdate();
-                        if (i <= 0) throw new SQLException("발주에 실패하였습니다.");
-                        else System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
+                        if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
                     }
             }
 
@@ -139,13 +145,15 @@ public class PurchaseDAO {
                 try (PreparedStatement totalPstmt = conn.prepareCall(totalSql)) {
                     totalPstmt.setInt(1, id);
                     ResultSet rs = totalPstmt.executeQuery();
-                    if (rs.next()) System.out.printf("발주 상품ID : %d , 발주 상품명 : %s , 발주 상품수량 : %d , 발주 상품 총 가격 : %d",
-                            rs.getInt("product_id"), rs.getString("product_name"),
-                            rs.getInt("quantity"), rs.getInt("total_price"));
+                    if (rs.next()) {
+                        System.out.printf("발주 상품ID : %d , 발주 상품명 : %s , 발주 상품수량 : %d , 발주 상품 총 가격 : %d\n",
+                                rs.getInt("product_id"), rs.getString("product_name"),
+                                rs.getInt("quantity"), rs.getInt("total_price"));
+                    }
                 }
+    }
+    }
 
-    }
-    }
 
     // 기능 D. id로 발주 목록에서 제거.(발주 취소)
     public int deletePurchase(int id) throws SQLException {
@@ -157,11 +165,26 @@ public class PurchaseDAO {
 
             try (PreparedStatement deletePstmt = conn.prepareStatement(deleteSql)) {
                     deletePstmt.setInt(1 , id);
-                    int i = deletePstmt.executeUpdate();
+                return deletePstmt.executeUpdate();
+            }
+        }
+    }
 
-                    if(i <= 0) throw new SQLException("id가 " + id + "인 상품은 발주목록에 없습니다.");
-                    else System.out.println(i + "건이 발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  id : " + id);
-                return i;
+
+    // 기능 E. id로 발주 수량 차감.
+    public int substractPurchase(int id , int quantity) throws SQLException {
+        try (Connection conn = Util.getConnection()) {
+            String substractSql = """
+                    update purchase set quantity = quantity - ?
+                    where product_id = ? and quantity - ? >= 0
+                    """;
+
+            try (PreparedStatement substractPstmt = conn.prepareStatement(substractSql)) {
+                substractPstmt.setInt(1 , quantity);
+                substractPstmt.setInt(2 , id);
+                substractPstmt.setInt(3 , quantity);
+
+                return substractPstmt.executeUpdate();
             }
         }
     }
