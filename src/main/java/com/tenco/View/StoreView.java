@@ -1,4 +1,8 @@
+package com.tenco.View;
 
+public class StoreView {
+
+}
 // 나중에 활용할 코드
 //package com.tenco.View;
 //

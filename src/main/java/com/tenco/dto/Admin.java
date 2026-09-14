@@ -1,4 +1,4 @@
 package com.tenco.dto;
 
-public class Admin {
+public class dto {
 }
