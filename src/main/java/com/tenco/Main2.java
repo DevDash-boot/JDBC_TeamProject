@@ -2,6 +2,7 @@ package com.tenco;
 
 
 import com.tenco.view.AdminView;
+import com.tenco.view.PurchaseView;
 import com.tenco.view.OrderItemView;
 import com.tenco.view.ProductView;
 import com.tenco.view.StoreInfoView;
@@ -46,7 +47,7 @@ public class Main2 {
                         }
                         if (isAdmin) {
                             System.out.println("발주/입고 메뉴로 이동합니다.\n");
-                            // PurchaseView 실행
+                            new PurchaseView().purchaseView();
                         }
                         break;
                     case 5:
