@@ -126,7 +126,7 @@ public class OrderItemDAO {
         return rows;
     }
 
-    // 주문별 총 금액 계산(SELECT + SUM)
+    // 주문별 금액 계산(SELECT + SUM)
     public int sumOrderItem(int orderId) {
         int totalPrice = 0;
         String sql = """
