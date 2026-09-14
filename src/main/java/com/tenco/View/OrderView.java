@@ -3,88 +3,233 @@ package com.tenco.View;
 import com.tenco.Service.OrderService;
 import com.tenco.dto.OrderDTO;
 import com.tenco.dto.OrderItemDTO;
-import com.tenco.util.util;
+import com.tenco.dto.ProductDTO;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class OrderView {
     private Scanner scanner = new Scanner(System.in);
     private OrderService orderService = new OrderService();
 
-    /**
-     * [결제 메뉴 화면 처리 흐름]
-     * 1. 결제 수단 입력 (CARD, CASH 등)
-     * 2. 구매 상품 및 수량 입력 반복 (종료 조건: product_id = 0)
-     * 3. 입력된 데이터를 기반으로 총 결제 금액 계산
-     * 4. Service 레이어로 주문 요청 전송 (트랜잭션 처리)
-     * 5. 처리 결과에 따른 사용자 응답 출력
-     */
-    private void handlerOrderView() {
-        System.out.println("[상품 결제]");
-        System.out.println("결제수단 (CARD/CASH)");
-        String paymentType = scanner.nextLine();
-
-        List<OrderItemDTO> items = new ArrayList<>();
-
+    public void displayMenu() {
         while (true) {
-            System.out.println("상품 ID 입력 (종료:0)");
-            int productId = Integer.parseInt(scanner.nextLine().trim());
+            System.out.println("======= 주문 관리 시스템 ======");
+            System.out.println(" 주문 등록(결제)");
+            System.out.println(" 주문 조회");
+            System.out.println(" 주문 상세 목록 조회");
+            System.out.println(" 종료");
+            System.out.println("=============================");
+            System.out.println("선택 : ");
 
-            if (productId == 0) break;
+            String choice = scanner.nextLine().trim();
 
-            // Product 구현이 아직 안되어있음.
-//             [STEP 1] DB에서 상품 정보를 조회하여 존재 여부 및 단가(price) 가져오기
-//             ProductDTO product = storeService.getProductById(productId);
-//
-//            if (product == null) {
-//                System.out.println("❌ 존재하지 않는 상품 ID입니다. 다시 입력해 주세요.");
-//                continue;
-//            }
-//
-//            System.out.println("   [선택 상품] " + product.getProductName() + " | 단가: " + product.getPrice() + "원");
-
-            // Product 구현이 아직 안되어있음.
-//            // [STEP 2] DB에서 가져온 product.getPrice()를 단가(orderPrice)로 자동 세팅
-//            OrderItemDTO item = new OrderItemDTO(0, 0, productId, quantity, product.getPrice());
-//            orderItemList.add(item);
-//
-//            System.out.println(">> [담기 완료] " + product.getProductName() + " " + quantity + "개 추가됨");
-        }
-
-        if (items.isEmpty()) {
-            System.out.println("❌ 주문할 상품이 선택되지 않아 결제를 취소합니다.");
-            return;
-        }
-
-        // [STEP 3] 담긴 상품들의 (단가 * 수량)을 합산하여 총 결제 금액 자동 계산
-        int totalPrice = items.stream()
-                .mapToInt(item -> item.getOrderPrice() * item.getQuantity())
-                .sum();
-
-        OrderDTO orderDTO = new OrderDTO(0, paymentType, totalPrice, null);
-
-        // [STEP 4] 결제 및 재고 차감 처리 진행
-        boolean isSuccess = orderService.processOrder(orderDTO, items);
-
-        if (isSuccess) {
-            System.out.println("결제가 성공적으로 안료되었습니다. 총 금액 : " + totalPrice + "원 입니다.");
-        } else {
-            System.out.println("결제 처리가 실패하였습니다.");
+            switch (choice) {
+                case "1":
+                    registerOrder();
+                    break;
+                case "2":
+                    showAllOrders();
+                    break;
+                case "3":
+                    showOrderDetial();
+                    break;
+                case "0":
+                    System.out.println("주문 관리 시스템 종료");
+                    break;
+                default:
+                    System.out.println("잘못된 입력");
+            }
         }
     }
 
-    // View에서 입력받은 productId로 DB에서 상품 정보(단가 포함)를 읽어오는 메서드
-    // 아직 Product 구현 안해서 사용할 수 없음.
-//    public ProductDTO getProductById(int productId) {
-//        try (Connection conn = util.getConnection()) {
-//            return productDAO.selectProductById(conn, productId);
-//        } catch (SQLException e) {
-//            System.err.println("상품 조회 실패: " + e.getMessage());
-//            return null;
-//        }
-//    }
+
+    // 상품 주문 (주문 등록)
+    private void registerOrder() {
+        System.out.println("======= 주문 등록 =======");
+
+        // 결제 수단 선택
+        String paymentType;
+        while (true) {
+            System.out.print("결제 수단 선택 (1: CARD, 2: CASH) : ");
+            String payInput = scanner.nextLine().trim();
+            if ("1".equals(payInput)) {
+                paymentType = "CARD";
+                break;
+            } else if ("2".equals(payInput)) {
+                paymentType = "CASH";
+                break;
+            } else {
+                System.out.println("올바른 결제 수단을 선택해 주세요 (1 또는 2).");
+            }
+        }
+
+        List<OrderItemDTO> items = new ArrayList<>();
+
+        // 장바구니 담기
+        while (true) {
+            System.out.print("구매할 상품 ID 입력 (장바구니 담기 완료:0): ");
+            int productId;
+            try {
+                productId = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("상품 id를 입력해주세요");
+                continue;
+            }
+
+            if (productId == 0) {
+                break; // 장바구니 입력 종료 -> 결제 단계
+            }
+
+            // DB에서 상품 정보를 조회
+            ProductDTO product = orderService.getProductById(productId);
+            if (product == null) {
+                System.out.println("존재하지 않는 상품 ID입니다. 다시 입력해 주세요.");
+                continue;
+            }
+
+            System.out.printf(" -> [선택 상품] %s | 단가: %,d원 | 남은 재고: %d개\n",
+                    product.getProductName(), product.getPrice(), product.getStock());
+
+            // 장바구니에 담긴 수량 계산
+            final int currentProductId = productId;
+            int cartQuantity = items.stream()
+                    .filter(item -> item.getProductId() == currentProductId)
+                    .mapToInt(OrderItemDTO::getQuantity)
+                    .sum();
+
+            // 수량 입력
+            int quantity = 0;
+            System.out.println("구매 수량 입력 : ");
+            while (true) {
+                try {
+                    quantity = Integer.parseInt(scanner.nextLine().trim());
+                    if (quantity <= 0) {
+                        System.out.println("수량은 1개 이상이어야합니다.");
+                        continue;
+                    }
+
+                    // 재고 체크
+                    if (quantity + cartQuantity > product.getStock()) {
+                        System.out.println("재고 부족 [현재 남은 재고:" + product.getStock() + "]");
+                        continue;
+                    }
+
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("숫자를 입력해주세요");
+                }
+            }
+
+            // 중복 상품 합산 처리
+            Optional<OrderItemDTO> existItem = items.stream()
+                    .filter(item -> item.getProductId() == currentProductId)
+                    .findFirst();
+
+            if (existItem.isPresent()) {
+                OrderItemDTO item = existItem.get();
+                item.setQuantity(item.getQuantity() + quantity);
+                System.out.printf(" => [수량 추가] %s (총 %d개)\n", product.getProductName(), item.getQuantity());
+            } else {
+                OrderItemDTO item = new OrderItemDTO(productId, quantity, product.getPrice());
+                items.add(item);
+                System.out.printf(" => [장바구니 담기 완료] %s %d개\n", product.getProductName(), quantity);
+            }
+        }
+        // 결제 처리 (장바구니 확인)
+        if (items.isEmpty()) {
+            System.out.println("주문할 상품이 선택되지 않았습니다.");
+            return;
+        }
+        // 총 금액 계산
+        int totalPrice = items.stream()
+                .mapToInt(item -> item.getOrderPrice() * item.getQuantity())
+                .sum();
+        OrderDTO orderDTO = new OrderDTO(paymentType, totalPrice);
+
+        // 결제 및 재고 차감 처리 (트랜잭션)
+        boolean isSuccess = orderService.processOrder(orderDTO, items);
+
+        if (isSuccess) {
+            System.out.println("결제 성공  총금액 : " + totalPrice + "원");
+        } else {
+            System.out.println("결제 실패");
+        }
+    }
+
+    // 전체 주문 조회 (주문 조회)
+    private void showAllOrders() {
+        System.out.println("====전체 주문 목록==========");
+        List<OrderDTO> orderList = orderService.getAllOrders();
+
+        if (orderList == null || orderList.isEmpty()) {
+            System.out.println("등록된 주문 없습니다.");
+            return;
+        }
+
+        System.out.println("주문번호 \t결제수단 \t총 금액 \t\t주문일시");
+        System.out.println("-----------------------------------------------");
+        for (OrderDTO order : orderList) {
+            System.out.printf("%d \t\t %-6s \t %,d원 \t\t %s \n",
+                    order.getOrderId(),
+                    order.getPaymentType(),
+                    order.getTotalPrice(),
+                    order.getOrderDate() != null ? order.getOrderDate().toString().substring(0, 16) : "N/A");
+        }
+        System.out.println("----------------------------------------------------------");
+    }
+
+    // 주문 상세 목록 조회
+    private void showOrderDetial() {
+        System.out.println("주문 상세 조회");
+        System.out.println("조회할 주문 ID : ");
+        int orderId;
+        try {
+            orderId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("숫자만 입력해 주세요");
+            return;
+        }
+
+        OrderDTO order = orderService.getOrderById(orderId);
+        if (order == null) {
+            System.out.println("존재하지 않는 주문 번호");
+            return;
+        }
+
+        List<OrderItemDTO> itemList = orderService.getOrderItemsByOrderId(orderId);
+
+        System.out.println("=======주문 상세 정보======");
+        System.out.println("주문 번호 : " + order.getOrderId());
+        System.out.println("결제 수단 : " + order.getPaymentType());
+        System.out.println("주문 일시 : " + order.getOrderDate());
+        System.out.println("--------------------------------");
+        System.out.println("상품ID\t상품명\t\t단가\t\t수량\t소계");
+        System.out.println("------------------------------------");
+
+        if (itemList != null && !itemList.isEmpty()) {
+            for (OrderItemDTO item : itemList) {
+                ProductDTO product = orderService.getProductById(item.getProductId());
+                String productName = (product != null) ? product.getProductName() : "알 수 없음";
+
+                int subTotal = item.getOrderPrice() * item.getQuantity();
+                System.out.printf("%d\t %-10s \t%,d원 \t %d개 \t%,d원 \n",
+                        item.getProductId(),
+                        productName,
+                        item.getOrderPrice(),
+                        item.getQuantity(),
+                        subTotal);
+            }
+        } else {
+            System.out.println("주문 상세 내역이 없습니다.");
+        }
+
+        System.out.println("--------------------------------");
+        System.out.printf("총 결제 금액 : %,d원 \n", order.getTotalPrice());
+        System.out.println("================================================");
+
+    }
+
 }

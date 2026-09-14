@@ -2,7 +2,6 @@ package com.tenco.dao;
 
 import com.tenco.dto.OrderDTO;
 
-import javax.print.DocFlavor;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
