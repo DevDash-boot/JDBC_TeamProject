@@ -14,8 +14,9 @@ public class ProductService {
     // id 바코드 필수
     public void addProduct(Product product) throws SQLException {
         if (product.getProductName() == null || product.getProductName().trim().isEmpty() ||
-        product.getBarcode() == null || product.getBarcode().trim().isEmpty()){
-            throw new SQLException("상품명과 바코드는 필수 입력 항목입니다.");
+        product.getBarcode() == null || product.getBarcode().trim().isEmpty() ||
+        product.getPrice() == 0){
+            throw new SQLException("상품명, 가격, 바코드는 필수 입력 항목입니다.");
         }
         productDAO.addProduct(product);
     }
@@ -38,7 +39,11 @@ public class ProductService {
             throw new SQLException("재고는 0보다 작으면 안 됩니다.");
         }
 
-        productDAO.updateProduct(product);
+        int rows = productDAO.updateProduct(product);
+
+        if (rows == 0) {
+            throw new SQLException("존재하지 않는 상품입니다.");
+        }
     }
 
     // 4. 상품 삭제

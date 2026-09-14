@@ -52,7 +52,7 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
+        return rows;
     }
 
     // 2. 상품 조회
@@ -70,6 +70,7 @@ public class ProductDAO {
                     while (rs.next()) {
                         Product product = new Product();
                         product.setProductName(rs.getString("product_name"));
+                        productList.add(product);
                     }
                 }
             }
@@ -86,7 +87,7 @@ public class ProductDAO {
 
         String sql = """
                 UPDATE product
-                SET product_name = ?, price = ?, stock = ?, category = ? 
+                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ? 
                 WHERE product_id = ?
                 """;
 
@@ -94,9 +95,11 @@ public class ProductDAO {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, product.getProductName());
                 pstmt.setInt(2, product.getPrice());
-                pstmt.setInt(3, product.getStock());
-                pstmt.setString(4, product.getCategory());
-                pstmt.setInt(5, product.getProductId());
+                pstmt.setString(3, product.getBarcode());
+                pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+                pstmt.setInt(5, product.getStock());
+                pstmt.setString(6, product.getCategory());
+                pstmt.setInt(7, product.getProductId());
 
                 rows = pstmt.executeUpdate();
                 System.out.println(rows + "행이 수정되었습니다.");
@@ -105,7 +108,7 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
+        return rows;
     }
 
 
@@ -130,7 +133,7 @@ public class ProductDAO {
             throw new RuntimeException(e);
         }
 
-        return 0;
+        return rows;
     }
 
     // 5. 상품 상세 조회
@@ -248,7 +251,7 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
+        return rows;
     }
 
 
@@ -261,6 +264,7 @@ public class ProductDAO {
                 .expirationDate(rs.getDate("expiration_date").toLocalDate())
                 .stock(rs.getInt("stock"))
                 .category(rs.getString("category"))
+                .status(rs.getBoolean("status"))
                 .build();
 
         return product;
