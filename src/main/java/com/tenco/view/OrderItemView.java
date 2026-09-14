@@ -48,13 +48,13 @@ public class OrderItemView {
     }
 
     private void addOrderItem() throws SQLException {
-        System.out.print("");
+        System.out.print("주문 번호 : ");
         int orderId = scanner.nextInt();
-        System.out.print("");
+        System.out.print("상품 번호 : ");
         int productId = scanner.nextInt();
-        System.out.print("");
+        System.out.print("수량 : ");
         int quantity = scanner.nextInt();
-        System.out.print("");
+        System.out.print("가격 : ");
         int orderPrice = scanner.nextInt();
 
         OrderItem orderItem = OrderItem.builder()
@@ -78,7 +78,7 @@ public class OrderItemView {
     }
 
     private void allOrderItem(){
-        System.out.println("특정 주문 상품 검색 : ");
+        System.out.println("주문할 상품 보기");
         List<OrderItem> orderItemList = orderItemService.allOrderItem();
         for(OrderItem o : orderItemList){
             System.out.printf("%d | %d | %d | %s | %d | %d\n ",
@@ -87,16 +87,33 @@ public class OrderItemView {
         }
     }
 
-    private void updateOrderItem(){
-
+    private void updateOrderItem() throws SQLException {
+        System.out.print("상품 수량 변경 : ");
+        int quantity = scanner.nextInt();
+        int orderItemId = scanner.nextInt();
+        int rows = orderItemService.updateOrderItem(quantity, orderItemId);
+        if (rows > 0){
+            System.out.println("상품 수량이 변경되었습니다.");
+        } else{
+            System.out.println("수정할 상품이 없습니다.");
+        }
     }
 
-    private void deleteOrderItem(){
-
+    private void deleteOrderItem() throws SQLException {
+        System.out.print("상품 삭제 : ");
+        int orderItemId = scanner.nextInt();
+        int rows = orderItemService.deleteOrderItem(orderItemId);
+        if (rows > 0){
+            System.out.println("상품 수량이 삭제되었습니다.");
+        } else{
+            System.out.println("삭제할 상품이 없습니다.");
+        }
     }
 
-    private void sumOrderItem(){
-
+    private void sumOrderItem() throws SQLException {
+        int orderId = scanner.nextInt();
+        int totalPrice = orderItemService.sumOrderItem(orderId);
+        System.out.println("총 금액은 " + totalPrice + "원 입니다.");
     }
 
     private void printMenu() {

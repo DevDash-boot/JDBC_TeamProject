@@ -1,13 +1,13 @@
 package com.tenco;
 
 
-import com.tenco.view.ConvenienceView;
-
+import com.tenco.view.OrderItemView;
 
 
 public class Main {
     public static void main(String[] args) {
-        ConvenienceView convenienceView = new ConvenienceView();
-        convenienceView.start();
+
+        OrderItemView orderItemView = new OrderItemView();
+        orderItemView.start();
     }
 }
