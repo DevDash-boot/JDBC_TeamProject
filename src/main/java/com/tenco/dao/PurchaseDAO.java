@@ -1,10 +1,8 @@
 package com.tenco.dao;
 
-import com.mysql.cj.protocol.Resultset;
 import com.tenco.dto.PurchaseDto;
-import com.tenco.util.util;
+import com.tenco.util.Util;
 
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +15,7 @@ public class PurchaseDAO {
     // 기능 A. 발주 가능한 상품 전체 조회.
     public List<PurchaseDto> getAllPurchases() throws SQLException {
         List<PurchaseDto> purchaseList = new ArrayList<>();
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             String existSql = """
                     select p.product_id ,  pr.product_name  , p.quantity , p.unit_price , p.total_price
                     from purchase p join product pr on p.product_id = pr.product_id;                
@@ -43,7 +41,7 @@ public class PurchaseDAO {
 
     // 기능 B. id로 상품이 발주 목록에 있는지.
     public PurchaseDto existList(int id) throws SQLException {
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             PurchaseDto purchaseDto = null;
             String alreadySql = """                 
                     select p.* , pr.product_name  
@@ -75,7 +73,7 @@ public class PurchaseDAO {
         PurchaseDto purchaseDto = existList(id); // 실제 발주 가능한 상품인지 -->  몇개 발주할지 (발주,총 발주 가격 수정)
         // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
 
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             // 1 - 1. 발주 목록에 없는 새로 발주할 상품이라면. insert로 purchase테이블에 등록.
 
             // 2 - 1. product테이블의 price를 가져와야하므로 select로 먼저 price저장.
@@ -157,7 +155,7 @@ public class PurchaseDAO {
 
     // 기능 D. id로 발주 목록에서 제거.(발주 취소)
     public int deletePurchase(int id) throws SQLException {
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             String deleteSql = """
                     delete from purchase
                     where product_id = ?
@@ -173,7 +171,7 @@ public class PurchaseDAO {
 
     // 기능 E. id로 발주 수량 차감.
     public int substractPurchase(int id , int quantity) throws SQLException {
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             String substractSql = """
                     update purchase set quantity = quantity - ?
                     where product_id = ? and quantity - ? >= 0

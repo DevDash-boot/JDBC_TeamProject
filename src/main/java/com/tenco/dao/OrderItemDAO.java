@@ -1,7 +1,7 @@
 package com.tenco.dao;
 
 import com.tenco.dto.OrderItem;
-import com.tenco.util.util;
+import com.tenco.util.Util;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +18,7 @@ public class OrderItemDAO {
                 INSERT INTO order_item(order_id, product_id, quantity, order_price)
                 VALUES (?, ?, ?, ?);
                 """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, orderItem.getOrderId());
                 pstmt.setInt(2, orderItem.getProductId());
@@ -48,7 +48,7 @@ public class OrderItemDAO {
                 ON oi.product_id = p.product_id
                 WHERE oi.order_id = ?;
                 """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, orderId);
                 try (ResultSet rs = pstmt.executeQuery()) {
@@ -77,7 +77,7 @@ public class OrderItemDAO {
             ON oi.product_id = p.product_id
             ORDER BY oi.order_item_id;
             """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 try (ResultSet rs = pstmt.executeQuery()) {
                     selectDB(rs, orderItemList);
@@ -96,7 +96,7 @@ public class OrderItemDAO {
                 UPDATE order_item SET quantity = ?
                 WHERE order_item_id = ?;
                 """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, quantity);
                 pstmt.setInt(2, orderItemId);
@@ -115,7 +115,7 @@ public class OrderItemDAO {
                 DELETE FROM order_item
                 WHERE order_item_id = ?;
                 """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, orderItemId);
                 rows = pstmt.executeUpdate();
@@ -134,7 +134,7 @@ public class OrderItemDAO {
                 FROM order_item
                 WHERE order_id = ?;
                 """;
-        try (Connection conn = util.getConnection()) {
+        try (Connection conn = Util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, orderId);
                 try (ResultSet rs = pstmt.executeQuery()) {

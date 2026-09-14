@@ -2,13 +2,11 @@ package com.tenco.Service;
 
 import com.tenco.dao.PurchaseDAO;
 import com.tenco.dto.PurchaseDto;
-import com.tenco.util.util;
+import com.tenco.util.Util;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 // getAllPurchases List
 // existList boolean
@@ -40,7 +38,7 @@ public class PurchaseService {
         }
         Connection conn = null;
         try {
-            conn = util.getConnection();
+            conn = Util.getConnection();
             conn.setAutoCommit(false); // 트랜잭션 시작.
 
             purchaseDAO.purcahseProduct(id , quantity);

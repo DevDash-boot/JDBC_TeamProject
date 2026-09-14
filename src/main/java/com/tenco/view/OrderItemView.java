@@ -2,7 +2,7 @@ package com.tenco.view;
 
 import com.tenco.Service.*;
 import com.tenco.dto.OrderItem;
-import com.tenco.util.util;
+import com.tenco.util.Util;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -35,7 +35,7 @@ public class OrderItemView {
                     case 6: sumOrderItem(); break;
                     case 0:
                         System.out.println("프로그램을 종료합니다.");
-                        util.close();
+                        Util.close();
                         scanner.close();
                         return;
                     default:
