@@ -17,10 +17,10 @@ public class OrderView {
     public void displayMenu() {
         while (true) {
             System.out.println("======= 주문 관리 시스템 ======");
-            System.out.println(" 주문 등록(결제)");
-            System.out.println(" 주문 조회");
-            System.out.println(" 주문 상세 목록 조회");
-            System.out.println(" 종료");
+            System.out.println("1. 주문 등록(결제)");
+            System.out.println("2. 주문 조회");
+            System.out.println("3. 주문 상세 목록 조회");
+            System.out.println("0. 종료");
             System.out.println("=============================");
             System.out.println("선택 : ");
 
@@ -34,11 +34,11 @@ public class OrderView {
                     showAllOrders();
                     break;
                 case "3":
-                    showOrderDetial();
+                    showOrderDetail();
                     break;
                 case "0":
                     System.out.println("주문 관리 시스템 종료");
-                    break;
+                    return;
                 default:
                     System.out.println("잘못된 입력");
             }
@@ -90,8 +90,11 @@ public class OrderView {
                 continue;
             }
 
-            System.out.printf(" -> [선택 상품] %s | 단가: %,d원 | 남은 재고: %d개\n",
-                    product.getProductName(), product.getPrice(), product.getStock());
+            if (product.getStock() <= 0) {
+                System.out.println("해당 상품의 재고는 0입니다.");
+                continue;
+            }
+
 
             // 장바구니에 담긴 수량 계산
             final int currentProductId = productId;
@@ -100,20 +103,38 @@ public class OrderView {
                     .mapToInt(OrderItemDTO::getQuantity)
                     .sum();
 
+            int availableStock = product.getStock() - cartQuantity;
+
+            System.out.printf(" -> [선택 상품] %s | 단가: %,d원 | 남은 재고: %d개 (장바구니 담긴 수량: %d개)\n",
+                    product.getProductName(), product.getPrice(), product.getStock(), cartQuantity);
+
+            if (availableStock <= 0) {
+                System.out.println("남은 재고를 모두 장바구니에 담았습니다.");
+                continue;
+            }
+
             // 수량 입력
-            int quantity = 0;
+            int quantity;
+            boolean isCanceled = false;
             System.out.println("구매 수량 입력 : ");
             while (true) {
                 try {
                     quantity = Integer.parseInt(scanner.nextLine().trim());
-                    if (quantity <= 0) {
+
+                    if (quantity == 0) {
+                        System.out.println(" -> 상품 선택을 취소했습니다.");
+                        isCanceled = true;
+                        break; // 수량 입력 루프 탈출
+                    }
+
+                    if (quantity < 0) {
                         System.out.println("수량은 1개 이상이어야합니다.");
                         continue;
                     }
 
                     // 재고 체크
-                    if (quantity + cartQuantity > product.getStock()) {
-                        System.out.println("재고 부족 [현재 남은 재고:" + product.getStock() + "]");
+                    if (quantity > availableStock) {
+                        System.out.printf("재고 부족 (추가 가능 최대 수량: %d개)\n", availableStock);
                         continue;
                     }
 
@@ -182,7 +203,7 @@ public class OrderView {
     }
 
     // 주문 상세 목록 조회
-    private void showOrderDetial() {
+    private void showOrderDetail() {
         System.out.println("주문 상세 조회");
         System.out.println("조회할 주문 ID : ");
         int orderId;

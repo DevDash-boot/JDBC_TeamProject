@@ -1,17 +1,22 @@
 package com.tenco;
 
-//TIP 코드를 <b>실행</b>하려면 <shortcut actionId="Run"/>을(를) 누르거나
-// 에디터 여백에 있는 <icon src="AllIcons.Actions.Execute"/> 아이콘을 클릭하세요.
+import com.tenco.View.OrderView;
+import com.tenco.util.util;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP 캐럿을 강조 표시된 텍스트에 놓고 <shortcut actionId="ShowIntentionActions"/>을(를) 누르면
-        // IntelliJ IDEA이(가) 수정을 제안하는 것을 확인할 수 있습니다.
-        System.out.printf("Hello and welcome!");
+        // 애플리케이션 종료 시 커넥션 풀 자원을 해제하기 위한 셧다운 훅(Shutdown Hook) 등록
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("\n[시스템] DB 커넥션 풀 자원을 정리합니다...");
+            util.close();
+        }));
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP <shortcut actionId="Debug"/>을(를) 눌러 코드 디버그를 시작하세요. 1개의 <icon src="AllIcons.Debugger.Db_set_breakpoint"/> 중단점을 설정해 드렸습니다
-            // 언제든 <shortcut actionId="ToggleLineBreakpoint"/>을(를) 눌러 중단점을 더 추가할 수 있습니다.
-            System.out.println("i = " + i);
-        }
+        System.out.println("편의점 주문 관리 시스템을 시작합니다.");
+
+        // View 객체 생성 및 메뉴 실행
+        OrderView orderView = new OrderView();
+        orderView.displayMenu();
+
+        System.out.println("프로그램이 정상적으로 종료되었습니다.");
     }
 }
