@@ -10,6 +10,8 @@ public class AuthService {
 
     private final AdminDAO adminDAO = new AdminDAO();
 
+
+
     // 1. 관리자 로그인 인증
     public Admin authenticationAdmin(String loginId, String password) throws SQLException {
         if (loginId == null || loginId.trim().isEmpty() ||
@@ -35,6 +37,9 @@ public class AuthService {
         if (newAdmin != null) {
             throw new SQLException("이미 등록되있는 아이디 입니다.");
         }
+
+
+
         int result = adminDAO.insertAdmin(admin);
         if (result == 0) {
             throw new SQLException("관리자 등록에 실패했습니다.");
@@ -50,5 +55,7 @@ public class AuthService {
         }
         return adminList;
     }
+
+    // 솔트 :  해시 처리 하기
 }
 

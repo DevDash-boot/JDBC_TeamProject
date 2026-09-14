@@ -1,4 +1,4 @@
 package com.tenco.dao;
 
-public class dao {
+public class ProductDAO {
 }
