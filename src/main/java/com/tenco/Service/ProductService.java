@@ -22,7 +22,7 @@ public class ProductService {
     }
 
     // 2. 상품 이름 조회
-    public List<Product> getProductName() {
+    public List<Product> getProductName() throws SQLException {
         return productDAO.getProductName();
     }
 
@@ -57,7 +57,7 @@ public class ProductService {
     }
 
     // 5. 전체 상품 조회
-    public List<Product> getProduct() {
+    public List<Product> getProduct()throws SQLException {
         return productDAO.getProduct();
     }
 

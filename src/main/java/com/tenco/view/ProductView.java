@@ -112,7 +112,7 @@ public class ProductView {
         System.out.println("'" + productName + "' 상품이 추가되었습니다.");
     }
 
-    private void getProductName() {
+    private void getProductName() throws SQLException {
         List<Product> productList = service.getProductName();
         System.out.println("\n === 상품 목록 ===");
         if (productList.isEmpty()) {
@@ -186,7 +186,7 @@ public class ProductView {
         System.out.println(productId + "번 상품이 삭제되었습니다.");
     }
 
-    private void getProduct() {
+    private void getProduct() throws SQLException {
         List<Product> productList = service.getProduct();
         System.out.println("\n === 상품 상세 목록 ===");
         if (productList.isEmpty()) {
