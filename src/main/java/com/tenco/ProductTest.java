@@ -1,14 +1,9 @@
 package com.tenco;
 
-import com.tenco.Service.ProductService;
-import com.tenco.View.ProductView;
+import com.tenco.view.ProductView;
 import com.tenco.dao.ProductDAO;
-import com.tenco.dto.Product;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProductTest {
 

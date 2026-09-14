@@ -68,7 +68,7 @@ public class PurchaseDAO {
 
 
     // 기능 C. 이 상품을 몇개 발주할지 + 총 발주 가격? + 실제 존재하는 발주 상품인지. -- 발주 신청.
-    public void purcahseProduct(int id, int quantity) throws SQLException {
+    public void purchaseProduct(int id, int quantity) throws SQLException {
         int price = 0;
         PurchaseDto purchaseDto = existList(id); // 실제 발주 가능한 상품인지 -->  몇개 발주할지 (발주,총 발주 가격 수정)
         // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
