@@ -155,6 +155,9 @@ public class OrderView {
                     System.out.println("숫자를 입력해주세요");
                 }
             }
+            if (isCanceled) {
+                continue;
+            }
 
             // 중복 상품 합산 처리
             Optional<OrderItem> existItem = items.stream()

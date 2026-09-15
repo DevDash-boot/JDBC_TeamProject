@@ -112,7 +112,6 @@ public class OrderService {
     }
 
     // 4. 전체 주문 목록 조회
-
     public List<Order> getAllOrders() {
         try (Connection conn = util.getConnection()) {
             return orderDAO.selectAllOrders(conn);
@@ -129,6 +128,27 @@ public class OrderService {
         } catch (SQLException e) {
             System.err.println("상품 조회 실패: " + e.getMessage());
             return null;
+        }
+    }
+
+    public boolean cancelOrder(int orderId) {
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            List<OrderItem> items = orderItemDAO.selectItemByOrderId(conn, orderId);
+            for (OrderItem item : items) {
+                productDAO.inStock(conn, item.getProductId(), item.getQuantity()); // 재고 복원
+            }
+            // order_item 삭제 or orders에 상태 컬럼 추가해서 CANCELED로 변경 (설계 선택)
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
         }
     }
 }

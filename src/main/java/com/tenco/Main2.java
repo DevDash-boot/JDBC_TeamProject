@@ -1,11 +1,7 @@
 package com.tenco;
 
 
-import com.tenco.view.AdminView;
-import com.tenco.view.PurchaseView;
-import com.tenco.view.OrderItemView;
-import com.tenco.view.ProductView;
-import com.tenco.view.StoreInfoView;
+import com.tenco.view.*;
 
 import java.util.Scanner;
 
@@ -34,7 +30,8 @@ public class Main2 {
                         break;
                     case 2:
                         System.out.println("주문/결제 메뉴로 이동합니다.\n");
-
+                        OrderView orderView = new OrderView();
+                        orderView.displayMenu();
                         break;
                     case 3:
                         System.out.println("주문한 상품 메뉴로 이동합니다.\n");

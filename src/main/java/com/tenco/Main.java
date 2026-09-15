@@ -54,17 +54,19 @@ public class Main extends JFrame {
 
         // TODO - 관리자 로그인 안돼면 if문 주석
         JButton productButton = createMenuButton("상품관리");
-       productButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
+        productButton.addActionListener(e -> {
+            //if (!checkAdmin()) return;
             showPanel(new ProductSwing());
-       });
+        });
 
         menu.add(productButton);
         menu.add(Box.createVerticalStrut(10));
 
         JButton orderButton = createMenuButton("주문 / 결제");
-        orderButton.addActionListener(e ->
-                showMessage("주문 / 결제 화면은 아직 준비 중입니다."));
+        orderButton.addActionListener(e -> {
+            showPanel(new OrderSwing());
+        });
+
         menu.add(orderButton);
         menu.add(Box.createVerticalStrut(10));
 
@@ -78,7 +80,7 @@ public class Main extends JFrame {
         // TODO - 관리자 로그인 안돼면 if문 주석
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
+            //if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
@@ -87,7 +89,7 @@ public class Main extends JFrame {
         // TODO - 관리자 로그인 안돼면 if문 주석
         JButton adminButton = createMenuButton("관리자 정보");
         adminButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
+            //if (!checkAdmin()) return;
             showPanel(new AdminSwing());
         });
         menu.add(adminButton);

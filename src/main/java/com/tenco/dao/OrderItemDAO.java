@@ -3,10 +3,7 @@ package com.tenco.dao;
 import com.tenco.dto.OrderItem;
 import com.tenco.util.util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,4 +158,41 @@ public class OrderItemDAO {
                     .build());
         }
     }
+
+
+    ///////////////////////////////
+    public int insertOrderItem(Connection conn, OrderItem orderItem) throws SQLException {
+        String sql = """
+            INSERT INTO order_item(order_id, product_id, quantity, order_price)
+            VALUES (?, ?, ?, ?)
+            """;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, orderItem.getOrderId());
+            pstmt.setInt(2, orderItem.getProductId());
+            pstmt.setInt(3, orderItem.getQuantity());
+            pstmt.setInt(4, orderItem.getOrderPrice());
+            int rows = pstmt.executeUpdate();
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) orderItem.setOrderItemId(rs.getInt(1));
+            }
+            return rows;
+        }
+    }
+
+    public List<OrderItem> selectItemByOrderId(Connection conn, int orderId) throws SQLException {
+        List<OrderItem> list = new ArrayList<>();
+        String sql = """
+            SELECT oi.order_item_id, oi.order_id, oi.product_id, p.product_name, oi.quantity, oi.order_price
+            FROM order_item oi JOIN product p ON oi.product_id = p.product_id
+            WHERE oi.order_id = ?
+            """;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                selectDB(rs, list); // 기존 private 메서드 재사용
+            }
+        }
+        return list;
+    }
+
 }
