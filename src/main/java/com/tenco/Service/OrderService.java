@@ -3,9 +3,9 @@ package com.tenco.Service;
 import com.tenco.dao.OrderDAO;
 import com.tenco.dao.OrderItemDAO;
 import com.tenco.dao.ProductDAO;
-import com.tenco.dto.OrderDTO;
-import com.tenco.dto.OrderItemDTO;
-import com.tenco.dto.ProductDTO;
+import com.tenco.dto.Order;
+import com.tenco.dto.OrderItem;
+import com.tenco.dto.Product;
 import com.tenco.util.util;
 
 import java.sql.Connection;
@@ -23,7 +23,7 @@ public class OrderService {
      * - order_item 저장
      * - product 재고 차감
      */
-    public boolean processOrder(OrderDTO orders, List<OrderItemDTO> items) {
+    public boolean processOrder(Order orders, List<OrderItem> items) {
         Connection conn = null;
         try {
             conn = util.getConnection();
@@ -38,10 +38,10 @@ public class OrderService {
             }
 
             // 2. order_item 저장 및 상품 재고 차감
-            for (OrderItemDTO itemDTO : items) {
+            for (OrderItem itemDTO : items) {
                 itemDTO.setOrderId(orderId); // 받아은 order_id 세팅
 
-                ProductDTO product =productDAO.selectProductById(conn, itemDTO.getProductId());
+                Product product =productDAO.selectProductById(conn, itemDTO.getProductId());
                 if (product == null || product.getStock() < itemDTO.getQuantity()) {
                     System.out.println("상품 [ID:" +itemDTO.getProductId() +"]의 재고가 부족합니다.");
                     conn.rollback();
@@ -88,7 +88,7 @@ public class OrderService {
     }
 
     // 2. 주문 단건 조회
-    public OrderDTO getOrderById(int orderId) {
+    public Order getOrderById(int orderId) {
         try (Connection conn = util.getConnection()) {
             return orderDAO.selectOrderById(conn, orderId);
         } catch (SQLException e) {
@@ -99,7 +99,7 @@ public class OrderService {
 
     // 3. 특정 주문의 상품 목록 조회
 
-    public List<OrderItemDTO> getOrderItemsByOrderId(int orderId) {
+    public List<OrderItem> getOrderItemsByOrderId(int orderId) {
         try (Connection conn = util.getConnection()) {
             return orderItemDAO.selectItemByOrderId(conn, orderId);
         } catch (SQLException e) {
@@ -110,7 +110,7 @@ public class OrderService {
 
     // 4. 전체 주문 목록 조회
 
-    public List<OrderDTO> getAllOrders() {
+    public List<Order> getAllOrders() {
         try (Connection conn = util.getConnection()) {
             return orderDAO.selectAllOrders(conn);
         } catch (SQLException e) {
@@ -120,7 +120,7 @@ public class OrderService {
     }
 
     // View에서 입력받은 productId로 DB에서 상품 정보(단가 포함)를 읽어오는 메서드
-    public ProductDTO getProductById(int productId) {
+    public Product getProductById(int productId) {
         try (Connection conn = util.getConnection()) {
             return productDAO.selectProductById(conn, productId);
         } catch (SQLException e) {
