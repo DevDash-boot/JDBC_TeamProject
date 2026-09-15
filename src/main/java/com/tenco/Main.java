@@ -1,9 +1,6 @@
 package com.tenco;
 
-import com.tenco.swing.OrderItemSwing;
-import com.tenco.swing.ProductSwing;
-import com.tenco.swing.PurchaseSwing;
-import com.tenco.swing.StoreInfoSwing;
+import com.tenco.swing.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,10 +52,10 @@ public class Main extends JFrame {
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
-        // TODO - 관리자 로그인 완료시 if문 살리기
+        // TODO - 관리자 로그인 안돼면 if문 주석
         JButton productButton = createMenuButton("상품관리");
        productButton.addActionListener(e -> {
-            //if (!checkAdmin()) return;
+            if (!checkAdmin()) return;
             showPanel(new ProductSwing());
        });
 
@@ -78,20 +75,20 @@ public class Main extends JFrame {
         menu.add(orderItemButton);
         menu.add(Box.createVerticalStrut(10));
 
-        // TODO - 관리자 로그인 완료시 if문 살리기
+        // TODO - 관리자 로그인 안돼면 if문 주석
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
-            //if (!checkAdmin()) return;
+            if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
         menu.add(Box.createVerticalStrut(10));
 
-        // TODO - 관리자 로그인 완료시 if문, showPanel 살리기
+        // TODO - 관리자 로그인 안돼면 if문 주석
         JButton adminButton = createMenuButton("관리자 정보");
         adminButton.addActionListener(e -> {
-            //if (!checkAdmin()) return;
-            //showPanel(new AdminSwing());
+            if (!checkAdmin()) return;
+            showPanel(new AdminSwing());
         });
         menu.add(adminButton);
         menu.add(Box.createVerticalStrut(10));

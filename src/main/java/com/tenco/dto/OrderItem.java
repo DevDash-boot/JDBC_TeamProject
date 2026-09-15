@@ -25,4 +25,10 @@ public class OrderItem {
         this.quantity = quantity;
         this.orderPrice = orderPrice;
     }
+
+    public OrderItem(int productId, int quantity, int orderPrice) {
+        this.productId = productId;
+        this.quantity = quantity;
+        this.orderPrice = orderPrice;
+    }
 }
