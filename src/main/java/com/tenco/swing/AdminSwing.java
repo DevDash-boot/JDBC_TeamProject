@@ -1,5 +1,6 @@
 package com.tenco.swing;
 
+import com.tenco.Main;
 import com.tenco.Service.AuthService;
 import com.tenco.dto.Admin;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class AdminSwing extends JPanel {
 
+    private final Main main;
     private final AuthService service = new AuthService();
 
     // 현재 로그인한 관리자 정보
@@ -25,19 +27,16 @@ public class AdminSwing extends JPanel {
 
     // 관리자 목록 테이블
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{"관리자 ID", "로그인 ID", "이름"},
-            0
+            new Object[]{"관리자 ID", "로그인 ID", "이름"}, 0
     );
 
     private final JTable adminTable = new JTable(tableModel);
 
-    public AdminSwing() {
+    public AdminSwing(Main main) {
+        this.main = main;
 
         setLayout(new BorderLayout());
 
-        // =========================
-        // 상단 메뉴
-        // =========================
         JPanel menuPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton loginButton = new JButton("로그인");
@@ -50,9 +49,6 @@ public class AdminSwing extends JPanel {
         menuPanel.add(listButton);
         menuPanel.add(logoutButton);
 
-        // =========================
-        // 로그인 상태
-        // =========================
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         statusPanel.add(loginStatusLabel);
 
@@ -62,71 +58,32 @@ public class AdminSwing extends JPanel {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // =========================
-        // 중앙 영역
-        // =========================
         contentPanel.setBorder(
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)
         );
-
         add(contentPanel, BorderLayout.CENTER);
 
-        // =========================
-        // 버튼 이벤트
-        // =========================
-
-        // 로그인
         loginButton.addActionListener(e -> loginMenu());
 
-        // 관리자 등록
         registerButton.addActionListener(e -> {
-
             if (requireAdmin("신규 관리자 등록")) {
                 registerMenu();
             }
-
         });
 
-        // 전체 목록 조회
         listButton.addActionListener(e -> {
-
             if (requireAdmin("관리자 전체 목록 조회")) {
                 showAllAdmins();
             }
-
         });
 
-        // 로그아웃
         logoutButton.addActionListener(e -> logout());
 
-        // 처음 화면
         showWelcome();
     }
 
-    // =========================================
-    // 처음 화면
-    // =========================================
-    private void showWelcome() {
-
-        contentPanel.removeAll();
-
-        JLabel label = new JLabel(
-                "관리자 관리 시스템",
-                SwingConstants.CENTER
-        );
-
-        label.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-
-        contentPanel.add(label, BorderLayout.CENTER);
-
-        refreshPanel();
-    }
-
-    // =========================================
     // 관리자 로그인
-    // =========================================
     private void loginMenu() {
-
         if (isAdminLoggedIn()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -156,43 +113,33 @@ public class AdminSwing extends JPanel {
 
         JButton loginButton = new JButton("로그인");
 
-        // 제목
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-
         formPanel.add(titleLabel, gbc);
 
-        // ID
         gbc.gridy++;
         gbc.gridwidth = 1;
-
         formPanel.add(idLabel, gbc);
 
         gbc.gridx = 1;
         formPanel.add(idField, gbc);
 
-        // 비밀번호
         gbc.gridx = 0;
         gbc.gridy++;
-
         formPanel.add(passwordLabel, gbc);
 
         gbc.gridx = 1;
         formPanel.add(passwordField, gbc);
 
-        // 로그인 버튼
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
-
         formPanel.add(loginButton, gbc);
 
         contentPanel.add(formPanel, BorderLayout.CENTER);
 
-        // 로그인 이벤트
         loginButton.addActionListener(e -> {
-
             String loginId = idField.getText().trim();
             String password = new String(passwordField.getPassword());
 
@@ -215,23 +162,24 @@ public class AdminSwing extends JPanel {
             }
 
             try {
-
-                Admin admin =
-                        service.authenticationAdmin(loginId, password);
+                Admin admin = service.authenticationAdmin(
+                        loginId,
+                        password
+                );
 
                 if (admin == null) {
-
                     JOptionPane.showMessageDialog(
                             this,
                             "로그인 실패!\nID 또는 비밀번호를 잘못 입력했습니다.",
                             "로그인 실패",
                             JOptionPane.ERROR_MESSAGE
                     );
-
                 } else {
-
                     currentAdminId = admin.getAdminId();
                     currentAdminName = admin.getName();
+
+                    // Main에도 로그인 정보 전달
+                    main.loginAdmin(admin);
 
                     updateLoginStatus();
 
@@ -246,7 +194,6 @@ public class AdminSwing extends JPanel {
                 }
 
             } catch (SQLException ex) {
-
                 JOptionPane.showMessageDialog(
                         this,
                         "로그인 오류!\n" + ex.getMessage(),
@@ -259,11 +206,8 @@ public class AdminSwing extends JPanel {
         refreshPanel();
     }
 
-    // =========================================
     // 관리자 등록
-    // =========================================
     private void registerMenu() {
-
         contentPanel.removeAll();
 
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -286,48 +230,44 @@ public class AdminSwing extends JPanel {
 
         JButton registerButton = new JButton("관리자 등록");
 
-        // 제목
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         formPanel.add(titleLabel, gbc);
 
-        // ID
         gbc.gridy++;
         gbc.gridwidth = 1;
         formPanel.add(idLabel, gbc);
+
         gbc.gridx = 1;
         formPanel.add(idField, gbc);
 
-        // 비밀번호
         gbc.gridx = 0;
         gbc.gridy++;
         formPanel.add(passwordLabel, gbc);
+
         gbc.gridx = 1;
         formPanel.add(passwordField, gbc);
 
-        // 이름
         gbc.gridx = 0;
         gbc.gridy++;
         formPanel.add(nameLabel, gbc);
+
         gbc.gridx = 1;
         formPanel.add(nameField, gbc);
 
-        // 등록 버튼
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
         formPanel.add(registerButton, gbc);
+
         contentPanel.add(formPanel, BorderLayout.CENTER);
 
-        // 등록 이벤트
         registerButton.addActionListener(e -> {
-
             String loginId = idField.getText().trim();
             String password = new String(passwordField.getPassword());
             String name = nameField.getText().trim();
 
-            // 기본 입력 검증
             if (loginId.isEmpty()) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -354,23 +294,27 @@ public class AdminSwing extends JPanel {
                 nameField.requestFocus();
                 return;
             }
+
             Admin admin = Admin.builder()
                     .loginId(loginId)
                     .password(password)
                     .name(name)
                     .build();
+
             try {
                 service.registrationAdmin(admin);
+
                 JOptionPane.showMessageDialog(
                         this,
                         "신규 관리자가 성공적으로 등록되었습니다!",
                         "등록 성공",
                         JOptionPane.INFORMATION_MESSAGE
                 );
-                // 입력창 초기화
+
                 idField.setText("");
                 passwordField.setText("");
                 nameField.setText("");
+
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -380,22 +324,26 @@ public class AdminSwing extends JPanel {
                 );
             }
         });
+
         refreshPanel();
     }
 
-    // =========================================
-    // 관리자 전체 목록 조회
-    // =========================================
+    // 관리자 전체 목록
     private void showAllAdmins() {
         contentPanel.removeAll();
         tableModel.setRowCount(0);
+
         List<Admin> adminList = service.getAllAdmin();
+
         if (adminList == null || adminList.isEmpty()) {
             JLabel emptyLabel = new JLabel(
                     "등록된 관리자가 없습니다.",
                     SwingConstants.CENTER
             );
-            contentPanel.add(emptyLabel, BorderLayout.CENTER);
+            contentPanel.add(
+                    emptyLabel,
+                    BorderLayout.CENTER
+            );
         } else {
             for (Admin admin : adminList) {
                 tableModel.addRow(new Object[]{
@@ -404,16 +352,20 @@ public class AdminSwing extends JPanel {
                         admin.getName()
                 });
             }
+
             JScrollPane scrollPane =
                     new JScrollPane(adminTable);
-            contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+            contentPanel.add(
+                    scrollPane,
+                    BorderLayout.CENTER
+            );
         }
+
         refreshPanel();
     }
 
-    // =========================================
     // 로그아웃
-    // =========================================
     private void logout() {
         if (!isAdminLoggedIn()) {
             JOptionPane.showMessageDialog(
@@ -424,19 +376,23 @@ public class AdminSwing extends JPanel {
             );
             return;
         }
+
         JOptionPane.showMessageDialog(
                 this,
                 currentAdminName + " 관리자님이 로그아웃되었습니다."
         );
+
         currentAdminId = null;
         currentAdminName = null;
+
+        // Main에도 로그아웃 정보 전달
+        main.logoutAdmin();
+
         updateLoginStatus();
         showWelcome();
     }
 
-    // =========================================
     // 관리자 권한 확인
-    // =========================================
     private boolean requireAdmin(String menuName) {
         if (!isAdminLoggedIn()) {
             JOptionPane.showMessageDialog(
@@ -447,33 +403,52 @@ public class AdminSwing extends JPanel {
             );
             return false;
         }
+
         return true;
     }
 
-    // =========================================
     // 로그인 여부
-    // =========================================
     private boolean isAdminLoggedIn() {
         return currentAdminId != null;
     }
 
-    // =========================================
-    // 로그인 상태 표시 변경
-    // =========================================
+    // 로그인 상태 표시
     private void updateLoginStatus() {
         if (isAdminLoggedIn()) {
             loginStatusLabel.setText(
                     "로그인: " + currentAdminName + " 관리자"
             );
         } else {
-
             loginStatusLabel.setText("로그아웃 상태");
         }
     }
 
-    // =========================================
-    // 화면 새로고침
-    // =========================================
+    // 처음 화면
+    private void showWelcome() {
+        contentPanel.removeAll();
+
+        JLabel label = new JLabel(
+                "관리자 관리 시스템",
+                SwingConstants.CENTER
+        );
+
+        label.setFont(
+                new Font(
+                        "맑은 고딕",
+                        Font.BOLD,
+                        24
+                )
+        );
+
+        contentPanel.add(
+                label,
+                BorderLayout.CENTER
+        );
+
+        refreshPanel();
+    }
+
+    // 화면 갱신
     private void refreshPanel() {
         contentPanel.revalidate();
         contentPanel.repaint();
