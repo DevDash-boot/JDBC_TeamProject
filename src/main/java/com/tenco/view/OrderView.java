@@ -53,7 +53,7 @@ public class OrderView {
         }
     }
 
-    // TODO- canaelOrder 작성
+    // TODO- cancelOrder 작성
     private void cancelOrder() {
     }
 

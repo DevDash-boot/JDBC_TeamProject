@@ -51,6 +51,7 @@ public class OrderService {
 
                 // 주문 상품 저장
                 // TODO - insertOrderItem 추가 or 수정
+                // addOrderItem이랑 겹침(아마)
                 int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
                 if (itemResult == 0) {
                     conn.rollback();
@@ -100,7 +101,7 @@ public class OrderService {
     }
 
     // 3. 특정 주문의 상품 목록 조회
-
+    // TODO - orderItem의 selectOrderItem과 겹침
     public List<OrderItem> getOrderItemsByOrderId(int orderId) {
         try (Connection conn = util.getConnection()) {
             return orderItemDAO.selectItemByOrderId(conn, orderId);
