@@ -57,8 +57,10 @@ public class Main extends JFrame {
         JButton productButton = createMenuButton("상품관리");
         productButton.addActionListener(e -> {
             if (!checkAdmin()) return;
-            showMessage("상품관리 화면은 아직 준비 중입니다.");
+            showPanel(new ProductSwing());
         });
+
+
         menu.add(productButton);
         menu.add(Box.createVerticalStrut(10));
 
