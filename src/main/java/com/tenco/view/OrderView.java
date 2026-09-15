@@ -1,9 +1,9 @@
-package com.tenco.View;
+package com.tenco.view;
 
 import com.tenco.Service.OrderService;
-import com.tenco.dto.OrderDTO;
-import com.tenco.dto.OrderItemDTO;
-import com.tenco.dto.ProductDTO;
+import com.tenco.dto.Order;
+import com.tenco.dto.OrderItem;
+import com.tenco.dto.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +53,10 @@ public class OrderView {
         }
     }
 
+    // TODO- cancelOrder 작성
+    private void cancelOrder() {
+    }
+
 
     // 상품 주문 (주문 등록)
     private void registerOrder() {
@@ -74,7 +78,7 @@ public class OrderView {
             }
         }
 
-        List<OrderItemDTO> items = new ArrayList<>();
+        List<OrderItem> items = new ArrayList<>();
 
         // 장바구니 담기
         while (true) {
@@ -92,7 +96,7 @@ public class OrderView {
             }
 
             // DB에서 상품 정보를 조회
-            ProductDTO product = orderService.getProductById(productId);
+            Product product = orderService.getProductById(productId);
             if (product == null) {
                 System.out.println("존재하지 않는 상품 ID입니다. 다시 입력해 주세요.");
                 continue;
@@ -108,7 +112,7 @@ public class OrderView {
             final int currentProductId = productId;
             int cartQuantity = items.stream()
                     .filter(item -> item.getProductId() == currentProductId)
-                    .mapToInt(OrderItemDTO::getQuantity)
+                    .mapToInt(OrderItem::getQuantity)
                     .sum();
 
             int availableStock = product.getStock() - cartQuantity;
@@ -151,18 +155,21 @@ public class OrderView {
                     System.out.println("숫자를 입력해주세요");
                 }
             }
+            if (isCanceled) {
+                continue;
+            }
 
             // 중복 상품 합산 처리
-            Optional<OrderItemDTO> existItem = items.stream()
+            Optional<OrderItem> existItem = items.stream()
                     .filter(item -> item.getProductId() == currentProductId)
                     .findFirst();
 
             if (existItem.isPresent()) {
-                OrderItemDTO item = existItem.get();
+                OrderItem item = existItem.get();
                 item.setQuantity(item.getQuantity() + quantity);
                 System.out.printf(" => [수량 추가] %s (총 %d개)\n", product.getProductName(), item.getQuantity());
             } else {
-                OrderItemDTO item = new OrderItemDTO(productId, quantity, product.getPrice());
+                OrderItem item = new OrderItem(productId, quantity, product.getPrice());
                 items.add(item);
                 System.out.printf(" => [장바구니 담기 완료] %s %d개\n", product.getProductName(), quantity);
             }
@@ -176,10 +183,10 @@ public class OrderView {
         int totalPrice = items.stream()
                 .mapToInt(item -> item.getOrderPrice() * item.getQuantity())
                 .sum();
-        OrderDTO orderDTO = new OrderDTO(paymentType, totalPrice);
+        Order Order = new Order(paymentType, totalPrice);
 
         // 결제 및 재고 차감 처리 (트랜잭션)
-        boolean isSuccess = orderService.processOrder(orderDTO, items);
+        boolean isSuccess = orderService.processOrder(Order, items);
 
         if (isSuccess) {
             System.out.println("결제 성공  총금액 : " + totalPrice + "원");
@@ -191,7 +198,7 @@ public class OrderView {
     // 전체 주문 조회 (주문 조회)
     private void showAllOrders() {
         System.out.println("====전체 주문 목록==========");
-        List<OrderDTO> orderList = orderService.getAllOrders();
+        List<Order> orderList = orderService.getAllOrders();
 
         if (orderList == null || orderList.isEmpty()) {
             System.out.println("등록된 주문 없습니다.");
@@ -200,7 +207,7 @@ public class OrderView {
 
         System.out.println("주문번호 \t결제수단 \t총 금액 \t\t주문일시");
         System.out.println("-----------------------------------------------");
-        for (OrderDTO order : orderList) {
+        for (Order order : orderList) {
             System.out.printf("%d \t\t %-6s \t %,d원 \t\t %s \n",
                     order.getOrderId(),
                     order.getPaymentType(),
@@ -222,13 +229,13 @@ public class OrderView {
             return;
         }
 
-        OrderDTO order = orderService.getOrderById(orderId);
+        Order order = orderService.getOrderById(orderId);
         if (order == null) {
             System.out.println("존재하지 않는 주문 번호");
             return;
         }
 
-        List<OrderItemDTO> itemList = orderService.getOrderItemsByOrderId(orderId);
+        List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
 
         System.out.println("=======주문 상세 정보======");
         System.out.println("주문 번호 : " + order.getOrderId());
@@ -239,8 +246,8 @@ public class OrderView {
         System.out.println("------------------------------------");
 
         if (itemList != null && !itemList.isEmpty()) {
-            for (OrderItemDTO item : itemList) {
-                ProductDTO product = orderService.getProductById(item.getProductId());
+            for (OrderItem item : itemList) {
+                Product product = orderService.getProductById(item.getProductId());
                 String productName = (product != null) ? product.getProductName() : "알 수 없음";
 
                 int subTotal = item.getOrderPrice() * item.getQuantity();
@@ -273,7 +280,7 @@ public class OrderView {
             return;
         }
 
-        OrderDTO order =orderService.getOrderById(orderId);
+        Order order =orderService.getOrderById(orderId);
         if (order == null) {
             System.out.println("존재하지 않는 주문번호입니다.");
             return;
@@ -281,5 +288,4 @@ public class OrderView {
 
 
     }
-
 }
