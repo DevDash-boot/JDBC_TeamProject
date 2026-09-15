@@ -26,11 +26,9 @@ import java.util.List;
 
 public class ProductDAO {
 
-
     // 1. 상품 등록
     public int addProduct(Product product) {
         int rows = 0;
-
         String sql = """
                 INSERT INTO product (product_name, price, barcode, expiration_date, stock, category)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -58,7 +56,6 @@ public class ProductDAO {
     // 2. 상품 조회
     public List<Product> getProductName() {
         List<Product> productList = new ArrayList<>();
-
         String sql = """
                 SELECT product_name FROM product
                 """;
@@ -84,7 +81,6 @@ public class ProductDAO {
     // 3. 상품 수정
     public int updateProduct(Product product) {
         int rows = 0;
-
         String sql = """
                 UPDATE product
                 SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ? 
@@ -111,7 +107,6 @@ public class ProductDAO {
         return rows;
     }
 
-
     // 4. 상품 삭제
     public int deleteProduct(int productId) {
         int rows = 0;
@@ -132,7 +127,6 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return rows;
     }
 
@@ -188,7 +182,6 @@ public class ProductDAO {
     // 7. 바코드로 상품 조회
     public List<Product> searchProductByBarcode(String productBarcode) {
         List<Product> productList = new ArrayList<>();
-
         String sql = """
                 SELECT * FROM product WHERE barcode LIKE ?
                 """;
@@ -213,7 +206,6 @@ public class ProductDAO {
     // 8. 재고 부족 상품 조회 << 재고 부족 기준: 10개)
     public List<Product> searchProductByStock() {
         List<Product> productList = new ArrayList<>();
-
         String sql = """
                 SELECT * FROM product WHERE stock <= 10
                 """;
@@ -221,7 +213,6 @@ public class ProductDAO {
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 try (ResultSet rs = pstmt.executeQuery()) {
-
                     while (rs.next()) {
                         productList.add(createProduct(rs));
                     }
@@ -237,7 +228,6 @@ public class ProductDAO {
     // 9. 재고가 0이면 상태 = false => UPDATE?
     public int updateStatus() {
         int rows = 0;
-
         String sql = """
                 UPDATE product SET status = 0 WHERE stock = 0
                 """;
@@ -260,7 +250,6 @@ public class ProductDAO {
                 update product set stock = stock + ?
                 where product_id = ?
                 """;
-
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
                 addPstmt.setInt(1 , quantity);
@@ -271,7 +260,6 @@ public class ProductDAO {
             }
         }
     }
-
 
     private Product createProduct(ResultSet rs) throws SQLException {
         Product product = Product.builder()
@@ -284,22 +272,42 @@ public class ProductDAO {
                 .category(rs.getString("category"))
                 .status(rs.getBoolean("status"))
                 .build();
-
         return product;
     }
 
     //////////////////////////////////////
+    /// 트랜잭션 처리용
     // 트랜잭션용 상품 단건 조회
     public Product selectProductById(Connection conn, int productId) throws SQLException {
-        String sql = "SELECT * FROM product WHERE product_id = ?";
-        Product product = null;
+        String sql = """
+            SELECT product_id, product_name, price, barcode,
+                   expiration_date, stock, category
+            FROM product
+            WHERE product_id = ?
+            """;
+
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);
+
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) product = createProduct(rs);
+                if (rs.next()) {
+                    return Product.builder()
+                            .productId(rs.getInt("product_id"))
+                            .productName(rs.getString("product_name"))
+                            .price(rs.getInt("price"))
+                            .barcode(rs.getString("barcode"))
+                            .expirationDate(
+                                    rs.getDate("expiration_date") != null
+                                            ? rs.getDate("expiration_date").toLocalDate()
+                                            : null
+                            )
+                            .stock(rs.getInt("stock"))
+                            .category(rs.getString("category"))
+                            .build();
+                }
             }
         }
-        return product;
+        return null;
     }
 
     // 재고 차감 (구매 시)
@@ -322,6 +330,4 @@ public class ProductDAO {
             return pstmt.executeUpdate();
         }
     }
-
-
 }

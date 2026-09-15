@@ -9,6 +9,8 @@ public class Main extends JFrame {
     private boolean isAdmin = false;
     private final JPanel contentPanel = new JPanel(new BorderLayout());
 
+    private Integer currentAdminId = null;
+
     public Main() {
         setTitle("무인편의점 재고 관리 시스템");
         setSize(1100, 700);
@@ -81,6 +83,7 @@ public class Main extends JFrame {
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
             //if (!checkAdmin()) return;
+
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
@@ -164,10 +167,9 @@ public class Main extends JFrame {
 
         return panel;
     }
-
     // 관리자 확인
     private boolean checkAdmin() {
-        if (!isAdmin) {
+        if (currentAdminId == null) {
             JOptionPane.showMessageDialog(
                     this,
                     "관리자 로그인이 필요합니다.",
@@ -176,7 +178,6 @@ public class Main extends JFrame {
             );
             return false;
         }
-
         return true;
     }
 

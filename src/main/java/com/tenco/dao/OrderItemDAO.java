@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderItemDAO {
+
+
     // 주문 상품 등록(INSERT)
     public int addOrderItem(OrderItem orderItem) throws SQLException {
         int rows = 0;
@@ -86,41 +88,30 @@ public class OrderItemDAO {
         return orderItemList;
     }
 
-    // 주문 상품 수량 수정(UPDATE)
-    public int updateOrderItem(int quantity, int orderItemId) {
-        int rows = 0;
+    public int updateOrderItem(Connection conn, int quantity, int orderItemId) throws SQLException {
         String sql = """
-                UPDATE order_item SET quantity = ?
-                WHERE order_item_id = ?;
-                """;
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, quantity);
-                pstmt.setInt(2, orderItemId);
-                rows = pstmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            UPDATE order_item
+            SET quantity = ?
+            WHERE order_item_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, orderItemId);
+            return pstmt.executeUpdate();
         }
-        return rows;
     }
 
-    // 주문 상품 삭제(DELETE)
-    public int deleteOrderItem(int orderItemId) {
-        int rows = 0;
+    public int deleteOrderItem(Connection conn, int orderItemId) throws SQLException {
         String sql = """
-                DELETE FROM order_item
-                WHERE order_item_id = ?;
-                """;
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, orderItemId);
-                rows = pstmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            DELETE FROM order_item
+            WHERE order_item_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderItemId);
+            return pstmt.executeUpdate();
         }
-        return rows;
     }
 
     // 주문별 금액 계산(SELECT + SUM)
@@ -159,7 +150,7 @@ public class OrderItemDAO {
         }
     }
 
-
+    // 다른 코드와 트랜잭션 용
     ///////////////////////////////
     public int insertOrderItem(Connection conn, OrderItem orderItem) throws SQLException {
         String sql = """
@@ -195,4 +186,78 @@ public class OrderItemDAO {
         return list;
     }
 
+    public OrderItem selectById(Connection conn, int orderItemId) throws SQLException {
+        String sql = """
+            SELECT order_item_id, order_id, product_id, quantity, order_price
+            FROM order_item
+            WHERE order_item_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderItemId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return OrderItem.builder()
+                            .orderItemId(rs.getInt("order_item_id"))
+                            .orderId(rs.getInt("order_id"))
+                            .productId(rs.getInt("product_id"))
+                            .quantity(rs.getInt("quantity"))
+                            .orderPrice(rs.getInt("order_price"))
+                            .build();
+                }
+            }
+        }
+        return null;
+    }
+
+    // 삭제 시 재고 관련 변경 부분
+    public int deleteByOrderId(Connection conn, int orderId) throws SQLException {
+        String sql = """
+            DELETE FROM order_item
+            WHERE order_id = ?
+            """;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    // 주문 수정 시 변경되는 합계금액 부분
+    public int sumOrderItem(Connection conn, int orderId) throws SQLException {
+        String sql = """
+            SELECT COALESCE(SUM(order_price * quantity), 0) AS total_price
+            FROM order_item
+            WHERE order_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total_price");
+                }
+            }
+        }
+        return 0;
+    }
+
+    // 남은 상품 확인하는 곳
+    public int countOrderItem(Connection conn, int orderId) throws SQLException {
+        String sql = """
+        SELECT COUNT(*)
+        FROM order_item
+        WHERE order_id = ?
+        """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
 }

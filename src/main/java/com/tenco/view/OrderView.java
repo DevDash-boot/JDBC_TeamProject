@@ -57,7 +57,6 @@ public class OrderView {
     private void cancelOrder() {
     }
 
-
     // 상품 주문 (주문 등록)
     private void registerOrder() {
         System.out.println("======= 주문 등록 =======");
@@ -107,7 +106,6 @@ public class OrderView {
                 continue;
             }
 
-
             // 장바구니에 담긴 수량 계산
             final int currentProductId = productId;
             int cartQuantity = items.stream()
@@ -143,7 +141,6 @@ public class OrderView {
                         System.out.println("수량은 1개 이상이어야합니다.");
                         continue;
                     }
-
                     // 재고 체크
                     if (quantity > availableStock) {
                         System.out.printf("재고 부족 (추가 가능 최대 수량: %d개)\n", availableStock);
@@ -285,7 +282,5 @@ public class OrderView {
             System.out.println("존재하지 않는 주문번호입니다.");
             return;
         }
-
-
     }
 }
