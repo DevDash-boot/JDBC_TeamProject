@@ -1,8 +1,9 @@
 package com.tenco;
 
-import com.tenco.view.OrderItemSwing;
-import com.tenco.view.PurchaseSwing;
-import com.tenco.view.StoreInfoSwing;
+import com.tenco.swing.OrderItemSwing;
+import com.tenco.swing.ProductSwing;
+import com.tenco.swing.PurchaseSwing;
+import com.tenco.swing.StoreInfoSwing;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,10 +58,8 @@ public class Main extends JFrame {
         JButton productButton = createMenuButton("상품관리");
         productButton.addActionListener(e -> {
             if (!checkAdmin()) return;
-            showPanel(new ProductSwing());
+            showMessage("상품관리 화면은 아직 준비 중입니다.");
         });
-
-
         menu.add(productButton);
         menu.add(Box.createVerticalStrut(10));
 

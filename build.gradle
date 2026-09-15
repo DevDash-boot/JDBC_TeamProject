@@ -16,9 +16,14 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.17'
 
-    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.46'
+    // implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.46'
+    compileOnly         'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.4.0'
+
+    // bcrypt 비밀번호 해시
+    implementation 'org.mindrot:jbcrypt:0.4'
 
     testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -27,4 +32,22 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    // 시작 클래스
+    manifest {
+        attributes 'Main-Class': 'com.tenco.Main'
+    }
+
+    // 의존 라이브러리(MySQL 드라이버 등)를 풀어서 함께 묶음
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    // 라이브러리끼리 같은 경로의 파일이 겹칠 때 첫 번째만 사용
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // 다른 라이브러리의 서명 파일이 섞이면 실행이 거부되므로 제외
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 }
