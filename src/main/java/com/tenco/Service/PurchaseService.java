@@ -43,7 +43,7 @@ public class PurchaseService {
 
             purchaseDAO.purchaseProduct(id , quantity);
             productDAO.addAmount(id , quantity);
-            // TODO 상품 테이블에서 설계한 상품 수량 추가 기능 작성.
+
             conn.commit();
 
         }catch (SQLException e) {
@@ -80,5 +80,4 @@ public class PurchaseService {
         if(i <= 0) throw new SQLException(" 유효한 ID를 입력해주세요. 입력되는 수량은 현재 발주된 상품의 수량을 초과할 수 없습니다. \n");
         else System.out.println(i + "건이 수정되었습니다. 발주수량이 차감되었습니다. ---  id : " + id );
     }
-
 }
