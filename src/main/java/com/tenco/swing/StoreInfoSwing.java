@@ -1,4 +1,4 @@
-package com.tenco.view;
+package com.tenco.swing;
 
 import com.tenco.Service.StoreInfoService;
 import com.tenco.dto.StoreInfo;
