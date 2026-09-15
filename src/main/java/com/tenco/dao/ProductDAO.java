@@ -180,8 +180,8 @@ public class ProductDAO {
         return productList;
     }
 
-    // 7. 바코드로 상품 조회
-    public List<Product> searchProductByBarcode(String productBarcode) {
+    // 7. 아이디로 상품 조회
+    public List<Product> searchProductById(int productId) {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
@@ -190,7 +190,7 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, "%" + productBarcode + "%");
+                pstmt.setString(1, "%" + productId + "%");
                 try (ResultSet rs = pstmt.executeQuery()) {
 
                     while (rs.next()) {
@@ -257,8 +257,8 @@ public class ProductDAO {
                 addPstmt.setInt(1 , quantity);
                 addPstmt.setInt(2 , id);
 
-                int i = addPstmt.executeUpdate();
-                if(i <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+                int rows = addPstmt.executeUpdate();
+                if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
             }
         }
     }
