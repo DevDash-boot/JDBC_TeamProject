@@ -78,11 +78,11 @@ public class OrderDAO {
         PreparedStatement updateStockStmt = null;
 
         // order_items 테이블 수량 UPDATE
-        String updatedItemSql = "UPDATE order_items SET quantity = ? WHERE order_id = ? AND product_id = ?";
+        String updatedItemSql = "UPDATE order_item SET quantity = ? WHERE order_id = ? AND product_id = ?";
         // order 테이블의 total_price UPDATE
         String updateOrderSql = "UPDATE orders SET total_price = total_price + ? WHERE order_id = ?";
         // product 테이블의 stock UPDATE (추가 구매시 차감, 구매 수량 감소시 원복)
-        String updateStockSql = "UPDATE products SET stock = stock - ? WHERE product_id = ?";
+        String updateStockSql = "UPDATE product SET stock = stock - ? WHERE product_id = ?";
 
         try {
             conn = util.getConnection();
@@ -156,7 +156,7 @@ public class OrderDAO {
         PreparedStatement deleteItemStmt = null;
 
         // 재고 원복
-        String updateStockSql = "UPDATE products SET stock = stock + ? WHERE product_id = ?";
+        String updateStockSql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
         // 주문 상태를 'CANCELED' 로 UPDATE (주문 내역에 주문 취소 기록 남기기)
         String updateOrderSql = "UPDATE orders SET status = 'CANCELED' WHERE order_id = ?";
 

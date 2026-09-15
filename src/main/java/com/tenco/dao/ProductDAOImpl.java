@@ -10,7 +10,7 @@ public class ProductDAOImpl implements ProductDAO {
     // 재고 차감
     @Override
     public int outStock(Connection conn, int productId, int quantity) {
-        String sql = "UPDATE products SET stock = stock - ? WHERE product_id = ? AND stock >=?";
+        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >=?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, quantity);
@@ -25,7 +25,7 @@ public class ProductDAOImpl implements ProductDAO {
 
     @Override
     public ProductDTO selectProductById(Connection conn, int productId) throws SQLException {
-        String sql = "SELECT product_id, product_name, price, stock FROM products WHERE product_id = ?";
+        String sql = "SELECT product_id, product_name, price, stock FROM product WHERE product_id = ?";
 
         ProductDTO product = null;
 
