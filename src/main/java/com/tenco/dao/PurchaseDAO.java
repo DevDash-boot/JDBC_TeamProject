@@ -1,5 +1,6 @@
 package com.tenco.dao;
 
+import com.tenco.dto.Product;
 import com.tenco.dto.PurchaseDto;
 import com.tenco.util.util;
 
@@ -48,6 +49,11 @@ public class PurchaseDAO {
                     from purchase p join product pr on p.product_id = pr.product_id
                     where p.product_id = ?
                     """;
+
+            // 상품 테이블에도 실제 존재하는 상품인지 확인.
+            Product product = new ProductDAO().selectProductById(conn , id);
+            if (product == null) throw new NullPointerException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+
             try (PreparedStatement alreadyPstmt = conn.prepareStatement(alreadySql)) {
                 alreadyPstmt.setInt(1, id);
                 try (ResultSet rs = alreadyPstmt.executeQuery()) {
@@ -95,17 +101,6 @@ public class PurchaseDAO {
                             values(? , ? , ? , ?);
                             """;
 
-                    String checkproductSql = """
-                            select product_id from product
-                            where product_id = ?
-                            """;
-
-                    try (PreparedStatement checkPstmt = conn.prepareStatement(checkproductSql)) {
-                        checkPstmt.setInt(1 , id);
-                        try (ResultSet rs = checkPstmt.executeQuery()) {
-                           if(!rs.next()) throw new SQLException("상품이 아예 존재하지 않습니다.");
-                        }
-                    }
 
                     try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
                         newPurchasePstmt.setInt(1 , id);
@@ -187,6 +182,5 @@ public class PurchaseDAO {
         }
     }
 }
-
 
 

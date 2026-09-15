@@ -23,7 +23,7 @@ public class PurchaseService {
     // 기능 B. 상품 ID로 발주 상품 단건 조회.
     public PurchaseDto existList(int id) throws SQLException {
         if(id <= 0 || purchaseDAO.existList(id) == null) {
-            throw new SQLException("id가 " + id + "인 상품은 발주 목록에 없습니다.");
+            System.out.println("id가 " + id + "인 상품은 발주 목록에 없습니다.");
         }
         return purchaseDAO.existList(id);
     }
@@ -43,13 +43,11 @@ public class PurchaseService {
 
             purchaseDAO.purchaseProduct(id , quantity);
             productDAO.addAmount(id , quantity);
-
             conn.commit();
 
         }catch (SQLException e) {
             if (conn != null) conn.rollback(); // catch문에 왔다면 문제가 생긴것이므로 rollback.
-            throw new SQLException(e);
-
+            throw new SQLException(e.getMessage());
         }finally {
             if (conn != null) {
                 conn.setAutoCommit(true);

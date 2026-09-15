@@ -11,15 +11,16 @@ public class PurchaseView {
     Scanner scanner = new Scanner(System.in);
 
     // TODO 관리자 받아서 관리자 이름 보이게
-    public void purchaseView() throws SQLException {
-        try {
+    public void purchaseView()  {
 
-            while (true) {
+        while (true) {
+            try {
                 System.out.println("------------------ 관리자 : " + "------------------");
                 System.out.println("====== 발주/입고 관리기능 ======.");
                 System.out.print("1.발주 목록 전체 조회 \t2.상품 ID로 발주 조회.\t3.발주 신청\t4.발주목록에서 제거(발주 취소)\t" +
                         "  \t5.메인 화면\n입력 : ");
                 int menu = scanner.nextInt();
+                scanner.nextLine();
 
                 switch (menu) {
                     case 1:
@@ -37,7 +38,7 @@ public class PurchaseView {
                         int addId = scanner.nextInt();
                         System.out.print("발주할 수랑 (최대 20개) : ");
                         int quantity = scanner.nextInt();
-                        purchaseService.purcahseProduct(addId , quantity);
+                        purchaseService.purcahseProduct(addId, quantity);
                         break;
 
                     case 4:
@@ -55,17 +56,17 @@ public class PurchaseView {
 //                        break;
 
                     case 5:
-                        // TODO 메인화면 view 메서드.
-                        break;
+                        return;
 
                     default:
                         System.out.println("메뉴는 1 ~ 5번에서 골라주세요.");
                 }
+
+            }catch(Exception e){
+                System.out.println(e.getMessage());
             }
-        }catch(SQLException e){
-            throw new SQLException(e);
         }
-        }
+    }
 
         // 전체조회를 사용자가 보기 편하게.
         public void purchaseAllView() throws SQLException {
@@ -77,10 +78,14 @@ public class PurchaseView {
         }
 
      // 단건 조회를 사용자가 보기 편하게.
-    public void purchaseSingleView(int id) throws SQLException {
+    public void purchaseSingleView(int id) throws Exception {
         PurchaseDto p = purchaseService.existList(id);
-            System.out.printf("상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" , p.getProduct_id() ,
+        System.out.printf("상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" , p.getProduct_id() ,
                     p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
+        }
+
+    public static void main(String[] args) {
+            new PurchaseView().purchaseView();
         }
     }
 
