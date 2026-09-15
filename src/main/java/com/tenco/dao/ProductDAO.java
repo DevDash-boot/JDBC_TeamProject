@@ -1,5 +1,6 @@
 package com.tenco.dao;
 
+import com.tenco.dto.OrderItem;
 import com.tenco.dto.Product;
 import com.tenco.util.util;
 
@@ -185,8 +186,8 @@ public class ProductDAO {
         return productList;
     }
 
-    // 7. 바코드로 상품 조회
-    public List<Product> searchProductByBarcode(String productBarcode) {
+    // 7. 아이디로 상품 조회
+    public List<Product> searchProductById(int productId) {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
@@ -195,7 +196,7 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, "%" + productBarcode + "%");
+                pstmt.setString(1, "%" + productId + "%");
                 try (ResultSet rs = pstmt.executeQuery()) {
 
                     while (rs.next()) {
@@ -244,8 +245,8 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    rows = pstmt.executeUpdate();
-                    System.out.println(rows + "행이 수정되었습니다.");
+                rows = pstmt.executeUpdate();
+                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -255,7 +256,7 @@ public class ProductDAO {
     }
 
     // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
-    public void addAmount(int id , int quantity) throws SQLException {
+    public void addAmount(int id, int quantity) throws SQLException {
         String addSql = """
                 update product set stock = stock + ?
                 where product_id = ?
@@ -263,13 +264,66 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
-                addPstmt.setInt(1 , quantity);
-                addPstmt.setInt(2 , id);
+                addPstmt.setInt(1, quantity);
+                addPstmt.setInt(2, id);
 
-                int i = addPstmt.executeUpdate();
-                if(i <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+                int rows = addPstmt.executeUpdate();
+                if (rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
             }
         }
+    }
+
+    // 11. 재고 차감
+    public int outStock(Connection conn, int productId, int quantity) {
+        int rows = 0;
+        String sql = """
+                update product
+                set stock = stock - ?
+                where product_id = ?
+                and stock >= ?;
+                """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, productId);
+            pstmt.setInt(3, quantity);
+
+            rows = pstmt.executeUpdate();
+            if (rows == 0) {
+                System.out.println("재고 차감에 실패했습니다.");
+            }
+        } catch (
+                SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return rows;
+    }
+
+    // 재고 증가
+    public int inputStock(OrderItem orderItem) {
+        int rows = 0;
+        String sql = """
+                update product
+                set stock = stock + ?
+                where product_id = ?
+                """;
+        try (Connection conn = util.getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, orderItem.getQuantity());
+                pstmt.setInt(2, orderItem.getProductId());
+
+                rows = pstmt.executeUpdate();
+                if (rows == 0) {
+                    System.out.println("재고 증감에 실패했습니다.");
+                }
+            } catch (
+                    SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return rows;
     }
 
 
