@@ -128,9 +128,6 @@ public class Main extends JFrame {
         // 관리자 정보
         JButton adminButton = createMenuButton("관리자 정보");
         adminButton.addActionListener(e -> {
-            if (!checkAdmin()) {
-                return;
-            }
             showPanel(new AdminSwing(this));
         });
         menu.add(adminButton);
