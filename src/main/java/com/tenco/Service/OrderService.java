@@ -112,6 +112,7 @@ public class OrderService {
     }
 
     // 4. 전체 주문 목록 조회
+
     public List<Order> getAllOrders() {
         try (Connection conn = util.getConnection()) {
             return orderDAO.selectAllOrders(conn);
