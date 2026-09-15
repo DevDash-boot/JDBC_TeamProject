@@ -22,6 +22,9 @@ CREATE TABLE orders (
     order_date DATE NOT NULL
 );
 
+ALTER TABLE orders 
+MODIFY order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
 -- 3. 주문 상품 테이블(고객이 주문한 것을 취소, 수정하는 부분)
 CREATE TABLE order_item (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY,
