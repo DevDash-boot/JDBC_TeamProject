@@ -101,7 +101,6 @@ public class PurchaseDAO {
                             values(? , ? , ? , ?);
                             """;
 
-
                     try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
                         newPurchasePstmt.setInt(1 , id);
                         newPurchasePstmt.setInt(2 , quantity);

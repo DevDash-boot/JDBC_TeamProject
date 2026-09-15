@@ -19,8 +19,16 @@ public class PurchaseView {
                 System.out.println("====== 발주/입고 관리기능 ======.");
                 System.out.print("1.발주 목록 전체 조회 \t2.상품 ID로 발주 조회.\t3.발주 신청\t4.발주목록에서 제거(발주 취소)\t" +
                         "  \t5.메인 화면\n입력 : ");
-                int menu = scanner.nextInt();
-                scanner.nextLine();
+
+                Integer menu = null;
+
+                try {
+                    menu = Integer.parseInt(scanner.nextLine());
+                } catch (NumberFormatException e) {
+                    System.out.println("정수를 입력하세요 (1 ~ 5)");
+                    continue;
+                }
+
 
                 switch (menu) {
                     case 1:
@@ -88,5 +96,3 @@ public class PurchaseView {
             new PurchaseView().purchaseView();
         }
     }
-
-
