@@ -288,5 +288,40 @@ public class ProductDAO {
         return product;
     }
 
+    //////////////////////////////////////
+    // 트랜잭션용 상품 단건 조회
+    public Product selectProductById(Connection conn, int productId) throws SQLException {
+        String sql = "SELECT * FROM product WHERE product_id = ?";
+        Product product = null;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, productId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) product = createProduct(rs);
+            }
+        }
+        return product;
+    }
+
+    // 재고 차감 (구매 시)
+    public int outStock(Connection conn, int productId, int quantity) throws SQLException {
+        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, productId);
+            pstmt.setInt(3, quantity); // WHERE 조건에도 넣어 동시성 이슈(마이너스 재고) 방지
+            return pstmt.executeUpdate();
+        }
+    }
+
+    // 재고 복원 (주문취소/수량감소 시)
+    public int inStock(Connection conn, int productId, int quantity) throws SQLException {
+        String sql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, productId);
+            return pstmt.executeUpdate();
+        }
+    }
+
 
 }

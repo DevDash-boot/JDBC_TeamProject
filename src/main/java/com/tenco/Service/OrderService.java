@@ -41,6 +41,7 @@ public class OrderService {
             for (OrderItem itemDTO : items) {
                 itemDTO.setOrderId(orderId); // 받아은 order_id 세팅
 
+                // TODO - selectProductById 추가 or 수정
                 Product product =productDAO.selectProductById(conn, itemDTO.getProductId());
                 if (product == null || product.getStock() < itemDTO.getQuantity()) {
                     System.out.println("상품 [ID:" +itemDTO.getProductId() +"]의 재고가 부족합니다.");
@@ -49,13 +50,15 @@ public class OrderService {
                 }
 
                 // 주문 상품 저장
+                // TODO - insertOrderItem 추가 or 수정
+                // addOrderItem이랑 겹침(아마)
                 int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
                 if (itemResult == 0) {
                     conn.rollback();
                     return false;
                 }
 
-                 // 재고 차감 (ProductDAO 차감 메서드)
+                // TODO - outStock 추가 or 수정
                 int stockResult = productDAO.outStock(conn, itemDTO.getProductId(), itemDTO.getQuantity());
                 if (stockResult == 0) {
                     conn.rollback();
@@ -98,7 +101,7 @@ public class OrderService {
     }
 
     // 3. 특정 주문의 상품 목록 조회
-
+    // TODO - orderItem의 selectOrderItem과 겹침
     public List<OrderItem> getOrderItemsByOrderId(int orderId) {
         try (Connection conn = util.getConnection()) {
             return orderItemDAO.selectItemByOrderId(conn, orderId);
@@ -109,6 +112,7 @@ public class OrderService {
     }
 
     // 4. 전체 주문 목록 조회
+    public List<Order> getAllOrders() {
 
     public List<Order> getAllOrders() {
         try (Connection conn = util.getConnection()) {
@@ -126,6 +130,27 @@ public class OrderService {
         } catch (SQLException e) {
             System.err.println("상품 조회 실패: " + e.getMessage());
             return null;
+        }
+    }
+
+    public boolean cancelOrder(int orderId) {
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            List<OrderItem> items = orderItemDAO.selectItemByOrderId(conn, orderId);
+            for (OrderItem item : items) {
+                productDAO.inStock(conn, item.getProductId(), item.getQuantity()); // 재고 복원
+            }
+            // order_item 삭제 or orders에 상태 컬럼 추가해서 CANCELED로 변경 (설계 선택)
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.tenco.View;
+package com.tenco.view;
 
 import com.tenco.Service.OrderService;
 import com.tenco.dto.Order;
@@ -51,6 +51,10 @@ public class OrderView {
                     System.out.println("잘못된 입력");
             }
         }
+    }
+
+    // TODO- cancelOrder 작성
+    private void cancelOrder() {
     }
 
 
@@ -151,6 +155,9 @@ public class OrderView {
                     System.out.println("숫자를 입력해주세요");
                 }
             }
+            if (isCanceled) {
+                continue;
+            }
 
             // 중복 상품 합산 처리
             Optional<OrderItem> existItem = items.stream()
@@ -176,10 +183,10 @@ public class OrderView {
         int totalPrice = items.stream()
                 .mapToInt(item -> item.getOrderPrice() * item.getQuantity())
                 .sum();
-        Order orderDTO = new Order(paymentType, totalPrice);
+        Order Order = new Order(paymentType, totalPrice);
 
         // 결제 및 재고 차감 처리 (트랜잭션)
-        boolean isSuccess = orderService.processOrder(orderDTO, items);
+        boolean isSuccess = orderService.processOrder(Order, items);
 
         if (isSuccess) {
             System.out.println("결제 성공  총금액 : " + totalPrice + "원");
