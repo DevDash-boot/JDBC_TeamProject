@@ -9,9 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-// getAllPurchases List
-// existList boolean
-// purcahseProduct  void
+
 public class PurchaseService {
     PurchaseDAO purchaseDAO = new PurchaseDAO();
     ProductDAO productDAO = new ProductDAO();
@@ -73,7 +71,7 @@ public class PurchaseService {
 
 
 
-    // 기능 E. 상품 ID로 발주 수량 차감.
+    // 기능 E. 상품 ID로 발주 수량 차감. -- 만들기만 함
     public void substractPurchase(int id , int quantity) throws SQLException {
         if(id <= 0 || quantity <= 0) {
             throw new SQLException("유효한 ID와 수량을 입력해주세요.");

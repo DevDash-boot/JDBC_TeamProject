@@ -169,7 +169,7 @@ public class PurchaseDAO {
     }
 
 
-    // 기능 E. id로 발주 수량 차감.
+    // 기능 E. id로 발주 수량 차감. -- 만들기만 함.
     public int substractPurchase(int id , int quantity) throws SQLException {
         try (Connection conn = util.getConnection()) {
             String substractSql = """
