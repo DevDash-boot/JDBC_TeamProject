@@ -22,7 +22,20 @@ public class ProductDAOImpl implements ProductDAO {
         }
     }
 
+    // 재고 복구 (주문 취소 시)
+    @Override
+    public int inStock(Connection conn, int productId, int quantity) throws SQLException {
+        String sql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
 
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, productId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+
+    // 단건 조회
     @Override
     public ProductDTO selectProductById(Connection conn, int productId) throws SQLException {
         String sql = "SELECT product_id, product_name, price, stock FROM product WHERE product_id = ?";
