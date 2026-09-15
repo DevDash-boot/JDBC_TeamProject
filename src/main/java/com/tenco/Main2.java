@@ -51,21 +51,11 @@ public class Main2 {
                         }
                         break;
                     case 5:
-                        if (!isAdmin){
-                            System.out.println("관리자 로그인 필요");
-                        }
-                        if (isAdmin) {
-                            System.out.println("관리자 메뉴로 이동합니다.\n");
-                            AdminView adminView = new AdminView();
-                            adminView.AdminStart();
-                        }
+                        System.out.println("관리자 메뉴로 이동합니다.\n");
+                        AdminView adminView = new AdminView();
+                        adminView.AdminStart();
                         break;
                     case 6:
-                        System.out.println("관리자 로그인으로 이동합니다.\n");
-                            // AdminView 실행
-
-                        break;
-                    case 7:
                         System.out.println("매장 정보로 이동합니다.\n");
                         StoreInfoView storeInfoView = new StoreInfoView();
                         storeInfoView.start();
@@ -75,7 +65,7 @@ public class Main2 {
                         scanner.close();
                         return;
                     default:
-                        System.out.println("0~5 사이의 숫자를 입력하세요.");
+                        System.out.println("0~6 사이의 숫자를 입력하세요.");
                 }
             } catch (Exception e) {
                 System.out.println("오류: " + e.getMessage());
@@ -89,9 +79,8 @@ public class Main2 {
         System.out.println("2.  주문 / 결제");
         System.out.println("3.  주문한 상품");
         System.out.println("4.  발주 / 입고(관리자)");
-        System.out.println("5.  관리자 정보(관리자)");
-        System.out.println("6.  관리자 로그인");
-        System.out.println("7.  매장 정보");
+        System.out.println("5.  관리자 정보(로그인)");
+        System.out.println("6.  매장 정보");
         System.out.println("0. 종료");
     }
 

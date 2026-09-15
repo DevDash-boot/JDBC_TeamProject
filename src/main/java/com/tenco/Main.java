@@ -1,9 +1,9 @@
 package com.tenco;
 
-import com.tenco.view.OrderItemSwing;
-import com.tenco.view.ProductSwing;
-import com.tenco.view.PurchaseSwing;
-import com.tenco.view.StoreInfoSwing;
+import com.tenco.swing.OrderItemSwing;
+import com.tenco.swing.ProductSwing;
+import com.tenco.swing.PurchaseSwing;
+import com.tenco.swing.StoreInfoSwing;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,14 +55,13 @@ public class Main extends JFrame {
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
+        // TODO - 관리자 로그인 완료시 if문 살리기
         JButton productButton = createMenuButton("상품관리");
-//        productButton.addActionListener(e -> {
-//            if (!checkAdmin()) return;
-//            showMessage("상품관리 화면은 아직 준비 중입니다.");
-//        });
-        productButton.addActionListener(e -> {
+       productButton.addActionListener(e -> {
+            //if (!checkAdmin()) return;
             showPanel(new ProductSwing());
-        });
+       });
+
         menu.add(productButton);
         menu.add(Box.createVerticalStrut(10));
 
@@ -79,31 +78,22 @@ public class Main extends JFrame {
         menu.add(orderItemButton);
         menu.add(Box.createVerticalStrut(10));
 
+        // TODO - 관리자 로그인 완료시 if문 살리기
         JButton purchaseButton = createMenuButton("발주 / 입고");
-//        purchaseButton.addActionListener(e -> {
-//            if (!checkAdmin()) return;
-//            showPanel(new PurchaseSwing());
-//        });
         purchaseButton.addActionListener(e -> {
+            //if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
         menu.add(Box.createVerticalStrut(10));
 
+        // TODO - 관리자 로그인 완료시 if문, showPanel 살리기
         JButton adminButton = createMenuButton("관리자 정보");
         adminButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
-            showMessage("관리자 정보 화면은 아직 준비 중입니다.");
+            //if (!checkAdmin()) return;
+            //showPanel(new AdminSwing());
         });
         menu.add(adminButton);
-        menu.add(Box.createVerticalStrut(10));
-
-        JButton loginButton = createMenuButton("관리자 로그인");
-        loginButton.addActionListener(e -> {
-            isAdmin = true;
-            JOptionPane.showMessageDialog(this, "관리자 로그인 상태입니다.");
-        });
-        menu.add(loginButton);
         menu.add(Box.createVerticalStrut(10));
 
         // 매장 정보
