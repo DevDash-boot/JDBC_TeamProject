@@ -1,4 +1,4 @@
-package com.tenco.view;
+package com.tenco.swing;
 
 import com.tenco.Service.OrderItemService;
 import com.tenco.dto.OrderItem;
@@ -6,7 +6,6 @@ import com.tenco.dto.OrderItem;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.SQLException;
 import java.util.List;
 
 public class OrderItemSwing extends JPanel {
