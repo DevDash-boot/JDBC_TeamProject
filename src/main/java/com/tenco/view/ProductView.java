@@ -37,7 +37,7 @@ public class ProductView {
                     case 4: deleteProduct(); break;
                     case 5: getProduct(); break;
                     case 6: searchProductByName(); break;
-                    case 7: searchProductByBarcode(); break;
+                    case 7: searchProductById(); break;
                     case 8: searchProductByStock(); break;
                     case 9:
                         System.out.println("프로그램을 종료합니다.");
@@ -62,7 +62,7 @@ public class ProductView {
         System.out.println("4. 상품 삭제");
         System.out.println("5. 상품 상세 조회");
         System.out.println("6. 상품명 검색");
-        System.out.println("7. 바코드로 상품 조회");
+        System.out.println("7. 아이디로 상품 조회");
         System.out.println("8. 재고 부족 상품 조회");
         System.out.println("9. 종료");
     }
@@ -232,15 +232,15 @@ public class ProductView {
         }
     }
 
-    private void searchProductByBarcode() throws SQLException {
-        System.out.println("상품 바코드: ");
-        String productBarcode = sc.nextLine().trim();
-        if (productBarcode.isEmpty()) {
-            System.out.println("바코드를 입력해주세요.");
+    private void searchProductById() throws SQLException {
+        System.out.println("상품 아이디: ");
+        int productId = sc.nextInt();
+        if (productId == 0) {
+            System.out.println("아이디를 입력해주세요.");
             return;
         }
 
-        List<Product> productList = service.searchProductByBarcode(productBarcode);
+        List<Product> productList = service.searchProductById(productId);
         System.out.println("\n=== 검색 결과 ===");
         if (productList.isEmpty()) {
             System.out.println("검색 결과가 없습니다.");
