@@ -9,9 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-// getAllPurchases List
-// existList boolean
-// purcahseProduct  void
+
 public class PurchaseService {
     PurchaseDAO purchaseDAO = new PurchaseDAO();
     ProductDAO productDAO = new ProductDAO();
@@ -25,7 +23,7 @@ public class PurchaseService {
     // 기능 B. 상품 ID로 발주 상품 단건 조회.
     public PurchaseDto existList(int id) throws SQLException {
         if(id <= 0 || purchaseDAO.existList(id) == null) {
-            throw new SQLException("id가 " + id + "인 상품은 발주 목록에 없습니다.");
+            System.out.println("id가 " + id + "인 상품은 발주 목록에 없습니다.");
         }
         return purchaseDAO.existList(id);
     }
@@ -45,13 +43,11 @@ public class PurchaseService {
 
             purchaseDAO.purchaseProduct(id , quantity);
             productDAO.addAmount(id , quantity);
-            // TODO 상품 테이블에서 설계한 상품 수량 추가 기능 작성.
             conn.commit();
 
         }catch (SQLException e) {
             if (conn != null) conn.rollback(); // catch문에 왔다면 문제가 생긴것이므로 rollback.
-            throw new SQLException(e);
-
+            throw new SQLException(e.getMessage());
         }finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
@@ -73,7 +69,7 @@ public class PurchaseService {
 
 
 
-    // 기능 E. 상품 ID로 발주 수량 차감.
+    // 기능 E. 상품 ID로 발주 수량 차감. -- 만들기만 함
     public void substractPurchase(int id , int quantity) throws SQLException {
         if(id <= 0 || quantity <= 0) {
             throw new SQLException("유효한 ID와 수량을 입력해주세요.");
@@ -82,5 +78,4 @@ public class PurchaseService {
         if(i <= 0) throw new SQLException(" 유효한 ID를 입력해주세요. 입력되는 수량은 현재 발주된 상품의 수량을 초과할 수 없습니다. \n");
         else System.out.println(i + "건이 수정되었습니다. 발주수량이 차감되었습니다. ---  id : " + id );
     }
-
 }

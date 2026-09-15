@@ -1,5 +1,6 @@
 package com.tenco.dao;
 
+import com.tenco.dto.OrderItem;
 import com.tenco.dto.Product;
 import com.tenco.util.util;
 
@@ -182,6 +183,7 @@ public class ProductDAO {
     // 7. 바코드로 상품 조회
     public List<Product> searchProductByBarcode(String productBarcode) {
         List<Product> productList = new ArrayList<>();
+
         String sql = """
                 SELECT * FROM product WHERE barcode LIKE ?
                 """;
@@ -234,8 +236,8 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    rows = pstmt.executeUpdate();
-                    System.out.println(rows + "행이 수정되었습니다.");
+                rows = pstmt.executeUpdate();
+                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -276,7 +278,6 @@ public class ProductDAO {
     }
 
     //////////////////////////////////////
-    /// 트랜잭션 처리용
     // 트랜잭션용 상품 단건 조회
     public Product selectProductById(Connection conn, int productId) throws SQLException {
         String sql = """

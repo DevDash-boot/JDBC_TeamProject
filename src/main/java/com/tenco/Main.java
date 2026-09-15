@@ -82,8 +82,7 @@ public class Main extends JFrame {
         // TODO - 관리자 로그인 안돼면 if문 주석
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
-            //if (!checkAdmin()) return;
-
+            if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
@@ -167,6 +166,7 @@ public class Main extends JFrame {
 
         return panel;
     }
+
     // 관리자 확인
     private boolean checkAdmin() {
         if (currentAdminId == null) {
