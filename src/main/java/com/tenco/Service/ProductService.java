@@ -69,12 +69,12 @@ public class ProductService {
         return productDAO.searchProductByName(productName);
     }
 
-    // 7. 바코드로 상품 조회
-    public List<Product> searchProductByBarcode(String productBarcode) throws SQLException {
-        if (productBarcode == null || productBarcode.trim().isEmpty()) {
-            throw new SQLException("바코드를 입력해주세요");
+    // 7. 아이디로 상품 조회
+    public List<Product> searchProductById(int productId) throws SQLException {
+        if (productId == 0) {
+            throw new SQLException("상품의 ID를 입력해주세요");
         }
-        return productDAO.searchProductByBarcode(productBarcode);
+        return productDAO.searchProductById(productId);
     }
 
     // 8. 재고 부족 상품 조회 << 재고 부족 기준: 10개)

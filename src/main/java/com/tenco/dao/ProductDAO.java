@@ -1,5 +1,6 @@
 package com.tenco.dao;
 
+import com.tenco.dto.OrderItem;
 import com.tenco.dto.Product;
 import com.tenco.util.util;
 
@@ -185,8 +186,8 @@ public class ProductDAO {
         return productList;
     }
 
-    // 7. 바코드로 상품 조회
-    public List<Product> searchProductByBarcode(String productBarcode) {
+    // 7. 아이디로 상품 조회
+    public List<Product> searchProductById(int productId) {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
@@ -195,7 +196,7 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, "%" + productBarcode + "%");
+                pstmt.setString(1, "%" + productId + "%");
                 try (ResultSet rs = pstmt.executeQuery()) {
 
                     while (rs.next()) {
@@ -244,8 +245,8 @@ public class ProductDAO {
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    rows = pstmt.executeUpdate();
-                    System.out.println(rows + "행이 수정되었습니다.");
+                rows = pstmt.executeUpdate();
+                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
