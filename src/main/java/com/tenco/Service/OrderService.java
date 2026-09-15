@@ -1,8 +1,6 @@
 package com.tenco.Service;
 
-import com.tenco.dao.OrderDAO;
-import com.tenco.dao.OrderItemDAO;
-import com.tenco.dao.ProductDAO;
+import com.tenco.dao.*;
 import com.tenco.dto.OrderDTO;
 import com.tenco.dto.OrderItemDTO;
 import com.tenco.dto.ProductDTO;
@@ -14,8 +12,8 @@ import java.util.List;
 
 public class OrderService {
     private final OrderDAO orderDAO = new OrderDAO();
-    private final OrderItemDAO orderItemDAO = new OrderItemDAO();
-    private final ProductDAO productDAO = new ProductDAO();
+    private final OrderItemDAO orderItemDAO = new OrderItemDAOImpl();
+    private final ProductDAO productDAO = new ProductDAOImpl();
 
     /**
      * 1. 신규 주문 처리 (트랜잭션)
@@ -128,4 +126,28 @@ public class OrderService {
             return null;
         }
     }
+
+    // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영
+    public boolean updateOrderItemQuantity(int orderId, int productId, int oldQuantity, int newQuantity, int price) {
+        // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
+        int quantityDIff = newQuantity - oldQuantity;
+        int priceDiff = quantityDIff * price;
+
+        // DB 트랜잭션 수행 (Connection commit/rollback)
+        // 1. order_items 테이블의 수량(quantity) UPDATE
+        // 2. orders 테이블의 total_price UPDATE (기존 total_price + priceDiff)
+        // 3. products 테이블의 stock UPDATE (기존 stock - quantityDiff)
+        return orderDAO.updateOrderItemAndStock(orderId, productId, newQuantity, priceDiff, quantityDIff);
+    }
+
+    // 주문 취소 처리 (재고 복구 + 주문 데이터 처리)
+    public boolean cancelOrder(int orderId, List<OrderItemDTO> itemList) {
+        // DB 트랜잭션 수행 (Connection commit/rollback)
+        // 1. itemList를 순회하며 각 상품(productId)의 재고(stock)를 수량(quantity)만큼 증가(+)
+        // 2. order_items 테이블에서 해당 order_id 관련 레코드 삭제 (또는 status='CANCELED' 업데이트)
+        // 3. orders 테이블에서 해당 order_id 레코드 삭제 (또는 status='CANCELED' 업데이트)
+
+        return orderDAO.cancelOrderTransaction(orderId, itemList);
+    }
+
 }

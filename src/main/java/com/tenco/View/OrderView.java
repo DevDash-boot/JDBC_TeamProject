@@ -20,6 +20,8 @@ public class OrderView {
             System.out.println("1. 주문 등록(결제)");
             System.out.println("2. 주문 조회");
             System.out.println("3. 주문 상세 목록 조회");
+            System.out.println("4. 주문 상품 수량 변경");
+            System.out.println("5. 주문 취소");
             System.out.println("0. 종료");
             System.out.println("=============================");
             System.out.println("선택 : ");
@@ -35,6 +37,12 @@ public class OrderView {
                     break;
                 case "3":
                     showOrderDetail();
+                    break;
+                case "4":
+                    updateOrderItemQuantity();
+                    break;
+                case "5":
+                    cancelOrder(); // 추가
                     break;
                 case "0":
                     System.out.println("주문 관리 시스템 종료");
@@ -252,5 +260,171 @@ public class OrderView {
         System.out.println("================================================");
 
     }
+
+    // 이미 완료된 주문의 상품 수량 변경
+    private void updateOrderItemQuantity() {
+        System.out.println("===== 주문 상품 수량 변경 ====");
+        System.out.println("수량을 변경할 주문 ID 입력 : ");
+        int orderId;
+        try {
+            orderId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("숫자를 입력해주세요");
+            return;
+        }
+
+        OrderDTO order = orderService.getOrderById(orderId);
+        if (order == null) {
+            System.out.println("존재하지 않는 주문번호입니다.");
+            return;
+        }
+
+        List<OrderItemDTO> itemList = orderService.getOrderItemsByOrderId(orderId);
+        if (itemList == null || itemList.isEmpty()) {
+            System.out.println("해당 주문에 상품 내역이 없습니다.");
+            return;
+        }
+
+        // 주문 상세 항목 출력
+        System.out.println("[주문번호 : " + orderId + "] 상품 목록");
+        for (OrderItemDTO item : itemList) {
+            ProductDTO product = orderService.getProductById(item.getProductId());
+            String productName = (product != null) ? product.getProductName() : "알수 없음";
+            System.out.printf("상품 ID: %d | 상품명 : %s | 현재 수량 : %d개 | 단가 : %,d원",
+                    item.getProductId(), productName, item.getQuantity(), item.getOrderPrice());
+        }
+
+        // 변경할 상품 입력
+        System.out.println("수량을 변경할 상품 ID 입력 (취소 : 0) :");
+        int productId;
+        try {
+            productId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("숫자만 입력해주세요");
+            return;
+        }
+
+        if (productId == 0) {
+            System.out.println("수량 변경을 취소하겠습니다.");
+            return;
+        }
+
+        // 대상 항목 찾기
+        Optional<OrderItemDTO> targetItemOpt = itemList.stream()
+                .filter(item -> item.getProductId() == productId)
+                .findFirst();
+
+        if (targetItemOpt.isEmpty()) {
+            System.out.println("해당 주문에 입력하신 상품이 없습니다");
+            return;
+        }
+
+        OrderItemDTO targetItem = targetItemOpt.get();
+        ProductDTO product = orderService.getProductById(productId);
+
+        // 변경 가능 재고 계산
+        // (현재 재고 + 해당 주문에 이미 묶여있던 수량)
+        int maxAvailableStock = product.getStock() + targetItem.getQuantity();
+
+        System.out.printf(" [선택 상품] %s (현재 수량 : %d개 / 최대 변경 가능 수량 %d개)",
+                product.getProductName(), targetItem.getQuantity(), maxAvailableStock);
+
+        int newQuantity;
+        while (true) {
+            System.out.println("변경하실 수량 입력 (취소 : 0) :");
+            try {
+                newQuantity = Integer.parseInt(scanner.nextLine().trim());
+                if (newQuantity == 0) {
+                    System.out.println("변경을 취소하겠습니다.");
+                    return;
+                }
+                if (newQuantity < 0) {
+                    System.out.println("수량은 1개 이상이어야합니다.");
+                    return;
+                }
+                if (newQuantity > maxAvailableStock) {
+                    System.out.printf("재고가 부족합니다 .(최대 가능 수량 : %d개)", maxAvailableStock);
+                    continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("숫자만 입력해주세요.");
+            }
+        }
+        // 기존 주문의 수량과 변경할 수량이 똑같은 경우
+        if (newQuantity == targetItem.getQuantity()) {
+            System.out.println("기존 수량과 일치합니다.");
+            return;
+        }
+
+        // 트랜잭션(주문 수량에 맞춰서 상품의 재고 업데이트해야됨)
+        boolean isSuccess = orderService.updateOrderItemQuantity(orderId, productId, targetItem.getQuantity(), newQuantity, targetItem.getOrderPrice());
+
+        if (isSuccess) {
+            System.out.println("주문 상품 수량 변경 선공");
+        } else {
+            System.out.println("수량 변경 처리 중 오류 발생");
+        }
+
+    }
+
+    // 주문한 상품 삭제
+    private void cancelOrder() {
+        System.out.println("==== 주문 취소 ====");
+        System.out.println("취소할 주문 ID 입력");
+        int orderId;
+        try {
+            orderId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("숫자만 입력해주세요");
+            return;
+        }
+
+        // 주문 확인
+        OrderDTO order = orderService.getOrderById(orderId);
+        if (order == null) {
+            System.out.println("검색하신 주문 번호가 없습니다.");
+            return;
+        }
+
+        // 주문 상세 항목(상품 & 수량) 조회
+        List<OrderItemDTO> itemList = orderService.getOrderItemsByOrderId(orderId);
+        if (itemList == null || itemList.isEmpty()) {
+            System.out.println("취소할 주문내역이 없습니다.");
+            return;
+        }
+
+        // 취소할 주문 정보 표시
+        System.out.println("== 취소할 주문 정보 ==");
+        System.out.printf(" 주문 번호 : %d", order.getOrderId());
+        System.out.printf(" 결제 수단 : %s", order.getPaymentType());
+        System.out.printf(" 총 결제 금액 : %,d", order.getTotalPrice());
+        System.out.println(" 주문 내역 : ");
+        for (OrderItemDTO item : itemList) {
+            ProductDTO product = orderService.getProductById(item.getProductId());
+            String productName = (product != null) ? product.getProductName() : "알수없음";
+            System.out.printf(" * %s (%d개)", productName, item.getQuantity());
+        }
+
+        // 주문 취소 확인
+        System.out.println("주문 취소하시겠습니까? (Y/N)");
+        String confirm = scanner.nextLine().trim();
+
+        if (!"Y".equalsIgnoreCase(confirm)) {
+            System.out.println("주문 취소 중단하셨습니다.");
+            return;
+        }
+
+        // 트랜잭션(주문 취소에 맞춰서 재고 복구)
+        boolean isSuccess = orderService.cancelOrder(orderId, itemList);
+
+        if (isSuccess) {
+            System.out.println("주문 취소 성공");
+        } else {
+            System.out.println("주문 취소 처리 중 오류 발생");
+        }
+
+    }
+
 
 }
