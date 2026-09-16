@@ -27,44 +27,45 @@ public class OrderItemView {
 
             try {
                 switch (choice){
-                    case 1: addOrderItem(); break;
-                    case 2: selectOrderItem(); break;
-                    case 3: allOrderItem(); break;
-                    case 4: updateOrderItem(); break;
-                    case 5: deleteOrderItem(); break;
-                    case 6: sumOrderItem(); break;
+                    // TODO -주문등록 삭제
+//                    case 1: addOrderItem(); break;
+                    case 1: selectOrderItem(); break;
+                    case 2: allOrderItem(); break;
+                    case 3: updateOrderItem(); break;
+                    case 4: deleteOrderItem(); break;
+                    case 5: sumOrderItem(); break;
                     case 0:
                         System.out.println("프로그램을 종료합니다.");
                         util.close();
                         scanner.close();
                         return;
                     default:
-                        System.out.println("0~6 사이의 숫자를 입력하세요.");
+                        System.out.println("0~5 사이의 숫자를 입력하세요.");
                 }
             } catch (Exception e) {
                 System.out.println("오류: " + e.getMessage());
             }
         }
     }
-
-    private void addOrderItem() throws SQLException {
-        System.out.print("주문 번호 : ");
-        int orderId = scanner.nextInt();
-        System.out.print("상품 번호 : ");
-        int productId = scanner.nextInt();
-        System.out.print("수량 : ");
-        int quantity = scanner.nextInt();
-        System.out.print("가격 : ");
-        int orderPrice = scanner.nextInt();
-
-        OrderItem orderItem = OrderItem.builder()
-                .orderId(orderId)
-                .productId(productId)
-                .quantity(quantity)
-                .orderPrice(orderPrice)
-                .build();
-        orderItemService.addOrderItem(orderItem);
-    }
+    // TODO - 주문등록 필요없어서 삭제
+//    private void addOrderItem() throws SQLException {
+//        System.out.print("주문 번호 : ");
+//        int orderId = scanner.nextInt();
+//        System.out.print("상품 번호 : ");
+//        int productId = scanner.nextInt();
+//        System.out.print("수량 : ");
+//        int quantity = scanner.nextInt();
+//        System.out.print("가격 : ");
+//        int orderPrice = scanner.nextInt();
+//
+//        OrderItem orderItem = OrderItem.builder()
+//                .orderId(orderId)
+//                .productId(productId)
+//                .quantity(quantity)
+//                .orderPrice(orderPrice)
+//                .build();
+//        orderItemService.addOrderItem(orderItem);
+//    }
 
     private void selectOrderItem() throws SQLException {
         System.out.print("특정 주문 검색 : ");
@@ -124,12 +125,13 @@ public class OrderItemView {
 
     private void printMenu() {
         System.out.println("\n[메뉴]");
-        System.out.println("1. 주문 등록");
-        System.out.println("2. 특정 상품 조회");
-        System.out.println("3. 주문 전체 조회");
-        System.out.println("4. 주문한 상품 수량 수정");
-        System.out.println("5. 주문한 상품 삭제");
-        System.out.println("6. 주문별 총 금액 계산");
+        // TODO - 주문등록 삭제
+        //        System.out.println("1. 주문 등록");
+        System.out.println("1. 특정 상품 조회");
+        System.out.println("2. 주문 전체 조회");
+        System.out.println("3. 주문한 상품 수량 수정");
+        System.out.println("4. 주문한 상품 삭제");
+        System.out.println("5. 주문별 총 금액 계산");
         System.out.println("0. 종료");
     }
 

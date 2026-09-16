@@ -23,8 +23,8 @@ public class OrderItemSwing extends JPanel {
 
         JLabel title = new JLabel("주문한 상품");
         title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-
-        JButton addButton = new JButton("주문 등록");
+            // TODO - 주문등록 삭제
+//        JButton addButton = new JButton("주문 등록");
         JButton selectButton = new JButton("특정 주문 조회");
         JButton allButton = new JButton("전체 조회");
         JButton updateButton = new JButton("수량 수정");
@@ -33,7 +33,7 @@ public class OrderItemSwing extends JPanel {
 
         topPanel.add(title);
         topPanel.add(Box.createHorizontalStrut(15));
-        topPanel.add(addButton);
+//        topPanel.add(addButton); // TODO - 주문등록 삭제
         topPanel.add(selectButton);
         topPanel.add(allButton);
         topPanel.add(updateButton);
@@ -59,7 +59,8 @@ public class OrderItemSwing extends JPanel {
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // 버튼 이벤트
-        addButton.addActionListener(e -> addOrderItem());
+        // TODO - 주문등록 삭제
+//        addButton.addActionListener(e -> addOrderItem());
         selectButton.addActionListener(e -> selectOrderItem());
         allButton.addActionListener(e -> allOrderItem());
         updateButton.addActionListener(e -> updateOrderItem());
@@ -69,30 +70,30 @@ public class OrderItemSwing extends JPanel {
         // 처음 화면에 전체 주문 상품 출력
         allOrderItem();
     }
-
-    // 주문 등록
-    private void addOrderItem() {
-        try {
-            int orderId = readInt("주문 번호를 입력하세요.");
-            int productId = readInt("상품 번호를 입력하세요.");
-            int quantity = readInt("수량을 입력하세요.");
-            int orderPrice = readInt("가격을 입력하세요.");
-
-            OrderItem orderItem = OrderItem.builder()
-                    .orderId(orderId)
-                    .productId(productId)
-                    .quantity(quantity)
-                    .orderPrice(orderPrice)
-                    .build();
-
-            orderItemService.addOrderItem(orderItem);
-
-            JOptionPane.showMessageDialog(this, "주문 상품이 등록되었습니다.");
-            allOrderItem();
-        } catch (Exception e) {
-            showError(e);
-        }
-    }
+    // TODO - 주문등록 삭제
+//    // 주문 등록
+//    private void addOrderItem() {
+//        try {
+//            int orderId = readInt("주문 번호를 입력하세요.");
+//            int productId = readInt("상품 번호를 입력하세요.");
+//            int quantity = readInt("수량을 입력하세요.");
+//            int orderPrice = readInt("가격을 입력하세요.");
+//
+//            OrderItem orderItem = OrderItem.builder()
+//                    .orderId(orderId)
+//                    .productId(productId)
+//                    .quantity(quantity)
+//                    .orderPrice(orderPrice)
+//                    .build();
+//
+//            orderItemService.addOrderItem(orderItem);
+//
+//            JOptionPane.showMessageDialog(this, "주문 상품이 등록되었습니다.");
+//            allOrderItem();
+//        } catch (Exception e) {
+//            showError(e);
+//        }
+//    }
 
     // 특정 주문 조회
     private void selectOrderItem() {

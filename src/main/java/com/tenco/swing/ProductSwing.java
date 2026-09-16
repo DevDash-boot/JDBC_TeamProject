@@ -29,7 +29,7 @@ public class ProductSwing extends JPanel {
         JButton deleteButton = new JButton("상품 삭제");
         JButton allButton = new JButton("상품 전체 조회");
         JButton searchNameButton = new JButton("상품명 검색");
-        JButton searchBarcodeButton = new JButton("바코드 검색");
+        JButton searchBarcodeButton = new JButton("상품 ID 검색");
         JButton stockButton = new JButton("재고 부족 상품");
 
         menuPanel.add(addButton);
@@ -56,7 +56,7 @@ public class ProductSwing extends JPanel {
         deleteButton.addActionListener(e -> deleteProduct());
         allButton.addActionListener(e -> getProduct(contentPanel));
         searchNameButton.addActionListener(e -> searchProductByName(contentPanel));
-        searchBarcodeButton.addActionListener(e -> searchProductByBarcode(contentPanel));
+        searchBarcodeButton.addActionListener(e -> searchProductById(contentPanel));
         stockButton.addActionListener(e -> searchProductByStock(contentPanel));
     }
 
@@ -299,29 +299,49 @@ public class ProductSwing extends JPanel {
         }
     }
 
-    // 바코드 검색
-    private void searchProductByBarcode(JPanel contentPanel) {
-        String barcode = JOptionPane.showInputDialog(this, "검색할 상품 바코드를 입력해주세요.");
-        if (barcode == null) return;
+    // 상품 ID 검색
+    private void searchProductById(JPanel contentPanel) {
+        String input = JOptionPane.showInputDialog(
+                this,
+                "검색할 상품 ID를 입력해주세요."
+        );
 
-        barcode = barcode.trim();
-        if (barcode.isEmpty()) {
-            showWarning("바코드를 입력해주세요.");
+        if (input == null) return;
+
+        input = input.trim();
+
+        if (input.isEmpty()) {
+            showWarning("상품 ID를 입력해주세요.");
             return;
         }
 
         try {
-            List<Product> productList = productService.searchProductByBarcode(barcode);
+            int productId = Integer.parseInt(input);
+
+            if (productId <= 0) {
+                showWarning("상품 ID는 1 이상이어야 합니다.");
+                return;
+            }
+
+            List<Product> productList =
+                    productService.searchProductById(productId);
+
             tableModel.setRowCount(0);
 
             for (Product p : productList) {
                 addProductRow(p);
             }
 
-            if (productList.isEmpty()) showMessage("검색 결과가 없습니다.");
-            showTable(contentPanel, "바코드 검색 결과");
+            if (productList.isEmpty()) {
+                showMessage("검색 결과가 없습니다.");
+            }
+
+            showTable(contentPanel, "상품 ID 검색 결과");
+
+        } catch (NumberFormatException e) {
+            showWarning("상품 ID는 숫자로 입력해주세요.");
         } catch (SQLException e) {
-            showError("바코드 검색 중 오류가 발생했습니다.", e);
+            showError("상품 ID 검색 중 오류가 발생했습니다.", e);
         }
     }
 
