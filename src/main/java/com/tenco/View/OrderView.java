@@ -281,9 +281,16 @@ public class OrderView {
             return;
         }
 
+
+
         OrderDTO order = orderService.getOrderById(orderId);
         if (order == null) {
             System.out.println("존재하지 않는 주문번호입니다.");
+            return;
+        }
+
+        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
+            System.out.println("취소된 주문의 상품 수량은 변경할 수 없습니다.");
             return;
         }
 

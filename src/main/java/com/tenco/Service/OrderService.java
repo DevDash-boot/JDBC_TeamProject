@@ -160,7 +160,7 @@ public class OrderService {
         }
     }
 
-    // --- Helper Methods ---
+    // --- 중복 Methods ---
     // 트랜잭션 롤백 중복 부분
     private void rollbackQuietly(Connection conn) {
         if (conn != null) {
