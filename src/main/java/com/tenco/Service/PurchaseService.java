@@ -33,7 +33,7 @@ public class PurchaseService {
     public void purcahseProduct(int id, int quantity) throws SQLException {
         if(id <= 0) {
             throw new SQLException("유효한 ID를 넣어주세요.");
-        } else if (quantity <= 0 || 20 <= quantity ) {
+        } else if (quantity <= 0 || 20 < quantity ) {
             throw new SQLException("발주 신청 수량은 한번에 최대 20개까지만 가능합니다.");
         }
         Connection conn = null;
@@ -62,11 +62,30 @@ public class PurchaseService {
         if(id <= 0) {
             throw new SQLException("유효한 ID를 입력해주세요.");
         }
-        int i = purchaseDAO.deletePurchase(id);
-        if(i <= 0) throw new SQLException("id가 " + id + "인 상품은 발주목록에 없습니다.");
-        else System.out.println(i + "건이 발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  id : " + id);
-    }
+        Connection conn = null;
 
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            PurchaseDto purchaseDto = purchaseDAO.deletePurchase(id);
+            productDAO.outStock(conn , purchaseDto.getProductId() , purchaseDto.getQauntity());
+
+            System.out.println("발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  발주ID : " + id);
+
+            conn.commit();
+        } catch (RuntimeException e) {
+            if(conn != null) conn.rollback();
+            throw new SQLException("발주 취소에 실패하였습니다.");
+
+        }finally {
+            if(conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+
+    }
 
 
     // 기능 E. 상품 ID로 발주 수량 차감. -- 만들기만 함
