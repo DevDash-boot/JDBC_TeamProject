@@ -162,8 +162,8 @@ public class ProductDAO {
     }
 
     // 6. 상품명을 검색
-    public Product searchProductByName(String productName) {
-        Product product = new Product();
+    public List<Product> searchProductByName(String productName) {
+        List<Product> productList = new ArrayList<>();
 
         String sql = """
                 SELECT * FROM product WHERE product_name LIKE ?
@@ -174,17 +174,16 @@ public class ProductDAO {
                 pstmt.setString(1, "%" + productName + "%");
                 try (ResultSet rs = pstmt.executeQuery()) {
 
-                    if (rs.next()) {
-                        return createProduct(rs);
+                    while (rs.next()) {
+                        productList.add(createProduct(rs));
                     }
-
-                    return null;
                 }
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return productList;
     }
 
     // 7. 아이디로 상품 조회
