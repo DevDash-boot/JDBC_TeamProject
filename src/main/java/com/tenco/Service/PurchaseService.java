@@ -23,7 +23,7 @@ public class PurchaseService {
     // 기능 B. 상품 ID로 발주 상품 단건 조회.
     public PurchaseDto existList(int id) throws SQLException {
         if (id <= 0 || purchaseDAO.existList(id) == null) {
-            throw new SQLException("id가 " + id + "인 상품은 발주 목록에 없습니다.");
+            System.out.println("id가 " + id + "인 상품은 발주 목록에 없습니다.");
         }
         return purchaseDAO.existList(id);
     }
@@ -33,7 +33,7 @@ public class PurchaseService {
     public void purcahseProduct(int id, int quantity) throws SQLException {
         if (id <= 0) {
             throw new SQLException("유효한 ID를 넣어주세요.");
-        } else if (quantity <= 0 || 20 < quantity) {
+        } else if (quantity <= 0 || 20 <= quantity) {
             throw new SQLException("발주 신청 수량은 한번에 최대 20개까지만 가능합니다.");
         }
         Connection conn = null;
