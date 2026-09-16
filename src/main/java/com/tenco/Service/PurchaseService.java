@@ -102,7 +102,6 @@ public class PurchaseService {
                 // 자동 커밋 해제(트랜잭션 시작)
                 conn.setAutoCommit(false);
 
-
                 // i[0] = product_id    ,     i[1] = 성공 row수.
 
                 // 발주 수량 차감
@@ -123,5 +122,4 @@ public class PurchaseService {
             }
         }
     }
-
 

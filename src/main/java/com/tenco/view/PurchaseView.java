@@ -9,7 +9,6 @@ import java.util.Scanner;
 public class PurchaseView {
     PurchaseService purchaseService = new PurchaseService();
     Scanner scanner = new Scanner(System.in);
-
     // TODO 관리자 받아서 관리자 이름 보이게
     public void purchaseView()  {
         Integer menu = null;
@@ -23,7 +22,7 @@ public class PurchaseView {
                 try {
                     menu = Integer.parseInt(scanner.nextLine());
                 } catch (NumberFormatException e) {
-                    System.out.println("정수를 입력하세요 (1 ~ 5)");
+                    System.out.println("정수를 입력하세요 (1 ~ 6)");
                     continue;
                 }
 
