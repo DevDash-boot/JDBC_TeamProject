@@ -162,8 +162,8 @@ public class ProductDAO {
     }
 
     // 6. 상품명을 검색
-    public List<Product> searchProductByName(String productName) {
-        List<Product> productList = new ArrayList<>();
+    public Product searchProductByName(String productName) {
+        Product product = new Product();
 
         String sql = """
                 SELECT * FROM product WHERE product_name LIKE ?
@@ -174,41 +174,42 @@ public class ProductDAO {
                 pstmt.setString(1, "%" + productName + "%");
                 try (ResultSet rs = pstmt.executeQuery()) {
 
-                    while (rs.next()) {
-                        productList.add(createProduct(rs));
+                    if (rs.next()) {
+                        return createProduct(rs);
                     }
+
+                    return null;
                 }
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return productList;
     }
 
     // 7. 아이디로 상품 조회
-    public List<Product> searchProductById(int productId) {
-        List<Product> productList = new ArrayList<>();
+    public Product selectProductById(Connection conn, int productId) {
+        Product product = new Product();
 
         String sql = """
                 SELECT * FROM product WHERE product_id = ?
                 """;
 
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, productId);
-                try (ResultSet rs = pstmt.executeQuery()) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, productId);
+            try (ResultSet rs = pstmt.executeQuery()) {
 
-                    while (rs.next()) {
-                        productList.add(createProduct(rs));
-                    }
+                if (rs.next()) {
+                    return createProduct(rs);
                 }
-            }
+
+                return null;
+                }
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return productList;
     }
 
     // 8. 재고 부족 상품 조회 << 재고 부족 기준: 10개)
@@ -300,27 +301,25 @@ public class ProductDAO {
     }
 
     // 재고 증가
-    public int inputStock(OrderItem orderItem) {
+
+    public int inStock(Connection conn, int productId, int quantity) {
         int rows = 0;
         String sql = """
                 update product
                 set stock = stock + ?
                 where product_id = ?
                 """;
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, orderItem.getQuantity());
-                pstmt.setInt(2, orderItem.getProductId());
 
-                rows = pstmt.executeUpdate();
-                if (rows == 0) {
-                    System.out.println("재고 증감에 실패했습니다.");
-                }
-            } catch (
-                    SQLException e) {
-                throw new RuntimeException(e);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, productId);
+
+            rows = pstmt.executeUpdate();
+            if (rows == 0) {
+                System.out.println("재고 증감에 실패했습니다.");
             }
-        } catch (SQLException e) {
+        } catch (
+                SQLException e) {
             throw new RuntimeException(e);
         }
         return rows;
