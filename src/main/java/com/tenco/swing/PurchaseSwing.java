@@ -14,7 +14,7 @@ public class PurchaseSwing extends JPanel {
     private final PurchaseService purchaseService = new PurchaseService();
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{"상품 ID", "상품명", "발주 수량", "개당 가격", "총 발주 가격"}, 0
+            new Object[]{"발주번호","상품 ID", "상품명", "발주 수량", "개당 가격", "총 발주 가격"}, 0
     );
 
     private final JTable table = new JTable(tableModel);
@@ -68,6 +68,7 @@ public class PurchaseSwing extends JPanel {
 
             for (PurchaseDto p : purchaseList) {
                 tableModel.addRow(new Object[]{
+                        p.getPurchaseId(),
                         p.getProduct_id(),
                         p.getName(),
                         p.getQauntity(),
@@ -112,6 +113,7 @@ public class PurchaseSwing extends JPanel {
 
             tableModel.setRowCount(0);
             tableModel.addRow(new Object[]{
+                    p.getPurchaseId(),
                     p.getProduct_id(),
                     p.getName(),
                     p.getQauntity(),
@@ -214,7 +216,7 @@ public class PurchaseSwing extends JPanel {
     private void purchaseDelete() {
         String input = JOptionPane.showInputDialog(
                 this,
-                "발주 목록에서 제거할 상품 ID를 입력해주세요."
+                "발주 목록에서 제거할 발주번호를 입력해주세요."
         );
 
         if (input == null) {
@@ -222,11 +224,11 @@ public class PurchaseSwing extends JPanel {
         }
 
         try {
-            int productId = Integer.parseInt(input);
+            int purchaseId = Integer.parseInt(input);
 
             int result = JOptionPane.showConfirmDialog(
                     this,
-                    "상품 ID " + productId + "의 발주를 취소하시겠습니까?",
+                    "발주번호 " + purchaseId + "의 발주를 취소하시겠습니까?",
                     "발주 취소",
                     JOptionPane.YES_NO_OPTION
             );
@@ -235,7 +237,7 @@ public class PurchaseSwing extends JPanel {
                 return;
             }
 
-            purchaseService.deletePurchase(productId);
+            purchaseService.deletePurchase(purchaseId);
 
             JOptionPane.showMessageDialog(
                     this,
@@ -263,12 +265,12 @@ public class PurchaseSwing extends JPanel {
 
     // 발주 수량 차감
     private void purchaseSubtract() {
-        JTextField productIdField = new JTextField();
+        JTextField purchaseIdField = new JTextField();
         JTextField amountField = new JTextField();
 
         JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
-        panel.add(new JLabel("상품 ID"));
-        panel.add(productIdField);
+        panel.add(new JLabel("발주번호"));
+        panel.add(purchaseIdField);
         panel.add(new JLabel("차감 수량"));
         panel.add(amountField);
 
@@ -284,20 +286,20 @@ public class PurchaseSwing extends JPanel {
         }
 
         try {
-            int productId = Integer.parseInt(productIdField.getText());
+            int purchaseId = Integer.parseInt(purchaseIdField.getText());
             int amount = Integer.parseInt(amountField.getText());
 
-            if (productId <= 0 || amount <= 0) {
+            if (purchaseId <= 0 || amount <= 0) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "상품 ID와 차감 수량은 1 이상이어야 합니다.",
+                        "발주번호와 차감 수량은 1 이상이어야 합니다.",
                         "입력 오류",
                         JOptionPane.WARNING_MESSAGE
                 );
                 return;
             }
 
-            purchaseService.substractPurchase(productId, amount);
+            purchaseService.substractPurchase(purchaseId, amount);
 
             JOptionPane.showMessageDialog(
                     this,
