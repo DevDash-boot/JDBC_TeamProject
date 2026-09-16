@@ -68,14 +68,14 @@ public class ProductView {
     }
 
     private void addProduct() throws SQLException {
-        System.out.println("상품명: ");
+        System.out.print("상품명: ");
         String productName = sc.nextLine().trim();
         if (productName.isEmpty()) {
             System.out.println("상품명은 필수입니다.");
             return;
         }
 
-        System.out.println("가격: ");
+        System.out.print("가격: ");
         int price = sc.nextInt();
         sc.nextLine();
         if (price == 0 || price < 0) {
@@ -83,7 +83,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("바코드: ");
+        System.out.print("바코드: ");
         String barcode = sc.nextLine().trim();
         if (barcode.isEmpty()) {
             System.out.println("바코드는 필수입니다.");
@@ -93,11 +93,11 @@ public class ProductView {
         System.out.println("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
-        System.out.println("재고: ");
+        System.out.print("재고: ");
         int stock = sc.nextInt();
         sc.nextLine();
 
-        System.out.println("분류: ");
+        System.out.print("분류: ");
         String category = sc.nextLine();
 
         Product product = Product.builder()
@@ -126,18 +126,18 @@ public class ProductView {
     }
 
     private void updateProduct() throws SQLException {
-        System.out.println("수정할 상품 ID: ");
+        System.out.print("수정할 상품 ID: ");
         int productId = sc.nextInt();
         sc.nextLine();
 
-        System.out.println("상품명: ");
+        System.out.print("상품명: ");
         String productName = sc.nextLine().trim();
         if (productName.isEmpty()) {
             System.out.println("상품명은 필수입니다.");
             return;
         }
 
-        System.out.println("가격: ");
+        System.out.print("가격: ");
         int price = sc.nextInt();
         sc.nextLine();
         if (price == 0 || price < 0) {
@@ -145,7 +145,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("바코드: ");
+        System.out.print("바코드: ");
         String barcode = sc.nextLine().trim();
         if (barcode.isEmpty()) {
             System.out.println("바코드는 필수입니다.");
@@ -155,11 +155,11 @@ public class ProductView {
         System.out.println("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
-        System.out.println("재고: ");
+        System.out.print("재고: ");
         int stock = sc.nextInt();
         sc.nextLine();
 
-        System.out.println("분류: ");
+        System.out.print("분류: ");
         String category = sc.nextLine();
 
         Product product = Product.builder()
@@ -176,7 +176,7 @@ public class ProductView {
     }
 
     private void deleteProduct() throws SQLException {
-        System.out.println("삭제할 상품 ID: ");
+        System.out.print("삭제할 상품 ID: ");
         int productId = sc.nextInt();
         sc.nextLine();
         Product product = Product.builder()
@@ -207,7 +207,7 @@ public class ProductView {
     }
 
     private void searchProductByName() throws SQLException {
-        System.out.println("검색 상품: ");
+        System.out.print("검색 상품: ");
         String productName = sc.nextLine().trim();
         if (productName.isEmpty()) {
             System.out.println("검색어를 입력해주세요.");
@@ -233,9 +233,10 @@ public class ProductView {
     }
 
     private void searchProductById() throws SQLException {
-        System.out.println("상품 아이디: ");
+        System.out.print("상품 아이디: ");
         int productId = sc.nextInt();
-        if (productId == 0) {
+        sc.nextLine();
+        if (productId <= 0) {
             System.out.println("아이디를 입력해주세요.");
             return;
         }
@@ -277,8 +278,7 @@ public class ProductView {
             }
         }
     }
-
-
+    
     private int readInt(String prompt) {
         while (true) {
             System.out.println(prompt);
@@ -289,5 +289,4 @@ public class ProductView {
             }
         }
     }
-
 }
