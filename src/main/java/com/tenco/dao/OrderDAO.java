@@ -49,7 +49,6 @@ public class OrderDAO {
     }
 
     // 3. 전체 목록 조회
-    // 3. 전체 목록 조회
     public List<Order> selectAllOrders(Connection conn) throws SQLException {
         String sql = "SELECT order_id, payment_type, total_price, order_date FROM orders ORDER BY order_id DESC";
         List<Order> list = new ArrayList<>();
@@ -95,5 +94,4 @@ public class OrderDAO {
             return pstmt.executeUpdate();
         }
     }
-
 }
