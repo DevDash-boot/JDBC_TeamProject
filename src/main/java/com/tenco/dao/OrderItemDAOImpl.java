@@ -25,6 +25,9 @@ public class OrderItemDAOImpl implements OrderItemDAO {
     }
 
     // 2. 다건 주문 상품 등록 (Batch Processing)
+    // 주문 생성시 한번에 상품 저장할때 사용할려고 했지만
+    // 장바구니에 상품을 2개 이상 담으면 오류가 남 Batch 처리 검증 로직 오류
+    // 올바른 Batch 결과 검증 로직을 사용해야 함.
     @Override
     public int[] insertOrderItems(Connection conn, List<OrderItemDTO> dtoList) throws SQLException {
         String sql = "INSERT INTO order_item (order_id, product_id, quantity, order_price) VALUES (?, ?, ?, ?)";
