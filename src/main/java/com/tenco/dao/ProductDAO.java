@@ -185,12 +185,12 @@ public class ProductDAO {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
-                SELECT * FROM product WHERE barcode LIKE ?
+                SELECT * FROM product WHERE product_id LIKE ?
                 """;
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, "%" + productId + "%");
+                pstmt.setInt(1, productId);
                 try (ResultSet rs = pstmt.executeQuery()) {
 
                     while (rs.next()) {

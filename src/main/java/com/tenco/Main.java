@@ -48,11 +48,9 @@ public class Main extends JFrame {
     // 관리자 로그아웃
     public void logoutAdmin() {
         currentAdminId = null;
-
-        getContentPane().remove(0);
-        getContentPane().add(createHeader(), BorderLayout.NORTH);
-        getContentPane().revalidate();
-        getContentPane().repaint();
+        contentPanel.removeAll();
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     // 상단

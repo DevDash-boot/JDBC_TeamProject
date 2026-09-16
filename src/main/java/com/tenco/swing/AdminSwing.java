@@ -58,9 +58,7 @@ public class AdminSwing extends JPanel {
 
         add(topPanel, BorderLayout.NORTH);
 
-        contentPanel.setBorder(
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        );
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(contentPanel, BorderLayout.CENTER);
 
         loginButton.addActionListener(e -> loginMenu());
@@ -162,10 +160,7 @@ public class AdminSwing extends JPanel {
             }
 
             try {
-                Admin admin = service.authenticationAdmin(
-                        loginId,
-                        password
-                );
+                Admin admin = service.authenticationAdmin(loginId, password);
 
                 if (admin == null) {
                     JOptionPane.showMessageDialog(
@@ -189,7 +184,6 @@ public class AdminSwing extends JPanel {
                             "로그인 성공",
                             JOptionPane.INFORMATION_MESSAGE
                     );
-
                     showWelcome();
                 }
 
@@ -202,7 +196,6 @@ public class AdminSwing extends JPanel {
                 );
             }
         });
-
         refreshPanel();
     }
 
