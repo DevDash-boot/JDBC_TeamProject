@@ -262,7 +262,6 @@ public class OrderView {
         System.out.println("--------------------------------");
         System.out.printf("총 결제 금액 : %,d원 \n", order.getTotalPrice());
         System.out.println("================================================");
-
     }
 
     // 이미 완료된 주문의 상품 수량 변경

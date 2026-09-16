@@ -111,26 +111,24 @@ public class PurchaseDAO {
                         if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
                     }
 
-                // 3. 발주 성공했으면 다시 화면에 총 발주가격 , 발주한 상품 , 수량 다시 보여주기.
-                String totalSql = """
-                                select p.product_id , pr.product_name ,  p.quantity , p.total_price  
-                                from purchase p join product pr on p.product_id = pr.product_id
-                                where pr.product_id = ?                           
-                                """;
-                try (PreparedStatement totalPstmt = conn.prepareCall(totalSql)) {
-                    totalPstmt.setInt(1, id);
-                    ResultSet rs = totalPstmt.executeQuery();
-                    if (rs.next()) {
-                        System.out.printf("발주 상품ID : %d , 발주 상품명 : %s , 발주 상품수량 : %d , 발주 상품 총 가격 : %d\n",
-                                rs.getInt("product_id"), rs.getString("product_name"),
-                                rs.getInt("quantity"), rs.getInt("total_price"));
-                    }
+            // 3. 발주 성공했으면 다시 화면에 총 발주가격 , 발주한 상품 , 수량 다시 보여주기.
+            String totalSql = """
+                    select p.product_id , pr.product_name ,  p.quantity , p.total_price  
+                    from purchase p join product pr on p.product_id = pr.product_id
+                    where pr.product_id = ?                           
+                    """;
+            try (PreparedStatement totalPstmt = conn.prepareCall(totalSql)) {
+                totalPstmt.setInt(1, id);
+                ResultSet rs = totalPstmt.executeQuery();
+                if (rs.next()) {
+                    System.out.printf("발주 상품ID : %d , 발주 상품명 : %s , 발주 상품수량 : %d , 발주 상품 총 가격 : %d\n",
+                            rs.getInt("product_id"), rs.getString("product_name"),
+                            rs.getInt("quantity"), rs.getInt("total_price"));
                 }
-    }
+            }
+        }
     }
 
-    public static void main(String[] args) throws SQLException {
-        new PurchaseDAO().deletePurchase(5);
 
     }
     // 기능 D. purchaseId로 발주 목록에서 제거.(발주 취소) --> 상품테이블의 stock에서 차감.
