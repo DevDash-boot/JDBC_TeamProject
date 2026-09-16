@@ -33,13 +33,11 @@ public class OrderSwing extends JPanel {
         JButton registerButton = new JButton("주문 등록(결제)");
         JButton allOrderButton = new JButton("주문 조회");
         JButton detailButton = new JButton("주문 상세 조회");
-        JButton updateButton = new JButton("주문 상품 수량 변경");
         JButton cancelButton = new JButton("주문 취소");
 
         buttonPanel.add(registerButton);
         buttonPanel.add(allOrderButton);
         buttonPanel.add(detailButton);
-        buttonPanel.add(updateButton);
         buttonPanel.add(cancelButton);
 
         add(buttonPanel, BorderLayout.NORTH);
@@ -64,7 +62,6 @@ public class OrderSwing extends JPanel {
         registerButton.addActionListener(e -> registerOrder());
         allOrderButton.addActionListener(e -> showAllOrders());
         detailButton.addActionListener(e -> showOrderDetail());
-        updateButton.addActionListener(e -> updateOrderItemQuantity());
         cancelButton.addActionListener(e -> cancelOrder());
 
         showAllOrders();
@@ -101,6 +98,7 @@ public class OrderSwing extends JPanel {
             }
 
             int productId;
+
             try {
                 productId = Integer.parseInt(productIdInput.trim());
             } catch (NumberFormatException e) {
@@ -132,7 +130,10 @@ public class OrderSwing extends JPanel {
             int availableStock = product.getStock() - cartQuantity;
 
             if (availableStock <= 0) {
-                JOptionPane.showMessageDialog(this, "해당 상품의 재고를 모두 장바구니에 담았습니다.");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "해당 상품의 재고를 모두 장바구니에 담았습니다."
+                );
                 continue;
             }
 
@@ -151,6 +152,7 @@ public class OrderSwing extends JPanel {
             }
 
             int quantity;
+
             try {
                 quantity = Integer.parseInt(quantityInput.trim());
             } catch (NumberFormatException e) {
@@ -159,14 +161,18 @@ public class OrderSwing extends JPanel {
             }
 
             if (quantity <= 0) {
-                JOptionPane.showMessageDialog(this, "수량은 1개 이상이어야 합니다.");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "수량은 1개 이상이어야 합니다."
+                );
                 continue;
             }
 
             if (quantity > availableStock) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "재고가 부족합니다.\n추가 가능 수량 : " + availableStock + "개"
+                        "재고가 부족합니다.\n추가 가능 수량 : " +
+                                availableStock + "개"
                 );
                 continue;
             }
@@ -177,10 +183,14 @@ public class OrderSwing extends JPanel {
                     .orElse(null);
 
             if (existingItem != null) {
-                existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                existingItem.setQuantity(
+                        existingItem.getQuantity() + quantity
+                );
+
                 JOptionPane.showMessageDialog(
                         this,
-                        product.getProductName() + " 수량이 추가되었습니다.\n총 수량 : " +
+                        product.getProductName() +
+                                " 수량이 추가되었습니다.\n총 수량 : " +
                                 existingItem.getQuantity() + "개"
                 );
             } else {
@@ -189,28 +199,37 @@ public class OrderSwing extends JPanel {
                         quantity,
                         product.getPrice()
                 );
+
                 items.add(item);
+
                 JOptionPane.showMessageDialog(
                         this,
-                        product.getProductName() + " " + quantity + "개가 장바구니에 추가되었습니다."
+                        product.getProductName() +
+                                " " + quantity + "개가 장바구니에 추가되었습니다."
                 );
             }
         }
 
         if (items.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "주문할 상품이 선택되지 않았습니다.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "주문할 상품이 선택되지 않았습니다."
+            );
             return;
         }
 
         int totalPrice = items.stream()
-                .mapToInt(item -> item.getOrderPrice() * item.getQuantity())
+                .mapToInt(item ->
+                        item.getOrderPrice() * item.getQuantity())
                 .sum();
 
         Order order = new Order(paymentType, totalPrice);
 
         int result = JOptionPane.showConfirmDialog(
                 this,
-                "총 결제 금액 : " + String.format("%,d", totalPrice) + "원\n\n결제하시겠습니까?",
+                "총 결제 금액 : " +
+                        String.format("%,d", totalPrice) +
+                        "원\n\n결제하시겠습니까?",
                 "결제 확인",
                 JOptionPane.YES_NO_OPTION
         );
@@ -227,6 +246,7 @@ public class OrderSwing extends JPanel {
                     "결제가 완료되었습니다.\n총 결제 금액 : " +
                             String.format("%,d", totalPrice) + "원"
             );
+
             showAllOrders();
         } else {
             JOptionPane.showMessageDialog(
@@ -241,10 +261,14 @@ public class OrderSwing extends JPanel {
     private void showAllOrders() {
         try {
             List<Order> orderList = orderService.getAllOrders();
+
             orderTableModel.setRowCount(0);
 
             if (orderList == null || orderList.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "등록된 주문이 없습니다.");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "등록된 주문이 없습니다."
+                );
                 return;
             }
 
@@ -260,10 +284,12 @@ public class OrderSwing extends JPanel {
                         orderDate
                 });
             }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
                     this,
-                    "주문 조회 중 오류가 발생했습니다.\n" + e.getMessage(),
+                    "주문 조회 중 오류가 발생했습니다.\n" +
+                            e.getMessage(),
                     "오류",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -282,6 +308,7 @@ public class OrderSwing extends JPanel {
         }
 
         int orderId;
+
         try {
             orderId = Integer.parseInt(orderIdInput.trim());
         } catch (NumberFormatException e) {
@@ -297,14 +324,14 @@ public class OrderSwing extends JPanel {
         }
 
         List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
+
         detailTableModel.setRowCount(0);
 
         if (itemList != null && !itemList.isEmpty()) {
             for (OrderItem item : itemList) {
                 Product product = orderService.getProductById(item.getProductId());
-                String productName = product != null
-                        ? product.getProductName()
-                        : "알 수 없음";
+
+                String productName = product != null ? product.getProductName() : "알 수 없음";
 
                 int subTotal = item.getOrderPrice() * item.getQuantity();
 
@@ -328,111 +355,6 @@ public class OrderSwing extends JPanel {
         );
     }
 
-    private void updateOrderItemQuantity() {
-        String orderIdInput = JOptionPane.showInputDialog(
-                this,
-                "수량을 변경할 주문 ID를 입력하세요.",
-                "주문 상품 수량 변경"
-        );
-
-        if (orderIdInput == null) {
-            return;
-        }
-
-        int orderId;
-        try {
-            orderId = Integer.parseInt(orderIdInput.trim());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "주문 ID는 숫자로 입력해주세요.");
-            return;
-        }
-
-        Order order = orderService.getOrderById(orderId);
-
-        if (order == null) {
-            JOptionPane.showMessageDialog(this, "존재하지 않는 주문번호입니다.");
-            return;
-        }
-
-        List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
-
-        if (itemList == null || itemList.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "주문 상품이 없습니다.");
-            return;
-        }
-
-        String[] itemChoices = new String[itemList.size()];
-
-        for (int i = 0; i < itemList.size(); i++) {
-            OrderItem item = itemList.get(i);
-            Product product = orderService.getProductById(item.getProductId());
-
-            String productName = product != null
-                    ? product.getProductName()
-                    : "알 수 없음";
-
-            itemChoices[i] =
-                    "상품ID: " + item.getProductId() +
-                            " | " + productName +
-                            " | 현재 수량: " + item.getQuantity();
-        }
-
-        String selected = (String) JOptionPane.showInputDialog(
-                this,
-                "수량을 변경할 상품을 선택하세요.",
-                "상품 선택",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                itemChoices,
-                itemChoices[0]
-        );
-
-        if (selected == null) {
-            return;
-        }
-
-        int selectedIndex = 0;
-
-        for (int i = 0; i < itemChoices.length; i++) {
-            if (itemChoices[i].equals(selected)) {
-                selectedIndex = i;
-                break;
-            }
-        }
-
-        OrderItem selectedItem = itemList.get(selectedIndex);
-
-        String quantityInput = JOptionPane.showInputDialog(
-                this,
-                "새로운 수량을 입력하세요.\n현재 수량 : " +
-                        selectedItem.getQuantity(),
-                "수량 변경"
-        );
-
-        if (quantityInput == null) {
-            return;
-        }
-
-        int newQuantity;
-
-        try {
-            newQuantity = Integer.parseInt(quantityInput.trim());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "수량은 숫자로 입력해주세요.");
-            return;
-        }
-
-        if (newQuantity <= 0) {
-            JOptionPane.showMessageDialog(this, "수량은 1개 이상이어야 합니다.");
-            return;
-        }
-
-        JOptionPane.showMessageDialog(
-                this,
-                "수량 변경 기능은 OrderService 구현에 맞춰 연결해야 합니다."
-        );
-    }
-
     private void cancelOrder() {
         String orderIdInput = JOptionPane.showInputDialog(
                 this,
@@ -443,28 +365,36 @@ public class OrderSwing extends JPanel {
         if (orderIdInput == null) {
             return;
         }
-
         int orderId;
-
         try {
             orderId = Integer.parseInt(orderIdInput.trim());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "주문 ID는 숫자로 입력해주세요.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "주문 ID는 숫자로 입력해주세요."
+            );
             return;
         }
 
         Order order = orderService.getOrderById(orderId);
 
         if (order == null) {
-            JOptionPane.showMessageDialog(this, "존재하지 않는 주문번호입니다.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "존재하지 않는 주문번호입니다."
+            );
             return;
         }
 
         int result = JOptionPane.showConfirmDialog(
                 this,
-                "주문번호 " + orderId + "번을 취소하시겠습니까?\n" +
+                "주문번호 " + orderId +
+                        "번을 취소하시겠습니까?\n" +
                         "총 금액 : " +
-                        String.format("%,d원", order.getTotalPrice()),
+                        String.format(
+                                "%,d원",
+                                order.getTotalPrice()
+                        ),
                 "주문 취소 확인",
                 JOptionPane.YES_NO_OPTION
         );
@@ -473,9 +403,22 @@ public class OrderSwing extends JPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(
-                this,
-                "현재 cancelOrder()는 Service 구현에 맞춰 연결해야 합니다."
-        );
+        boolean success = orderService.cancelOrder(orderId);
+
+        if (success) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "주문이 취소되었습니다."
+            );
+            showAllOrders();
+
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "주문 취소에 실패했습니다.",
+                    "오류",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 }
