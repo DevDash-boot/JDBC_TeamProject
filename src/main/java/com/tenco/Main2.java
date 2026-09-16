@@ -10,7 +10,7 @@ public class Main2 {
 
     public static void main(String[] args) {
         System.out.println("===== 무인편의점 재고 관리 시스템 =====");
-        boolean isAdmin = true;
+        boolean isAdmin = false;
 
         while(true){
             printMenu();
