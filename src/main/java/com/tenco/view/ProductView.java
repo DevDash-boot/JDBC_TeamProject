@@ -24,6 +24,7 @@ public class ProductView {
 
     public void start() {
         System.out.println("=== 무인 편의점 상품 관리 시스템 ===");
+
         while (true) {
             printMenu();
             int choice = readInt("선택: ");
@@ -278,6 +279,7 @@ public class ProductView {
         }
     }
 
+
     private int readInt(String prompt) {
         while (true) {
             System.out.println(prompt);
@@ -288,4 +290,5 @@ public class ProductView {
             }
         }
     }
+
 }
