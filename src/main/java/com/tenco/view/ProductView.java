@@ -40,9 +40,6 @@ public class ProductView {
                     case 7: searchProductById(); break;
                     case 8: searchProductByStock(); break;
                     case 9:
-                        System.out.println("프로그램을 종료합니다.");
-                        util.close();
-                        sc.close();
                         return;
                     default:
                         System.out.println("1~9 사이의 숫자를 입력하세요");
@@ -90,7 +87,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("유통기한 (예시: xxxx-xx-xx): ");
+        System.out.print("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
         System.out.print("재고: ");
@@ -152,7 +149,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("유통기한 (예시: xxxx-xx-xx): ");
+        System.out.print("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
         System.out.print("재고: ");
@@ -278,7 +275,7 @@ public class ProductView {
             }
         }
     }
-    
+
     private int readInt(String prompt) {
         while (true) {
             System.out.println(prompt);
