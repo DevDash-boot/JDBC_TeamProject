@@ -187,28 +187,28 @@ public class ProductDAO {
     }
 
     // 7. 아이디로 상품 조회
-    public Product selectProductById(Connection conn, int productId) {
-        Product product = new Product();
+    public List<Product> searchProductById(int productId) {
+        List<Product> productList = new ArrayList<>();
 
         String sql = """
                 SELECT * FROM product WHERE product_id = ?
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, productId);
-            try (ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = util.getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, productId);
+                try (ResultSet rs = pstmt.executeQuery()) {
 
-                if (rs.next()) {
-                    return createProduct(rs);
+                    while (rs.next()) {
+                        productList.add(createProduct(rs));
+                    }
                 }
-
-                return null;
-                }
-
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return productList;
     }
 
     // 8. 재고 부족 상품 조회 << 재고 부족 기준: 10개)
@@ -300,25 +300,27 @@ public class ProductDAO {
     }
 
     // 재고 증가
-
-    public int inStock(Connection conn, int productId, int quantity) {
+    public int inputStock(OrderItem orderItem) {
         int rows = 0;
         String sql = """
                 update product
                 set stock = stock + ?
                 where product_id = ?
                 """;
+        try (Connection conn = util.getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, orderItem.getQuantity());
+                pstmt.setInt(2, orderItem.getProductId());
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, quantity);
-            pstmt.setInt(2, productId);
-
-            rows = pstmt.executeUpdate();
-            if (rows == 0) {
-                System.out.println("재고 증감에 실패했습니다.");
+                rows = pstmt.executeUpdate();
+                if (rows == 0) {
+                    System.out.println("재고 증감에 실패했습니다.");
+                }
+            } catch (
+                    SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (
-                SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return rows;
