@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @ToString
 @Builder
 
-public class ProductDTO {
+public class Product {
 
     private int productId;
     private String productName;
