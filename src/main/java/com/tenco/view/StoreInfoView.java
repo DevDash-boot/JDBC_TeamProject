@@ -16,6 +16,7 @@ public class StoreInfoView {
         while (true) {
             System.out.println("\n1. 매장 전체 정보");
             System.out.println("2. 매장 위치별 정보");
+            System.out.println("3. 이전 화면");
             int choice = readInt("\n선택 : ");
             try {
                 switch (choice) {
@@ -25,14 +26,10 @@ public class StoreInfoView {
                     case 2:
                         LocationStore();
                         break;
-                    case 0:
-                        System.out.println("프로그램을 종료합니다.");
-                        ;
-                        util.close();
-                        scanner.close();
+                    case 3:
                         return;
                     default:
-                        System.out.println("0~2 사이의 숫자를 입력하세요.");
+                        System.out.println("1~3 사이의 숫자를 입력하세요.");
                 }
             } catch (Exception e) {
                 System.out.println("오류: " + e.getMessage());

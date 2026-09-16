@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Main extends JFrame {
-
     // 현재 로그인한 관리자 ID
     private Integer currentAdminId;
 
@@ -16,7 +15,6 @@ public class Main extends JFrame {
 
     public Main(Integer currentAdminId) {
         this.currentAdminId = currentAdminId;
-
         setTitle("무인편의점 재고 관리 시스템");
         setSize(1100, 700);
         setLocationRelativeTo(null);
@@ -31,26 +29,39 @@ public class Main extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    // 관리자 로그인 정보 저장
+    // 관리자 로그인 정보 저장 및 상단 헤더 갱신
     public void loginAdmin(Admin admin) {
         if (admin == null) {
             return;
         }
 
         currentAdminId = admin.getAdminId();
+        refreshHeader();
+    }
 
-        getContentPane().remove(0);
+    // 관리자 로그아웃 및 화면 초기화
+    public void logoutAdmin() {
+        currentAdminId = null;
+        refreshHeader();
+
+        contentPanel.removeAll();
+        contentPanel.add(createHomePanel(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    // 상단 헤더 갱신
+    private void refreshHeader() {
+        BorderLayout layout = (BorderLayout) getContentPane().getLayout();
+        Component oldHeader = layout.getLayoutComponent(BorderLayout.NORTH);
+
+        if (oldHeader != null) {
+            getContentPane().remove(oldHeader);
+        }
+
         getContentPane().add(createHeader(), BorderLayout.NORTH);
         getContentPane().revalidate();
         getContentPane().repaint();
-    }
-
-    // 관리자 로그아웃
-    public void logoutAdmin() {
-        currentAdminId = null;
-        contentPanel.removeAll();
-        contentPanel.revalidate();
-        contentPanel.repaint();
     }
 
     // 상단
@@ -87,7 +98,7 @@ public class Main extends JFrame {
         menu.setBackground(new Color(245, 247, 250));
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-        // Todo - 관리자 로그인 if문
+
         // 상품 관리
         JButton productButton = createMenuButton("상품관리");
         productButton.addActionListener(e -> {
@@ -112,7 +123,7 @@ public class Main extends JFrame {
         });
         menu.add(orderItemButton);
         menu.add(Box.createVerticalStrut(10));
-        // Todo - 관리자 로그인 if문
+
         // 발주 / 입고
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
