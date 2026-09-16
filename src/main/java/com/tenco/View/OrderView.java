@@ -281,8 +281,6 @@ public class OrderView {
             return;
         }
 
-
-
         OrderDTO order = orderService.getOrderById(orderId);
         if (order == null) {
             System.out.println("존재하지 않는 주문번호입니다.");
@@ -336,6 +334,11 @@ public class OrderView {
 
         OrderItemDTO targetItem = targetItemOpt.get();
         ProductDTO product = orderService.getProductById(productId);
+
+        if (product == null) {
+            System.out.println("해당 상품의 정보를 찾을 수 없습니다.");
+            return;
+        }
 
         // 변경 가능 재고 계산
         // (현재 재고 + 해당 주문에 이미 묶여있던 수량)
@@ -417,14 +420,14 @@ public class OrderView {
 
         // 취소할 주문 정보 표시
         System.out.println("== 취소할 주문 정보 ==");
-        System.out.printf(" 주문 번호 : %d", order.getOrderId());
-        System.out.printf(" 결제 수단 : %s", order.getPaymentType());
-        System.out.printf(" 총 결제 금액 : %,d", order.getTotalPrice());
+        System.out.printf(" 주문 번호 : %d\n", order.getOrderId());
+        System.out.printf(" 결제 수단 : %s\n", order.getPaymentType());
+        System.out.printf(" 총 결제 금액 : %,d\n", order.getTotalPrice());
         System.out.println(" 주문 내역 : ");
         for (OrderItemDTO item : itemList) {
             ProductDTO product = orderService.getProductById(item.getProductId());
             String productName = (product != null) ? product.getProductName() : "알수없음";
-            System.out.printf(" * %s (%d개)", productName, item.getQuantity());
+            System.out.printf(" * %s (%d개)\n", productName, item.getQuantity());
         }
 
         // 주문 취소 확인

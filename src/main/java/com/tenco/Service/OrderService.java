@@ -13,7 +13,7 @@ import java.util.List;
 public class OrderService {
     private final OrderDAO orderDAO = new OrderDAO();
     private final OrderItemDAO orderItemDAO = new OrderItemDAOImpl();
-    private final ProductDAO productDAO = new ProductDAOImpl();
+    private final ProductDAO productDAO = new ProductDAO();
 
     /**
      * 1. 신규 주문 처리 (트랜잭션)
@@ -46,18 +46,21 @@ public class OrderService {
                     return false;
                 }
 
-                // 주문 상품 저장
-                int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
-                if (itemResult == 0) {
+                // 재고 차감 (ProductDAO 구매시 차감 메서드)
+                int stockResult = productDAO.buyOutStock(conn, itemDTO.getProductId(), itemDTO.getQuantity());
+                if (stockResult == 0) {
+                    System.err.println("상품 [ID: " + itemDTO.getProductId() + "]의 재고가 부족하거나 존재하지 않습니다.");
                     conn.rollback();
                     return false;
                 }
-
-                // 재고 차감 (ProductDAO 차감 메서드)
-                int stockResult = productDAO.outStock(conn, itemDTO.getProductId(), itemDTO.getQuantity());
-                if (stockResult == 0) {
-                    conn.rollback();
-                    return false;
+                
+                // 주문 상품 일괄 저장 (Batch Insert)
+                int[] itemResult = orderItemDAO.insertOrderItems(conn, items);
+                for (int count : itemResult) {
+                    if (count == 0) {
+                        conn.rollback();
+                        return false;
+                    }
                 }
             }
             conn.commit(); // 성공시 커밋
