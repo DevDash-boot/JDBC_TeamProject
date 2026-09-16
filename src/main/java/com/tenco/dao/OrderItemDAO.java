@@ -8,29 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderItemDAO {
-
-    // 주문 상품 등록(INSERT)
-    // TODO -주문등록은 필요없을거 같아서 삭제
-//    public int addOrderItem(OrderItem orderItem) throws SQLException {
-//        int rows = 0;
-//        String sql = """
-//                INSERT INTO order_item(order_id, product_id, quantity, order_price)
-//                VALUES (?, ?, ?, ?);
-//                """;
-//        try (Connection conn = util.getConnection()) {
-//            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//                pstmt.setInt(1, orderItem.getOrderId());
-//                pstmt.setInt(2, orderItem.getProductId());
-//                pstmt.setInt(3, orderItem.getQuantity());
-//                pstmt.setInt(4, orderItem.getOrderPrice());
-//                rows = pstmt.executeUpdate();
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return rows;
-//    }
-
     // 특정 주문 상품 조회(SELECT + WHERE)
     public List<OrderItem> selectOrderItem(int orderId) {
         List<OrderItem> orderItemList = new ArrayList<>();
@@ -88,6 +65,7 @@ public class OrderItemDAO {
         return orderItemList;
     }
 
+    // 수량 수정
     public int updateOrderItem(Connection conn, int quantity, int orderItemId) throws SQLException {
         String sql = """
             UPDATE order_item
@@ -102,6 +80,7 @@ public class OrderItemDAO {
         }
     }
 
+    // 삭제
     public int deleteOrderItem(Connection conn, int orderItemId) throws SQLException {
         String sql = """
             DELETE FROM order_item
@@ -150,8 +129,9 @@ public class OrderItemDAO {
         }
     }
 
-    // 다른 코드와 트랜잭션 용
     ///////////////////////////////
+    // 다른 코드와 트랜잭션 용
+    // order에서 주문 결제(등록)시 orderItem에도 주문이 추가되어야 한다.
     public int insertOrderItem(Connection conn, OrderItem orderItem) throws SQLException {
         String sql = """
             INSERT INTO order_item(order_id, product_id, quantity, order_price)
@@ -170,6 +150,7 @@ public class OrderItemDAO {
         }
     }
 
+    // order에서 조회, 상세 조회를 하면 orderItem에 저장된 정보를 가져간다.
     public List<OrderItem> selectItemByOrderId(Connection conn, int orderId) throws SQLException {
         List<OrderItem> list = new ArrayList<>();
         String sql = """
@@ -210,7 +191,7 @@ public class OrderItemDAO {
         return null;
     }
 
-    // 삭제 시 재고 관련 변경 부분
+    // order에서 주문 취소(삭제) 시 orderItem의 주문도 삭제되어야 한다.
     public int deleteByOrderId(Connection conn, int orderId) throws SQLException {
         String sql = """
             DELETE FROM order_item
@@ -242,7 +223,7 @@ public class OrderItemDAO {
         return 0;
     }
 
-    // 남은 상품 확인하는 곳
+    // 남은 상품 확인하는 코드
     public int countOrderItem(Connection conn, int orderId) throws SQLException {
         String sql = """
         SELECT COUNT(*)
