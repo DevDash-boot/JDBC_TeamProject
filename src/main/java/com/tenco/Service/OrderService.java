@@ -147,19 +147,21 @@ public class OrderService {
             conn.setAutoCommit(false);
 
             // 각 상품 재고 복구
-            for (OrderItemDTO item : itemList) {
-                int result = productDAO.inStock(conn, item.getOrderId(), item.getQuantity());
-                if (result == 0) {
-                    throw new SQLException("상품 ID " + item.getProductId() + "의 재고 원복 실패");
-                }
-            }
+            orderDAO.cancelOrderTransaction(conn, orderId, itemList);
 
+            conn.commit();
+            return true;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            rollbackQuietly(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeQuietly(conn);
         }
     }
-    // --- Helper Methods ---
 
+    // --- Helper Methods ---
+    // 트랜잭션 롤백 중복 부분
     private void rollbackQuietly(Connection conn) {
         if (conn != null) {
             try {
@@ -170,6 +172,7 @@ public class OrderService {
         }
     }
 
+    // 트랜잭션 자원해제 중복 부분
     private void closeQuietly(Connection conn) {
         if (conn != null) {
             try {
@@ -182,4 +185,3 @@ public class OrderService {
     }
 }
 
-}

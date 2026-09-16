@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @ToString
+// status 주문상태 추가
 public class OrderDTO {
     private int orderId;
     private String paymentType;

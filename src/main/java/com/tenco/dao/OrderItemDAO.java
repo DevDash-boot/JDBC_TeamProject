@@ -10,7 +10,7 @@ public interface OrderItemDAO {
     int insertOrderItem(Connection conn, OrderItemDTO dto) throws SQLException;
 
     // 2. 다건 주문 등록
-    public int[] insertOrderItems(Connection conn, List<OrderItemDTO> dtoList) throws SQLException
+    public int[] insertOrderItems(Connection conn, List<OrderItemDTO> dtoList) throws SQLException;
 
     // 3. 특정 주문의 상품 목록 조회
     List<OrderItemDTO> selectItemByOrderId(Connection conn, int orderId) throws SQLException;

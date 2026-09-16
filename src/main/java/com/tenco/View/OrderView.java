@@ -123,7 +123,6 @@ public class OrderView {
 
             // 수량 입력
             int quantity;
-            boolean isCanceled = false;
             System.out.println("구매 수량 입력 : ");
             while (true) {
                 try {
@@ -131,7 +130,6 @@ public class OrderView {
 
                     if (quantity == 0) {
                         System.out.println(" -> 상품 선택을 취소했습니다.");
-                        isCanceled = true;
                         break; // 수량 입력 루프 탈출
                     }
 
@@ -198,13 +196,14 @@ public class OrderView {
             return;
         }
 
-        System.out.println("주문번호 \t결제수단 \t총 금액 \t\t주문일시");
+        System.out.println("주문번호 \t결제수단 \t총 금액 \t 주문 상태 \t\t주문일시");
         System.out.println("-----------------------------------------------");
         for (OrderDTO order : orderList) {
-            System.out.printf("%d \t\t %-6s \t %,d원 \t\t %s \n",
+            System.out.printf("%d \t\t %-6s \t %,d원 \t %s \t\t %s \n",
                     order.getOrderId(),
                     order.getPaymentType(),
                     order.getTotalPrice(),
+                    order.getStatus() != null ? order.getStatus() : "??",
                     order.getOrderDate() != null ? order.getOrderDate().toString().substring(0, 16) : "N/A");
         }
         System.out.println("----------------------------------------------------------");
@@ -228,12 +227,21 @@ public class OrderView {
             return;
         }
 
+        boolean isCancelled = "CANCELLED".equalsIgnoreCase(order.getStatus());
+
         List<OrderItemDTO> itemList = orderService.getOrderItemsByOrderId(orderId);
 
         System.out.println("=======주문 상세 정보======");
         System.out.println("주문 번호 : " + order.getOrderId());
         System.out.println("결제 수단 : " + order.getPaymentType());
+        System.out.println("주문 상태 : " + (isCancelled ? "취소됨" : order.getStatus()));
         System.out.println("주문 일시 : " + order.getOrderDate());
+
+        // 취소된 주문일 경우 안내 문구 표시
+        if (isCancelled) {
+            System.out.println("===========================");
+            System.out.println("해당 주문은 취소된 주문의 상세 내역입니다.");
+        }
         System.out.println("--------------------------------");
         System.out.println("상품ID\t상품명\t\t단가\t\t수량\t소계");
         System.out.println("------------------------------------");
@@ -290,7 +298,7 @@ public class OrderView {
         for (OrderItemDTO item : itemList) {
             ProductDTO product = orderService.getProductById(item.getProductId());
             String productName = (product != null) ? product.getProductName() : "알수 없음";
-            System.out.printf("상품 ID: %d | 상품명 : %s | 현재 수량 : %d개 | 단가 : %,d원",
+            System.out.printf("상품 ID: %d | 상품명 : %s | 현재 수량 : %d개 | 단가 : %,d원\n",
                     item.getProductId(), productName, item.getQuantity(), item.getOrderPrice());
         }
 
@@ -326,7 +334,7 @@ public class OrderView {
         // (현재 재고 + 해당 주문에 이미 묶여있던 수량)
         int maxAvailableStock = product.getStock() + targetItem.getQuantity();
 
-        System.out.printf(" [선택 상품] %s (현재 수량 : %d개 / 최대 변경 가능 수량 %d개)",
+        System.out.printf(" \n[선택 상품] %s (현재 수량 : %d개 / 최대 변경 가능 수량 %d개)\n",
                 product.getProductName(), targetItem.getQuantity(), maxAvailableStock);
 
         int newQuantity;
@@ -343,7 +351,7 @@ public class OrderView {
                     return;
                 }
                 if (newQuantity > maxAvailableStock) {
-                    System.out.printf("재고가 부족합니다 .(최대 가능 수량 : %d개)", maxAvailableStock);
+                    System.out.printf("재고가 부족합니다 .(최대 가능 수량 : %d개)\n", maxAvailableStock);
                     continue;
                 }
                 break;
@@ -384,6 +392,12 @@ public class OrderView {
         OrderDTO order = orderService.getOrderById(orderId);
         if (order == null) {
             System.out.println("검색하신 주문 번호가 없습니다.");
+            return;
+        }
+
+        // 이미 취소된 주문인지 확인
+        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
+            System.out.println("이미 취소된 주문입니다.");
             return;
         }
 

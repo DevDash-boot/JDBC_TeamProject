@@ -2,7 +2,6 @@ package com.tenco.dao;
 
 import com.tenco.dto.OrderDTO;
 import com.tenco.dto.OrderItemDTO;
-import com.tenco.util.util;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ public class OrderDAO {
     }
 
     // 3. 전체 목록 조회
-    // 3. 전체 목록 조회
     public List<OrderDTO> selectAllOrders(Connection conn) throws SQLException {
         String sql = "SELECT order_id, payment_type, total_price, status , order_date FROM orders ORDER BY order_id DESC";
         List<OrderDTO> list = new ArrayList<>();
@@ -71,18 +69,6 @@ public class OrderDAO {
         }
         return list;
     }
-
-    // 주문 상태 변경
-    public int updateOrderStatus(Connection conn, int orderId, String status) throws SQLException {
-        String sql = "UPDATE orders SET status = ? WHERE order_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, status);
-            pstmt.setInt(2, orderId);
-            return pstmt.executeUpdate();
-        }
-    }
-
 
     // 주문 상품 수량 변경 및 재고, 총 금액 반영 (트랜잭션) (Connection 외부 주입 방식)
     public void updateOrderItemAndStock(Connection conn, int orderId, int productId, int newQuantity, int priceDiff, int quantityDiff) throws SQLException {
