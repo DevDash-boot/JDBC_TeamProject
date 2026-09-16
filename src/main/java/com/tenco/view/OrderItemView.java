@@ -20,77 +20,83 @@ public class OrderItemView {
     // 4. 호출 중 SQLException 이 나면 에러 메세지를 출력하고 다시 1번으로 돌아간다.
     // 5. 0번을 입력하면 프로그램 종료 또는 return 루프 탈출
     public void start(){
-        System.out.println("===== 무인편의점 재고 관리 시스템 =====");
+        System.out.println("===== 무인편의점 상품 관리 시스템 =====");
         while(true){
             printMenu();
             int choice = readInt("선택: ");
 
             try {
                 switch (choice){
-                    case 1: addOrderItem(); break;
-                    case 2: selectOrderItem(); break;
-                    case 3: allOrderItem(); break;
-                    case 4: updateOrderItem(); break;
-                    case 5: deleteOrderItem(); break;
-                    case 6: sumOrderItem(); break;
+                    // TODO -주문등록 삭제
+//                    case 1: addOrderItem(); break;
+                    case 1: selectOrderItem(); break;
+                    case 2: allOrderItem(); break;
+                    case 3: updateOrderItem(); break;
+                    case 4: deleteOrderItem(); break;
+                    case 5: sumOrderItem(); break;
                     case 0:
                         System.out.println("프로그램을 종료합니다.");
                         util.close();
                         scanner.close();
                         return;
                     default:
-                        System.out.println("1~6 사이의 숫자를 입력하세요.");
+                        System.out.println("0~5 사이의 숫자를 입력하세요.");
                 }
             } catch (Exception e) {
                 System.out.println("오류: " + e.getMessage());
             }
         }
     }
-
-    private void addOrderItem() throws SQLException {
-        System.out.print("주문 번호 : ");
-        int orderId = scanner.nextInt();
-        System.out.print("상품 번호 : ");
-        int productId = scanner.nextInt();
-        System.out.print("수량 : ");
-        int quantity = scanner.nextInt();
-        System.out.print("가격 : ");
-        int orderPrice = scanner.nextInt();
-
-        OrderItem orderItem = OrderItem.builder()
-                .orderId(orderId)
-                .productId(productId)
-                .quantity(quantity)
-                .orderPrice(orderPrice)
-                .build();
-        orderItemService.addOrderItem(orderItem);
-    }
+    // TODO - 주문등록 필요없어서 삭제
+//    private void addOrderItem() throws SQLException {
+//        System.out.print("주문 번호 : ");
+//        int orderId = scanner.nextInt();
+//        System.out.print("상품 번호 : ");
+//        int productId = scanner.nextInt();
+//        System.out.print("수량 : ");
+//        int quantity = scanner.nextInt();
+//        System.out.print("가격 : ");
+//        int orderPrice = scanner.nextInt();
+//
+//        OrderItem orderItem = OrderItem.builder()
+//                .orderId(orderId)
+//                .productId(productId)
+//                .quantity(quantity)
+//                .orderPrice(orderPrice)
+//                .build();
+//        orderItemService.addOrderItem(orderItem);
+//    }
 
     private void selectOrderItem() throws SQLException {
-        System.out.println("특정 주문 상품 검색 : ");
+        System.out.print("특정 주문 검색 : ");
         int orderId = scanner.nextInt();
         List<OrderItem> orderItemList = orderItemService.selectOrderItem(orderId);
+        System.out.println("ID|주문자ID|상품ID|상품명|수량|가격");
+        System.out.println("───────────────────────────────────");
         for(OrderItem o : orderItemList){
-            System.out.printf("%d | %d | %d | %s | %d | %d\n ",
+            System.out.printf("%d  |  %d  |  %d  |  %s  |  %d  |  %d\n",
                     o.getOrderItemId(), o.getOrderId(), o.getProductId(),
                     o.getProductName(), o.getQuantity(), o.getOrderPrice());
         }
     }
 
     private void allOrderItem(){
-        System.out.println("주문할 상품 보기");
+        System.out.println("[전체 보기]");
         List<OrderItem> orderItemList = orderItemService.allOrderItem();
+        System.out.println("ID|주문자ID|상품ID|상품명|수량|가격");
+        System.out.println("───────────────────────────────────");
         for(OrderItem o : orderItemList){
-            System.out.printf("%d | %d | %d | %s | %d | %d\n ",
+            System.out.printf("%d  |  %d  |  %d  |  %s  |  %d  |  %d\n",
                     o.getOrderItemId(), o.getOrderId(), o.getProductId(),
                     o.getProductName(), o.getQuantity(), o.getOrderPrice());
         }
     }
 
     private void updateOrderItem() throws SQLException {
+        System.out.print("수정할 주문ID 선택 : ");
+        int orderItemId = scanner.nextInt();
         System.out.print("상품 수량 변경 : ");
         int quantity = scanner.nextInt();
-        int orderItemId = scanner.nextInt();
         int rows = orderItemService.updateOrderItem(quantity, orderItemId);
         if (rows > 0){
             System.out.println("상품 수량이 변경되었습니다.");
@@ -100,7 +106,7 @@ public class OrderItemView {
     }
 
     private void deleteOrderItem() throws SQLException {
-        System.out.print("상품 삭제 : ");
+        System.out.print("주문 삭제 : ");
         int orderItemId = scanner.nextInt();
         int rows = orderItemService.deleteOrderItem(orderItemId);
         if (rows > 0){
@@ -111,19 +117,21 @@ public class OrderItemView {
     }
 
     private void sumOrderItem() throws SQLException {
+        System.out.print("주문자ID : ");
         int orderId = scanner.nextInt();
         int totalPrice = orderItemService.sumOrderItem(orderId);
-        System.out.println("총 금액은 " + totalPrice + "원 입니다.");
+        System.out.println("주문자 ID " + orderId +  "의 총 금액은 " + totalPrice + "원 입니다.");
     }
 
     private void printMenu() {
-        System.out.println("[메뉴]");
-        System.out.println("1.  주문 상품 등록");
-        System.out.println("2.  특정 상품 조회");
-        System.out.println("3.  주문 전체 조회");
-        System.out.println("4.  주문 상품 수량 수정");
-        System.out.println("5.  주문 상품 삭제");
-        System.out.println("6.  주문별 총 금액 계산");
+        System.out.println("\n[메뉴]");
+        // TODO - 주문등록 삭제
+        //        System.out.println("1. 주문 등록");
+        System.out.println("1. 특정 상품 조회");
+        System.out.println("2. 주문 전체 조회");
+        System.out.println("3. 주문한 상품 수량 수정");
+        System.out.println("4. 주문한 상품 삭제");
+        System.out.println("5. 주문별 총 금액 계산");
         System.out.println("0. 종료");
     }
 
