@@ -16,17 +16,18 @@ public class OrderItemService {
     private final OrderDAO orderDAO = new OrderDAO();
     private final ProductDAO productDAO = new ProductDAO();
 
-    // 주문 상품 등록
-    public int addOrderItem(OrderItem orderItem) throws SQLException {
-        if (orderItem == null) {
-            throw new SQLException("주문한 상품 정보가 없습니다.");
-        } else if (orderItem.getOrderId() <= 0 || orderItem.getProductId() <= 0) {
-            throw new SQLException("주문자 번호와 상품번호를 입력해주세요.");
-        } else if (orderItem.getQuantity() <= 0) {
-            throw new SQLException("상품은 1개 이상입니다.");
-        }
-        return orderItemDAO.addOrderItem(orderItem);
-    }
+//    // 주문 상품 등록
+//    // TODO -주문등록 필요없어서 삭제
+//    public int addOrderItem(OrderItem orderItem) throws SQLException {
+//        if (orderItem == null) {
+//            throw new SQLException("주문한 상품 정보가 없습니다.");
+//        } else if (orderItem.getOrderId() <= 0 || orderItem.getProductId() <= 0) {
+//            throw new SQLException("주문자 번호와 상품번호를 입력해주세요.");
+//        } else if (orderItem.getQuantity() <= 0) {
+//            throw new SQLException("상품은 1개 이상입니다.");
+//        }
+//        return orderItemDAO.addOrderItem(orderItem);
+//    }
 
     // 특정 주문 상품 조회
     public List<OrderItem> selectOrderItem(int orderId) throws SQLException {

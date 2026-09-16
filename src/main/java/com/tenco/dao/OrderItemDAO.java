@@ -9,27 +9,27 @@ import java.util.List;
 
 public class OrderItemDAO {
 
-
     // 주문 상품 등록(INSERT)
-    public int addOrderItem(OrderItem orderItem) throws SQLException {
-        int rows = 0;
-        String sql = """
-                INSERT INTO order_item(order_id, product_id, quantity, order_price)
-                VALUES (?, ?, ?, ?);
-                """;
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, orderItem.getOrderId());
-                pstmt.setInt(2, orderItem.getProductId());
-                pstmt.setInt(3, orderItem.getQuantity());
-                pstmt.setInt(4, orderItem.getOrderPrice());
-                rows = pstmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return rows;
-    }
+    // TODO -주문등록은 필요없을거 같아서 삭제
+//    public int addOrderItem(OrderItem orderItem) throws SQLException {
+//        int rows = 0;
+//        String sql = """
+//                INSERT INTO order_item(order_id, product_id, quantity, order_price)
+//                VALUES (?, ?, ?, ?);
+//                """;
+//        try (Connection conn = util.getConnection()) {
+//            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//                pstmt.setInt(1, orderItem.getOrderId());
+//                pstmt.setInt(2, orderItem.getProductId());
+//                pstmt.setInt(3, orderItem.getQuantity());
+//                pstmt.setInt(4, orderItem.getOrderPrice());
+//                rows = pstmt.executeUpdate();
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return rows;
+//    }
 
     // 특정 주문 상품 조회(SELECT + WHERE)
     public List<OrderItem> selectOrderItem(int orderId) {
