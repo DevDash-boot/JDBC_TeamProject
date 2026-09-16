@@ -24,6 +24,7 @@ public class ProductView {
 
     public void start() {
         System.out.println("=== 무인 편의점 상품 관리 시스템 ===");
+
         while (true) {
             printMenu();
             int choice = readInt("선택: ");
@@ -234,7 +235,8 @@ public class ProductView {
     private void searchProductById() throws SQLException {
         System.out.println("상품 아이디: ");
         int productId = sc.nextInt();
-        if (productId == 0) {
+        sc.nextLine();
+        if (productId <= 0) {
             System.out.println("아이디를 입력해주세요.");
             return;
         }
@@ -277,6 +279,7 @@ public class ProductView {
         }
     }
 
+
     private int readInt(String prompt) {
         while (true) {
             System.out.println(prompt);
@@ -287,4 +290,5 @@ public class ProductView {
             }
         }
     }
+
 }
