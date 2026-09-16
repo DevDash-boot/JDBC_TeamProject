@@ -235,7 +235,8 @@ public class ProductView {
     private void searchProductById() throws SQLException {
         System.out.println("상품 아이디: ");
         int productId = sc.nextInt();
-        if (productId == 0) {
+        sc.nextLine();
+        if (productId <= 0) {
             System.out.println("아이디를 입력해주세요.");
             return;
         }

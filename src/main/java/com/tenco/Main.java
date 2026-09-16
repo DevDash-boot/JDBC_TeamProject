@@ -1,7 +1,6 @@
 package com.tenco;
 
 import com.tenco.swing.OrderItemSwing;
-import com.tenco.swing.ProductSwing;
 import com.tenco.swing.PurchaseSwing;
 import com.tenco.swing.StoreInfoSwing;
 
