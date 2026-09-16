@@ -130,7 +130,7 @@ public class PurchaseDAO {
     }
 
 
-    }
+
     // 기능 D. purchaseId로 발주 목록에서 제거.(발주 취소) --> 상품테이블의 stock에서 차감.
     public PurchaseDto deletePurchase(int id) throws SQLException {
         try (Connection conn = util.getConnection()) {
@@ -144,14 +144,14 @@ public class PurchaseDAO {
                     where purchase_id = ?
                     """;
 
+
             try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
                     existPstmt.setInt(1 , id);
                 try (ResultSet rs = existPstmt.executeQuery()) {
-                    if(!rs.next()) throw new NullPointerException(id + "는 발주목록에 존재하지 않는 ID 입니다.");
+                    if(!rs.next()) throw new SQLException(id + "는 목록에 존재하지 않는 ID 입니다.");
 
                     purchaseDto.setQauntity(rs.getInt("quantity"));
                     purchaseDto.setProductId(rs.getInt("product_id"));
-                    System.out.println(rs.getInt("product_id"));
                 }
             }
 
@@ -164,23 +164,35 @@ public class PurchaseDAO {
     }
 
 
-    // 기능 E. id로 발주 수량 차감. -- 만들기만 함.
-    public int substractPurchase(int id , int quantity) throws SQLException {
-        try (Connection conn = util.getConnection()) {
+    // 기능 E. 발주 id로 발주 수량 차감. -- 만들기만 함.
+    public int[] substractPurchase(Connection conn , int id , int quantity) throws SQLException {
+            int[] i = new int[2];
             String substractSql = """
                     update purchase set quantity = quantity - ?
-                    where product_id = ? and quantity - ? >= 0
+                    where purchase_id = ? and quantity - ? >= 0
                     """;
+            String  existPurchaseSql = """
+                    select purchase_id , product_id from purchase
+                    where purchase_id = ?
+                    """;
+
+        try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
+            existPstmt.setInt(1 , id);
+            try (ResultSet rs = existPstmt.executeQuery()) {
+                if(!rs.next()) throw new SQLException("ID : " + id + "는 목록에 존재하지 않습니다.");
+                i[0] = rs.getInt("product_id");
+            }
+        }
 
             try (PreparedStatement substractPstmt = conn.prepareStatement(substractSql)) {
                 substractPstmt.setInt(1 , quantity);
                 substractPstmt.setInt(2 , id);
                 substractPstmt.setInt(3 , quantity);
-
-                return substractPstmt.executeUpdate();
+                i[1] = substractPstmt.executeUpdate();
+                return i;
             }
         }
     }
-}
+
 
 
