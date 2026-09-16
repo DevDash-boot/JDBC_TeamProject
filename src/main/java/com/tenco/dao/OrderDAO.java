@@ -1,6 +1,7 @@
 package com.tenco.dao;
 
 import com.tenco.dto.Order;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +65,33 @@ public class OrderDAO {
             }
         }
         return list;
+    }
+
+    public int cancelOrder(Connection conn, int orderId) throws SQLException {
+        String sql = """
+            DELETE FROM orders
+            WHERE order_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, orderId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    // orderItem 에서 수량 변경 시 반영되는 부분을 위한 DAO
+    public int updateTotalPrice(Connection conn, int orderId, int totalPrice) throws SQLException {
+        String sql = """
+            UPDATE orders
+            SET total_price = ?
+            WHERE order_id = ?
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, totalPrice);
+            pstmt.setInt(2, orderId);
+
+            return pstmt.executeUpdate();
+        }
     }
 }
