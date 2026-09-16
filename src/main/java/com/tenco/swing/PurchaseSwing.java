@@ -68,7 +68,7 @@ public class PurchaseSwing extends JPanel {
 
             for (PurchaseDto p : purchaseList) {
                 tableModel.addRow(new Object[]{
-                        p.getProduct_id(),
+                        p.getProductId(),
                         p.getName(),
                         p.getQauntity(),
                         p.getUnitPrice(),
@@ -112,7 +112,7 @@ public class PurchaseSwing extends JPanel {
 
             tableModel.setRowCount(0);
             tableModel.addRow(new Object[]{
-                    p.getProduct_id(),
+                    p.getProductId(),
                     p.getName(),
                     p.getQauntity(),
                     p.getUnitPrice(),
