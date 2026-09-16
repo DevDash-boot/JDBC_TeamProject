@@ -89,10 +89,11 @@ public class Main extends JFrame {
         menu.setBackground(new Color(245, 247, 250));
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-
+// Todo - 관리자 로그인 if문
         // 상품 관리
         JButton productButton = createMenuButton("상품관리");
         productButton.addActionListener(e -> {
+            //if(!checkAdmin()) return;
             showPanel(new ProductSwing());
         });
         menu.add(productButton);
@@ -113,13 +114,11 @@ public class Main extends JFrame {
         });
         menu.add(orderItemButton);
         menu.add(Box.createVerticalStrut(10));
-
+        // Todo - 관리자 로그인 if문
         // 발주 / 입고
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
-            if (!checkAdmin()) {
-                return;
-            }
+            //if (!checkAdmin()) return;
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
