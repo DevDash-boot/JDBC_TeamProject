@@ -71,7 +71,7 @@ public class ProductService {
 
     // 7. 아이디로 상품 조회
     public List<Product> searchProductById(int productId) throws SQLException {
-        if (productId == 0) {
+        if (productId <= 0) {
             throw new SQLException("상품의 ID를 입력해주세요");
         }
         return productDAO.searchProductById(productId);
