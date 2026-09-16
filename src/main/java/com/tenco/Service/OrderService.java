@@ -53,14 +53,12 @@ public class OrderService {
                     conn.rollback();
                     return false;
                 }
-                
-                // 주문 상품 일괄 저장 (Batch Insert)
-                int[] itemResult = orderItemDAO.insertOrderItems(conn, items);
-                for (int count : itemResult) {
-                    if (count == 0) {
-                        conn.rollback();
-                        return false;
-                    }
+
+                // 주문 상품 저장
+                int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
+                if (itemResult == 0) {
+                    conn.rollback();
+                    return false;
                 }
             }
             conn.commit(); // 성공시 커밋
