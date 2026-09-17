@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PurchaseDto {
     private int purchaseId;
-    private int product_id;
+    private int productId;
     private int qauntity;
     private int unitPrice;
     private int totlaPrice;
@@ -20,7 +20,7 @@ public class PurchaseDto {
     public String toString3() {
         return "PurchaseDto{" +
                 "name='" + name + '\'' +
-                ", product_id=" + product_id +
+                ", product_id=" + productId +
                 ", qauntity=" + qauntity +
                 ", unitPrice=" + unitPrice +
                 '}';
