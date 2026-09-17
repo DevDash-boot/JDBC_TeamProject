@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 상품번호, 상품명, 가격, 바코드, 유통기한, 재고, 카테고리
+ * 상품번호, 상품명, 가격, ID, 유통기한, 재고, 카테고리
  * <p>
  * CRUD
  * 1. 상품 등록
@@ -20,7 +20,7 @@ import java.util.List;
  * 5. 상품 상세 조회
  * 6. 상품명으로 검색
  * ----------------------
- * 7. 바코드로 상품 조회
+ * 7. ID로 상품 조회
  * 8. 재고 부족 상품 조회
  * 9. 재고가 0이면 상태 = false
  */
@@ -185,7 +185,7 @@ public class ProductDAO {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
-                SELECT * FROM product WHERE product_id LIKE ?
+                SELECT * FROM product WHERE product_id = ?
                 """;
 
         try (Connection conn = util.getConnection()) {
@@ -247,12 +247,11 @@ public class ProductDAO {
     }
 
     // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
-    public void addAmount(int id , int quantity) throws SQLException {
+    public void addAmount(Connection conn , int id , int quantity) throws SQLException {
         String addSql = """
                 update product set stock = stock + ?
                 where product_id = ?
                 """;
-        try (Connection conn = util.getConnection()) {
             try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
                 addPstmt.setInt(1 , quantity);
                 addPstmt.setInt(2 , id);
@@ -261,7 +260,7 @@ public class ProductDAO {
                 if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
             }
         }
-    }
+
 
     private Product createProduct(ResultSet rs) throws SQLException {
         Product product = Product.builder()

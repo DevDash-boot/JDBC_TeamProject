@@ -106,7 +106,6 @@ public class OrderService {
     }
 
     // 4. 전체 주문 목록 조회
-
     public List<Order> getAllOrders() {
         try (Connection conn = util.getConnection()) {
             return orderDAO.selectAllOrders(conn);
@@ -183,6 +182,75 @@ public class OrderService {
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
+            }
+        }
+    }
+    // TODO - 추가
+    // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영 (트랜잭션)
+    public boolean updateOrderItemQuantity(int orderId, int productId, int oldQuantity, int newQuantity, int price) {
+        // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
+        int quantityDIff = newQuantity - oldQuantity;
+        int priceDiff = quantityDIff * price;
+
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            // DAO 를 통한 개별 처리
+            orderDAO.updateOrderItemAndStock(conn, orderId, productId, newQuantity, priceDiff, quantityDIff);
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            rollbackQuietly(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeQuietly(conn);
+        }
+    }
+    // 주문 취소 처리 (재고 복구 + 주문 상태 CANCELLED) (트랜잭션)
+    public boolean cancelOrder(int orderId, List<OrderItem> itemList) {
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            // 각 상품 재고 복구
+            orderDAO.cancelOrderTransaction(conn, orderId, itemList);
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            rollbackQuietly(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeQuietly(conn);
+        }
+    }
+
+    // --- 중복 Methods ---
+    // 트랜잭션 롤백 중복 부분
+    private void rollbackQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // 트랜잭션 자원해제 중복 부분
+    private void closeQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }

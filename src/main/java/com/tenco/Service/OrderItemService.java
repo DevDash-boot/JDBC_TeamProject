@@ -81,6 +81,15 @@ public class OrderItemService {
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.setAutoCommit(true);
+                        conn.close();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         }
     }
@@ -126,6 +135,15 @@ public class OrderItemService {
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.setAutoCommit(true);
+                        conn.close();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         }
     }
