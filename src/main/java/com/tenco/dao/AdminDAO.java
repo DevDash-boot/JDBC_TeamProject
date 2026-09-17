@@ -1,11 +1,12 @@
 package com.tenco.dao;
 
-// 관리자 테이블 DAO
-
 import com.tenco.dto.Admin;
-import com.tenco.util.util; // 팀원 util 올바른 import
+import com.tenco.util.util;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -10,20 +10,28 @@ repositories {
 }
 
 dependencies {
-    //커넥션 풀 라이브러리
+
+    // MySQL 드라이버 추가
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+    // bcrypt 비밀번호 해시
+    implementation 'org.mindrot:jbcrypt:0.4'
+
+    // 커넥션 풀 LIB
     implementation group: 'com.zaxxer', name: 'HikariCP', version: '5.1.0'
-    // 개발 과정에서 로그를 확인하고 싶다면 로그를 찍는 라이브러리를 추가할 수 있다.(slf4j)
+    // 개발 하는 과정에서 로그를 확인하고 싶다면 로그를 찍는 라이브러리 추가할 수 있음 -> slf4j
+    // Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'
+    // [추가] SLF4J 구현체 (Simple Logger)
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.17'
 
+    // 수정된 부분
     // implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.46'
+    // Lombok: implementation 한 줄을 지우고 아래 두 줄로 교체
     compileOnly         'org.projectlombok:lombok:1.18.46'
     annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.4.0'
-
-    // bcrypt 비밀번호 해시
-    implementation 'org.mindrot:jbcrypt:0.4'
 
     testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -33,6 +41,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
 
 jar {
     // 시작 클래스
