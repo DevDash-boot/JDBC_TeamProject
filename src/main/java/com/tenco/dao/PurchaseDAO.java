@@ -84,32 +84,32 @@ public class PurchaseDAO {
             // 1 - 1. 발주 목록에 없는 새로 발주할 상품이라면. insert로 purchase테이블에 등록.
 
             // 2 - 1. product테이블의 price를 가져와야하므로 select로 먼저 price저장.
-                    String priceSql = """
+            String priceSql = """
                         select price from product 
                         where product_id = ?
                         """;
-                    try (PreparedStatement pricePstmt = conn.prepareStatement(priceSql)) {
-                        pricePstmt.setInt(1 , id);
-                        try (ResultSet rs = pricePstmt.executeQuery()) {
-                            if (rs.next()) price = rs.getInt("price");
-                            else throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
-                        }
-                    }
+            try (PreparedStatement pricePstmt = conn.prepareStatement(priceSql)) {
+                pricePstmt.setInt(1 , id);
+                try (ResultSet rs = pricePstmt.executeQuery()) {
+                    if (rs.next()) price = rs.getInt("price");
+                    else throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+                }
+            }
 
-                    // 2 - 2. 위에서 price 가져왔으니 활용.
-                    String newPurchaseSql = """
+            // 2 - 2. 위에서 price 가져왔으니 활용.
+            String newPurchaseSql = """
                             insert into purchase(product_id , quantity , unit_price , total_price)
                             values(? , ? , ? , ?);
                             """;
 
-                    try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
-                        newPurchasePstmt.setInt(1 , id);
-                        newPurchasePstmt.setInt(2 , quantity);
-                        newPurchasePstmt.setInt(3 , price);
-                        newPurchasePstmt.setInt(4 , quantity * price);
-                        int i = newPurchasePstmt.executeUpdate();
-                        if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
-                    }
+            try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
+                newPurchasePstmt.setInt(1 , id);
+                newPurchasePstmt.setInt(2 , quantity);
+                newPurchasePstmt.setInt(3 , price);
+                newPurchasePstmt.setInt(4 , quantity * price);
+                int i = newPurchasePstmt.executeUpdate();
+                if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
+            }
 
             // 3. 발주 성공했으면 다시 화면에 총 발주가격 , 발주한 상품 , 수량 다시 보여주기.
             String totalSql = """
@@ -146,7 +146,7 @@ public class PurchaseDAO {
 
 
             try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
-                    existPstmt.setInt(1 , id);
+                existPstmt.setInt(1 , id);
                 try (ResultSet rs = existPstmt.executeQuery()) {
                     if(!rs.next()) throw new SQLException(id + "는 목록에 존재하지 않는 ID 입니다.");
 
@@ -156,8 +156,8 @@ public class PurchaseDAO {
             }
 
             try (PreparedStatement deletePstmt = conn.prepareStatement(deleteSql)) {
-                    deletePstmt.setInt(1 , id);
-                    deletePstmt.executeUpdate();
+                deletePstmt.setInt(1 , id);
+                deletePstmt.executeUpdate();
                 return purchaseDto;
             }
         }
@@ -196,6 +196,7 @@ public class PurchaseDAO {
             }
         }
     }
+}
 
 
 

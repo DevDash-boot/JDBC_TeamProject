@@ -34,7 +34,7 @@ public class PurchaseService {
     public void purcahseProduct(int id, int quantity) throws SQLException {
         if (id <= 0) {
             throw new SQLException("유효한 ID를 넣어주세요.");
-        } else if (quantity <= 0 || 20 < quantity) {
+        } else if (quantity <= 0 || 20 <= quantity) {
             throw new SQLException("발주 신청 수량은 한번에 최대 20개까지만 가능합니다.");
         }
         Connection conn = null;
@@ -87,12 +87,20 @@ public class PurchaseService {
         }
     }
 
+    // 기능 E. 상품 ID로 발주 수량 차감. -- 만들기만 함
+    // 트랜잭션 처리
+    // 1. 발주 수정
+    // 2. product 재고 변경
+    public void substractPurchase(int id, int quantity) throws SQLException {
 
-        // 기능 E. 상품 ID로 발주 수량 차감. -- 만들기만 함
-        // 트랜잭션 처리
-        // 1. 발주 수정
-        // 2. product 재고 변경
-        public void substractPurchase (int id, int quantity) throws SQLException {
+        if (id <= 0 || quantity <= 0) {
+            throw new SQLException("유효한 ID와 수량을 입력해주세요.");
+        }
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            // 자동 커밋 해제(트랜잭션 시작)
+            conn.setAutoCommit(false);
 
             if (id <= 0 || quantity <= 0) {
                 throw new SQLException("유효한 ID와 수량을 입력해주세요.");
