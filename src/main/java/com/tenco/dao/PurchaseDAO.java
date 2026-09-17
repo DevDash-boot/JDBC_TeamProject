@@ -48,7 +48,7 @@ public class PurchaseDAO {
             String alreadySql = """                 
                     select p.* , pr.product_name  
                     from purchase p join product pr on p.product_id = pr.product_id
-                    where p.product_id = ?
+                    where p.purchase_id = ?
                     """;
 
             // 상품 테이블에도 실제 존재하는 상품인지 확인.
@@ -127,7 +127,6 @@ public class PurchaseDAO {
                 }
             }
         }
-
 
 
 
