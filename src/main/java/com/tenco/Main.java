@@ -236,7 +236,6 @@ public class Main extends JFrame {
             );
             return false;
         }
-
         return true;
     }
 
