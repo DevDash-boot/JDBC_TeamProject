@@ -32,7 +32,7 @@ public class PurchaseView {
                         break;
 
                     case 2:
-                        System.out.print("조회할 상품 ID를 입력해주세요 : ");
+                        System.out.print("조회할 발주 ID를 입력해주세요 : ");
                         int selectId = scanner.nextInt();
                         scanner.nextLine();
                         purchaseSingleView(selectId);
@@ -92,5 +92,8 @@ public class PurchaseView {
                 p.getPurchaseId() , p.getProductId() , p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
         }
 
+    public static void main(String[] args) {
+        new PurchaseView().purchaseView();
+    }
     }
 
