@@ -20,7 +20,7 @@ public class PurchaseService {
     }
 
 
-    // 기능 B. 상품 ID로 발주 상품 단건 조회.
+    // 기능 B. 발주 ID로 발주 상품 단건 조회.
     public PurchaseDto existList(int id) throws SQLException {
         PurchaseDto purchaseDto = purchaseDAO.existList(id);
         if (id <= 0 || purchaseDto == null) {
@@ -34,7 +34,7 @@ public class PurchaseService {
     public void purcahseProduct(int id, int quantity) throws SQLException {
         if (id <= 0) {
             throw new SQLException("유효한 ID를 넣어주세요.");
-        } else if (quantity <= 0 || 20 <= quantity) {
+        } else if (quantity <= 0 || 20 < quantity) {
             throw new SQLException("발주 신청 수량은 한번에 최대 20개까지만 가능합니다.");
         }
         Connection conn = null;
@@ -54,7 +54,7 @@ public class PurchaseService {
 
         } catch (SQLException e) {
             if (conn != null) conn.rollback(); // catch문에 왔다면 문제가 생긴것이므로 rollback.
-            throw new SQLException(e.getMessage());
+            throw e;
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
@@ -75,22 +75,23 @@ public class PurchaseService {
             conn = util.getConnection();
             conn.setAutoCommit(false);
 
-            PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
-//            if(purchaseDto.getName() == null) throw new NullPointerException();
 
-            int i = productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
-            if(i == 0) throw new NumberFormatException();
+                 PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
+
+
+                int i = productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
+                if(i == 0) throw new SQLException("발주 취소시 상품 재고가 음수가 됩니다.");
+
+
 
             System.out.println("발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  발주ID : " + id);
 
             conn.commit();
-        } catch (NumberFormatException e) {
-            if (conn != null) conn.rollback();
-            throw new NumberFormatException("발주 취소하면 재고가 음수 또는 0개가 됩니다.");
 
-        }catch (SQLException e) {
+        }
+        catch (SQLException e) {
             if (conn != null) conn.rollback();
-            throw new SQLException("ID가 " + id + "인 상품은 존재하지 않습니다. 발주 취소에 실패하였습니다.");
+            throw e;
         }
         finally {
             if (conn != null) {
