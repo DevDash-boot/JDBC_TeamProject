@@ -82,9 +82,10 @@ public class ProductDAO {
     // 3. 상품 수정
     public int updateProduct(Product product) {
         int rows = 0;
+        // TODO - status 추가
         String sql = """
                 UPDATE product
-                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ? 
+                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ?, status = ? 
                 WHERE product_id = ?
                 """;
 
@@ -96,7 +97,9 @@ public class ProductDAO {
                 pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
                 pstmt.setInt(5, product.getStock());
                 pstmt.setString(6, product.getCategory());
-                pstmt.setInt(7, product.getProductId());
+                //TODO 추가
+                pstmt.setBoolean(7, product.isStatus());
+                pstmt.setInt(8, product.getProductId());
 
                 rows = pstmt.executeUpdate();
                 System.out.println(rows + "행이 수정되었습니다.");
