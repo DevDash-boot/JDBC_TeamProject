@@ -46,7 +46,6 @@ public class ProductDAO {
 
                 rows = pstmt.executeUpdate();
             }
-            System.out.println(rows + "행이 추가되었습니다.");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -84,7 +83,7 @@ public class ProductDAO {
         int rows = 0;
         String sql = """
                 UPDATE product
-                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ? 
+                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ?, status = ?
                 WHERE product_id = ?
                 """;
 
@@ -96,10 +95,10 @@ public class ProductDAO {
                 pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
                 pstmt.setInt(5, product.getStock());
                 pstmt.setString(6, product.getCategory());
-                pstmt.setInt(7, product.getProductId());
+                pstmt.setBoolean(7, product.isStatus());
+                pstmt.setInt(8, product.getProductId());
 
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -122,11 +121,12 @@ public class ProductDAO {
                 pstmt.setInt(1, productId);
 
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 삭제되었습니다.");
             }
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalStateException("주문 또는 발주 이력이 있는 상품은 삭제할 수 없습니다.", e);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("상품 삭제 중 DB 오류", e);
         }
         return rows;
     }
@@ -237,7 +237,6 @@ public class ProductDAO {
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -253,15 +252,16 @@ public class ProductDAO {
                 update product set stock = stock + ?
                 where product_id = ?
                 """;
-            try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
-                addPstmt.setInt(1 , quantity);
-                addPstmt.setInt(2 , id);
+        try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
+            addPstmt.setInt(1, quantity);
+            addPstmt.setInt(2, id);
 
                 rows = addPstmt.executeUpdate();
                 if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
             }
             return rows;
         }
+    }
 
 
     private Product createProduct(ResultSet rs) throws SQLException {
@@ -278,15 +278,15 @@ public class ProductDAO {
         return product;
     }
 
-    //////////////////////////////////////
+    /// ///////////////////////////////////
     // 트랜잭션용 상품 단건 조회
     public Product selectProductById(Connection conn, int productId) throws SQLException {
         String sql = """
-            SELECT product_id, product_name, price, barcode,
-                   expiration_date, stock, category
-            FROM product
-            WHERE product_id = ?
-            """;
+                SELECT product_id, product_name, price, barcode,
+                       expiration_date, stock, category
+                FROM product
+                WHERE product_id = ?
+                """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);

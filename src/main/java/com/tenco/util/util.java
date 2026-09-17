@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 //코드 수정 - [HikariCP] 커넥션 풀을 관리하는 클래스
 public class util {
-    private static final String URL = "jdbc:mysql://localhost:3306/convenience_store?serverTimezone=Asia/Seoul";
+    private static final String URL = "jdbc:mysql://localhost/convenience_store?serverTimezone=Asia/Seoul";
     private static final String DB_USER = System.getenv("DB_USER");
     private static final String DB_PASSWORD = System.getenv("DB_PASSWORD");
 

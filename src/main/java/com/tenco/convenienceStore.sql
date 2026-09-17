@@ -8,7 +8,7 @@ CREATE TABLE product (
     product_name VARCHAR(100) NOT NULL,
     price INT NOT NULL,
     barcode VARCHAR(50) NOT NULL UNIQUE,
-    expiration_date DATE,
+    expiration_date DATE NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     category VARCHAR(50) NOT NULL,
     status BOOLEAN NOT NULL DEFAULT TRUE
@@ -107,7 +107,7 @@ INSERT INTO purchase(product_id, quantity, unit_price, total_price)
 VALUES
     (8, 20, 1500, 30000),
     (6, 10, 3500, 35000),
-    (4, 120, 1800, 216000),
+    (4, 20, 1800, 216000),
     (3, 30, 1000, 30000),
     (1, 20, 1500, 30000),
     (10, 20, 2200, 44000);
