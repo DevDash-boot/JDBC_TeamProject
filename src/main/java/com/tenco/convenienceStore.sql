@@ -8,7 +8,7 @@ CREATE TABLE product (
     product_name VARCHAR(100) NOT NULL,
     price INT NOT NULL,
     barcode VARCHAR(50) NOT NULL UNIQUE,
-    expiration_date DATE,
+    expiration_date DATE NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     category VARCHAR(50) NOT NULL,
     status BOOLEAN NOT NULL DEFAULT TRUE
