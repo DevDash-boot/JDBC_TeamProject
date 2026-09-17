@@ -54,7 +54,7 @@ public class PurchaseService {
 
         } catch (SQLException e) {
             if (conn != null) conn.rollback(); // catch문에 왔다면 문제가 생긴것이므로 rollback.
-            throw new SQLException(e.getMessage());
+            throw e;
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
@@ -75,10 +75,14 @@ public class PurchaseService {
             conn = util.getConnection();
             conn.setAutoCommit(false);
 
-            PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
 
-            int i = productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
-            if(i == 0) throw new SQLException();
+                 PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
+
+
+                int i = productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
+                if(i == 0) throw new SQLException("발주 취소시 상품 재고가 음수가 됩니다.");
+
+
 
             System.out.println("발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  발주ID : " + id);
 
@@ -87,7 +91,7 @@ public class PurchaseService {
         }
         catch (SQLException e) {
             if (conn != null) conn.rollback();
-            throw new SQLException("ID가 " + id + "인 상품은 존재하지 않습니다. 발주 취소에 실패하였습니다.");
+            throw e;
         }
         finally {
             if (conn != null) {

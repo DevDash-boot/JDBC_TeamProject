@@ -56,7 +56,9 @@ public class PurchaseDAO {
                 alreadyPstmt.setInt(1, id);
 
                 try (ResultSet rs = alreadyPstmt.executeQuery()) {
-                    if (rs.next()) {
+
+                    if(!rs.next()) return null;
+
                         purchaseDto = PurchaseDto.builder()
                                 .purchaseId(rs.getInt("purchase_id"))
                                 .productId(rs.getInt("product_id"))
@@ -65,7 +67,7 @@ public class PurchaseDAO {
                                 .unitPrice(rs.getInt("unit_price"))
                                 .totlaPrice(rs.getInt("total_price"))
                                 .build();
-                    }
+
 
                     Product product = new ProductDAO().selectProductById(conn , purchaseDto.getProductId());
                     if (product == null) throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
@@ -147,7 +149,7 @@ public class PurchaseDAO {
             try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
                 existPstmt.setInt(1 , id);
                 try (ResultSet rs = existPstmt.executeQuery()) {
-                    if(!rs.next()) throw new SQLException();
+                    if(!rs.next()) throw new SQLException("ID가 " + id + "인 상품은 발주목록에 없습니다.");
 
                     purchaseDto.setQauntity(rs.getInt("quantity"));
                     purchaseDto.setProductId(rs.getInt("product_id"));
