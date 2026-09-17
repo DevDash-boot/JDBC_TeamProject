@@ -19,7 +19,7 @@ public class OrderItemService {
     // 특정 주문 상품 조회
     public List<OrderItem> selectOrderItem(int orderId) throws SQLException {
         if (orderId <= 0) {
-            throw new SQLException("주문자 번호를 입력해주세요.");
+            throw new IllegalArgumentException("주문자 번호가 올바르지 않습니다.");
         }
         return orderItemDAO.selectOrderItem(orderId);
     }
@@ -33,10 +33,10 @@ public class OrderItemService {
     // 주문 수정 시 재고도 변경되어야 하며, order의 총 금액도 변경되어야 한다.
     public int updateOrderItem(int quantity, int orderItemId) throws SQLException {
         if (orderItemId <= 0) {
-            throw new SQLException("주문상품 번호를 입력해주세요.");
+            throw new IllegalArgumentException("주문상품 번호가 올바르지 않습니다.");
         }
         if (quantity <= 0) {
-            throw new SQLException("수량은 1개 이상이어야 합니다.");
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
         }
         try (Connection conn = util.getConnection()) {
             // 트랜잭션 시작
@@ -80,15 +80,12 @@ public class OrderItemService {
                 return 1;
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                throw new SQLException("주문 처리에 실패했습니다.");
             } finally {
-                if (conn != null) {
-                    try {
-                        conn.setAutoCommit(true);
-                        conn.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
@@ -98,7 +95,7 @@ public class OrderItemService {
     // 삭제 시 재고 복구, order의 주문이 여러개면 반영해서 변경, 1건이면 삭제되어야한다.
     public int deleteOrderItem(int orderItemId) throws SQLException {
         if (orderItemId <= 0) {
-            throw new SQLException("주문상품 번호를 입력해주세요.");
+            throw new IllegalArgumentException("주문상품 번호가 올바르지 않습니다.");
         }
         try (Connection conn = util.getConnection()) {
             // 트랜잭션 시작
@@ -136,13 +133,10 @@ public class OrderItemService {
                 conn.rollback();
                 throw e;
             } finally {
-                if (conn != null) {
-                    try {
-                        conn.setAutoCommit(true);
-                        conn.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
@@ -151,7 +145,7 @@ public class OrderItemService {
     // 주문 합계 금액 조회
     public int sumOrderItem(int orderId) throws SQLException {
         if (orderId <= 0) {
-            throw new SQLException("주문자 번호를 입력해주세요.");
+            throw new IllegalArgumentException("주문번호가 올바르지 않습니다.");
         }
         return orderItemDAO.sumOrderItem(orderId);
     }
