@@ -37,8 +37,15 @@ public class OrderService {
                 return false;
             }
 
+
             // 2. order_item 저장 및 상품 재고 차감
             for (OrderItem itemDTO : items) {
+                // 수량 입력시 수량에 0이 들어왔는지 확인하는 방어적 코드
+                if (itemDTO.getQuantity() <= 0) {
+                    conn.rollback();
+                    return false;
+                }
+
                 itemDTO.setOrderId(orderId); // 받아은 order_id 세팅
 
                 Product product =productDAO.selectProductById(conn, itemDTO.getProductId());
@@ -187,7 +194,7 @@ public class OrderService {
     }
     // TODO - 추가
     // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영 (트랜잭션)
-    public boolean updateOrderItemQuantity(int orderId, int productId, int oldQuantity, int newQuantity, int price) {
+    public boolean updateOrderItemQuantity(int orderItemId,int orderId, int productId, int oldQuantity, int newQuantity, int price) {
         // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
         int quantityDIff = newQuantity - oldQuantity;
         int priceDiff = quantityDIff * price;
@@ -198,7 +205,7 @@ public class OrderService {
             conn.setAutoCommit(false);
 
             // DAO 를 통한 개별 처리
-            orderDAO.updateOrderItemAndStock(conn, orderId, productId, newQuantity, priceDiff, quantityDIff);
+            orderDAO.updateOrderItemAndStock(conn, orderItemId ,orderId, productId, newQuantity, priceDiff, quantityDIff);
 
             conn.commit();
             return true;
@@ -210,26 +217,27 @@ public class OrderService {
             closeQuietly(conn);
         }
     }
+    // TODO - 사용하지않는 주문취소 메서드 제거
     // 주문 취소 처리 (재고 복구 + 주문 상태 CANCELLED) (트랜잭션)
-    public boolean cancelOrder(int orderId, List<OrderItem> itemList) {
-        Connection conn = null;
-        try {
-            conn = util.getConnection();
-            conn.setAutoCommit(false);
-
-            // 각 상품 재고 복구
-            orderDAO.cancelOrderTransaction(conn, orderId, itemList);
-
-            conn.commit();
-            return true;
-        } catch (SQLException e) {
-            rollbackQuietly(conn);
-            e.printStackTrace();
-            return false;
-        } finally {
-            closeQuietly(conn);
-        }
-    }
+//    public boolean cancelOrder(int orderId, List<OrderItem> itemList) {
+//        Connection conn = null;
+//        try {
+//            conn = util.getConnection();
+//            conn.setAutoCommit(false);
+//
+//            // 각 상품 재고 복구
+//            orderDAO.cancelOrderTransaction(conn, orderId, itemList);
+//
+//            conn.commit();
+//            return true;
+//        } catch (SQLException e) {
+//            rollbackQuietly(conn);
+//            e.printStackTrace();
+//            return false;
+//        } finally {
+//            closeQuietly(conn);
+//        }
+//    }
 
     // --- 중복 Methods ---
     // 트랜잭션 롤백 중복 부분

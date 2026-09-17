@@ -359,42 +359,43 @@ public class OrderSwing extends JPanel {
         String orderIdInput = JOptionPane.showInputDialog(
                 this,
                 "취소할 주문 ID를 입력하세요.",
-                "주문 취소"
+                "주문 취소",
+                JOptionPane.QUESTION_MESSAGE
         );
 
+        // 취소 버튼을 누르거나 창을 닫은 경우
         if (orderIdInput == null) {
             return;
         }
+
+        // 공백 제거 및 빈 문자열 입력 체크
+        orderIdInput = orderIdInput.trim();
+        if (orderIdInput.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "주문 ID를 입력해 주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int orderId;
         try {
-            orderId = Integer.parseInt(orderIdInput.trim());
+            orderId = Integer.parseInt(orderIdInput);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "주문 ID는 숫자로 입력해주세요."
-            );
+            JOptionPane.showMessageDialog(this, "주문 ID는 숫자로 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        // DB에서 해당 주문 데이터 조회
         Order order = orderService.getOrderById(orderId);
-
         if (order == null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "존재하지 않는 주문번호입니다."
-            );
+            JOptionPane.showMessageDialog(this, "존재하지 않는 주문번호입니다.", "오류", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // 이미 취소된 주문인지 확인하는 로직이 있다면 추가하는 것이 좋습니다.
+        // if ("CANCELLED".equals(order.getStatus())) { ... return; }
 
         int result = JOptionPane.showConfirmDialog(
                 this,
-                "주문번호 " + orderId +
-                        "번을 취소하시겠습니까?\n" +
-                        "총 금액 : " +
-                        String.format(
-                                "%,d원",
-                                order.getTotalPrice()
-                        ),
+                String.format("주문번호 %d번을 취소하시겠습니까?\n총 금액 : %,d원", orderId, order.getTotalPrice()),
                 "주문 취소 확인",
                 JOptionPane.YES_NO_OPTION
         );
@@ -403,22 +404,14 @@ public class OrderSwing extends JPanel {
             return;
         }
 
+        // ★ 핵심 수정: 조회한 order 객체의 itemList를 넘겨주어야 합니다.
         boolean success = orderService.cancelOrder(orderId);
 
         if (success) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "주문이 취소되었습니다."
-            );
+            JOptionPane.showMessageDialog(this, "주문이 성공적으로 취소되었습니다.");
             showAllOrders();
-
         } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "주문 취소에 실패했습니다.",
-                    "오류",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "주문 취소에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

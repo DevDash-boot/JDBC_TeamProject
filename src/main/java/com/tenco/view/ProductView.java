@@ -172,15 +172,19 @@ public class ProductView {
         System.out.println("'" + productName + "' 상품이 변경되었습니다.");
     }
 
-    private void deleteProduct() throws SQLException {
+    private void deleteProduct() {
         System.out.print("삭제할 상품 ID: ");
         int productId = sc.nextInt();
         sc.nextLine();
         Product product = Product.builder()
                 .productId(productId)
                 .build();
-        service.deleteProduct(product);
-        System.out.println(productId + "번 상품이 삭제되었습니다.");
+        try {
+            service.deleteProduct(product);
+            System.out.println(productId + "번 상품이 삭제되었습니다.");
+        } catch (SQLException | RuntimeException e) {
+            System.out.println("오류: " + e.getMessage());
+        }
     }
 
     private void getProduct() throws SQLException {
