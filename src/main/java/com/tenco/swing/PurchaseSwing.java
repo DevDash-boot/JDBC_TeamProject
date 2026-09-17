@@ -1,4 +1,4 @@
- package com.tenco.swing;
+package com.tenco.swing;
 
 import com.tenco.Service.PurchaseService;
 import com.tenco.dto.PurchaseDto;

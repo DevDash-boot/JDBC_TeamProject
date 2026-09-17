@@ -196,14 +196,16 @@ public class OrderView {
             return;
         }
 
-        System.out.println("주문번호 \t결제수단 \t총 금액 \t 주문 상태 \t\t주문일시");
+        //System.out.println("주문번호 \t결제수단 \t총 금액 \t 주문 상태 \t\t주문일시");
+        System.out.println("주문번호 \t결제수단 \t총 금액 \t\t주문일시");
         System.out.println("-----------------------------------------------");
         for (Order order : orderList) {
-            System.out.printf("%d \t\t %-6s \t %,d원 \t %s \t\t %s \n",
+            System.out.printf("%d \t\t %-6s \t %,d원\t\t %s \n",
                     order.getOrderId(),
                     order.getPaymentType(),
                     order.getTotalPrice(),
-                    order.getStatus() != null ? order.getStatus() : "??",
+                    // TODO - status  제거
+                    // order.getStatus() != null ? order.getStatus() : "??",
                     order.getOrderDate() != null ? order.getOrderDate().toString().substring(0, 16) : "N/A");
         }
         System.out.println("----------------------------------------------------------");
@@ -226,22 +228,24 @@ public class OrderView {
             System.out.println("존재하지 않는 주문 번호");
             return;
         }
-
-        boolean isCancelled = "CANCELLED".equalsIgnoreCase(order.getStatus());
+        // TODO - status  제거
+        // boolean isCancelled = "CANCELLED".equalsIgnoreCase(order.getStatus());
 
         List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
 
         System.out.println("=======주문 상세 정보======");
         System.out.println("주문 번호 : " + order.getOrderId());
         System.out.println("결제 수단 : " + order.getPaymentType());
-        System.out.println("주문 상태 : " + (isCancelled ? "취소됨" : order.getStatus()));
+        // TODO - status  제거
+        // System.out.println("주문 상태 : " + (isCancelled ? "취소됨" : order.getStatus()));
         System.out.println("주문 일시 : " + order.getOrderDate());
 
+        // TODO - status  제거
         // 취소된 주문일 경우 안내 문구 표시
-        if (isCancelled) {
-            System.out.println("===========================");
-            System.out.println("해당 주문은 취소된 주문의 상세 내역입니다.");
-        }
+//        if (isCancelled) {
+//            System.out.println("===========================");
+//            System.out.println("해당 주문은 취소된 주문의 상세 내역입니다.");
+//        }
         System.out.println("--------------------------------");
         System.out.println("상품ID\t상품명\t\t단가\t\t수량\t소계");
         System.out.println("------------------------------------");
@@ -287,10 +291,11 @@ public class OrderView {
             return;
         }
 
-        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
-            System.out.println("취소된 주문의 상품 수량은 변경할 수 없습니다.");
-            return;
-        }
+        // // TODO - status  제거
+//        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
+//            System.out.println("취소된 주문의 상품 수량은 변경할 수 없습니다.");
+//            return;
+//        }
 
         List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
         if (itemList == null || itemList.isEmpty()) {
@@ -405,11 +410,12 @@ public class OrderView {
             return;
         }
 
-        // 이미 취소된 주문인지 확인
-        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
-            System.out.println("이미 취소된 주문입니다.");
-            return;
-        }
+        // TODO - status  제거
+//        // 이미 취소된 주문인지 확인
+//        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
+//            System.out.println("이미 취소된 주문입니다.");
+//            return;
+//        }
 
         // 주문 상세 항목(상품 & 수량) 조회
         List<OrderItem> itemList = orderService.getOrderItemsByOrderId(orderId);
@@ -439,8 +445,10 @@ public class OrderView {
             return;
         }
 
+        // TODO - status 제거 시
         // 트랜잭션(주문 취소에 맞춰서 재고 복구)
-        boolean isSuccess = orderService.cancelOrder(orderId, itemList);
+        //boolean isSuccess = orderService.cancelOrder(orderId, itemList);
+        boolean isSuccess = orderService.cancelOrder(orderId);
 
         if (isSuccess) {
             System.out.println("주문 취소 성공");

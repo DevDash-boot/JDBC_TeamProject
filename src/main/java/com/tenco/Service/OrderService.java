@@ -12,8 +12,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.tenco.util.util.getConnection;
-
 public class OrderService {
     private final OrderDAO orderDAO = new OrderDAO();
     private final OrderItemDAO orderItemDAO = new OrderItemDAO();
@@ -26,51 +24,64 @@ public class OrderService {
      * - product 재고 차감
      */
     public boolean processOrder(Order orders, List<OrderItem> items) {
-        if (items == null || items.isEmpty()) {
-            return false;
-        }
-
         Connection conn = null;
         try {
             conn = util.getConnection();
-            conn.setAutoCommit(false); // 트랜잭션 시작
+            // 자동 커밋 해제 (트랜잭션 시작)
+            conn.setAutoCommit(false);
 
             // 1. orders 테이블 저장 & 생성된 order_id 가져오기
             int orderId = orderDAO.insertOrder(conn, orders);
             if (orderId == 0) {
-                rollbackQuietly(conn);
+                conn.rollback();
                 return false;
             }
 
             // 2. order_item 저장 및 상품 재고 차감
             for (OrderItem itemDTO : items) {
-                itemDTO.setOrderId(orderId); // 발급받은 order_id 세팅
+                itemDTO.setOrderId(orderId); // 받아은 order_id 세팅
 
-                // 주문 상품 저장
-                int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
-                if (itemResult == 0) {
-                    rollbackQuietly(conn);
+                Product product =productDAO.selectProductById(conn, itemDTO.getProductId());
+                if (product == null || product.getStock() < itemDTO.getQuantity()) {
+                    System.out.println("상품 [ID:" +itemDTO.getProductId() +"]의 재고가 부족합니다.");
+                    conn.rollback();
                     return false;
                 }
 
-                // 상품 재고 차감 (ProductDAO의 updateStock 또는 updateProductStock 활용)
-                // 재고 차감이 실패(재고 부족 등)할 경우 롤백
-                boolean stockUpdated = productDAO.updateStock(conn, itemDTO.getProductId(), -itemDTO.getQuantity());
-                if (!stockUpdated) {
-                    rollbackQuietly(conn);
+                // 주문 상품 저장
+                // addOrderItem이랑 겹침(아마)
+                int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
+                if (itemResult == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                int stockResult = productDAO.outStock(conn, itemDTO.getProductId(), itemDTO.getQuantity());
+                if (stockResult == 0) {
+                    conn.rollback();
                     return false;
                 }
             }
-
-            conn.commit(); // 성공 시 커밋
+            conn.commit(); // 성공시 커밋
             return true;
-
         } catch (SQLException e) {
-            rollbackQuietly(conn);
+            if (conn != null) {
+                try {
+                    conn.rollback(); // 예외 발생시 롤백
+                } catch (SQLException rollbackEX) {
+                    rollbackEX.printStackTrace();
+                }
+            }
             e.printStackTrace();
             return false;
         } finally {
-            closeQuietly(conn); // 자원 반납
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEX) {
+                    closeEX.printStackTrace();
+                }
+            }
         }
     }
 
@@ -114,6 +125,67 @@ public class OrderService {
         }
     }
 
+    public boolean cancelOrder(int orderId) {
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+            // 1. 주문 상품 조회
+            List<OrderItem> items = orderItemDAO.selectItemByOrderId(conn, orderId);
+            if (items.isEmpty()) {
+                conn.rollback();
+                return false;
+            }
+
+            // 2. 재고 복원
+            for (OrderItem item : items) {
+                int result = productDAO.inStock(conn, item.getProductId(), item.getQuantity());
+                if (result == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 3. order_item 삭제
+            int itemResult = orderItemDAO.deleteByOrderId(conn, orderId);
+
+            if (itemResult == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // 4. orders 삭제
+            int orderResult = orderDAO.cancelOrder(conn, orderId);
+
+            if (orderResult == 0) {
+                conn.rollback();
+                return false;
+            }
+            // 5. 전부 성공
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+    // TODO - 추가
     // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영 (트랜잭션)
     public boolean updateOrderItemQuantity(int orderId, int productId, int oldQuantity, int newQuantity, int price) {
         // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
@@ -138,7 +210,6 @@ public class OrderService {
             closeQuietly(conn);
         }
     }
-
     // 주문 취소 처리 (재고 복구 + 주문 상태 CANCELLED) (트랜잭션)
     public boolean cancelOrder(int orderId, List<OrderItem> itemList) {
         Connection conn = null;
@@ -183,5 +254,4 @@ public class OrderService {
             }
         }
     }
-
 }

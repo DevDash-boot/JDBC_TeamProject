@@ -16,7 +16,7 @@ public class AdminView {
     private String currentAdminName = null;
 
 
-    public void AdminStart() {
+    public boolean AdminStart() {
         while (true) {
             printMenu();
             int choice = readInt("선택: ");
@@ -24,6 +24,9 @@ public class AdminView {
             switch (choice) {
                 case 1:
                     loginMenu();
+                    if (isAdminLoggedIn()) {
+                        return true;
+                    }
                     break;
                 case 2:
                     if (requireAdmin("신규 관리자 등록")) {
@@ -40,10 +43,9 @@ public class AdminView {
                     break;
                 case 0:
                     System.out.println("메인 메뉴로 돌아갑니다");
-                    return;
+                    return false;
                 default:
                     System.out.println("잘못된 입력입니다. 다시 입력해주세요.");
-
             }
         }
     }
@@ -75,39 +77,42 @@ public class AdminView {
     }
 
     // 1. 관리자 로그인
-    private void loginMenu() {
+    private Admin loginMenu() {
         if (isAdminLoggedIn()) {
             System.out.println("현재 로그인 상태입니다");
-            return;
+            return null;
         }
         System.out.println("\n 관리자 로그인");
-        System.out.println("ID: ");
+        System.out.print("ID: ");
         String loginId = scanner.nextLine().trim();
-        System.out.println("비밀번호: ");
+        System.out.print("비밀번호: ");
         String password = scanner.nextLine();
 
         try {
             Admin admin = service.authenticationAdmin(loginId, password);
             if (admin == null) {
                 System.out.println("로그인 실패! ID 또는 비밀번호를 잘못 입력했습니다");
+                return null;
             } else {
                 currentAdminId = admin.getAdminId();
                 currentAdminName = admin.getName();
                 System.out.println(currentAdminName + " 관리자님이 로그인 했습니다!");
+                return admin;
             }
         } catch (SQLException e) {
             System.out.println("오류! " + e.getMessage());
         }
+        return null;
     }
 
     // 2. 신규 관리자 등록
     private void registerMenu() {
         System.out.println("\n=== 신규 관리자 등록 ===");
-        System.out.println("ID: ");
+        System.out.print("ID: ");
         String loginId = scanner.nextLine().trim();
-        System.out.println("비밀번호: ");
+        System.out.print("비밀번호: ");
         String password = scanner.nextLine();
-        System.out.println("이름: ");
+        System.out.print("이름: ");
         String name = scanner.nextLine().trim();
 
         Admin admin = Admin.builder()

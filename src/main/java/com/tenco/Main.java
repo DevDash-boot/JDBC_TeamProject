@@ -7,16 +7,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Main extends JFrame {
-
-    // 현재 로그인한 관리자 ID
-    private Integer currentAdminId;
+    // 현재 로그인한 관리자 정보
+    private Admin currentAdmin;
 
     // 가운데 화면
     private final JPanel contentPanel = new JPanel(new BorderLayout());
 
-    public Main(Integer currentAdminId) {
-        this.currentAdminId = currentAdminId;
-
+    public Main() {
         setTitle("무인편의점 재고 관리 시스템");
         setSize(1100, 700);
         setLocationRelativeTo(null);
@@ -37,23 +34,41 @@ public class Main extends JFrame {
             return;
         }
 
-        currentAdminId = admin.getAdminId();
+        currentAdmin = admin;
+        refreshHeader();
+    }
 
-        getContentPane().remove(0);
+    // 현재 로그인한 관리자 가져오기
+    public Admin getCurrentAdmin() {
+        return currentAdmin;
+    }
+
+    // 관리자 로그아웃
+    public void logoutAdmin() {
+        currentAdmin = null;
+        refreshHeader();
+
+        contentPanel.removeAll();
+        contentPanel.add(createHomePanel(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    // 상단 헤더 갱신
+    private void refreshHeader() {
+        BorderLayout layout = (BorderLayout) getContentPane().getLayout();
+        Component oldHeader = layout.getLayoutComponent(BorderLayout.NORTH);
+
+        if (oldHeader != null) {
+            getContentPane().remove(oldHeader);
+        }
+
         getContentPane().add(createHeader(), BorderLayout.NORTH);
         getContentPane().revalidate();
         getContentPane().repaint();
     }
 
-    // 관리자 로그아웃
-    public void logoutAdmin() {
-        currentAdminId = null;
-        contentPanel.removeAll();
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
-
-    // 상단
+    // 상단 헤더
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setPreferredSize(new Dimension(0, 70));
@@ -64,10 +79,15 @@ public class Main extends JFrame {
         title.setFont(new Font("맑은 고딕", Font.BOLD, 24));
 
         String loginStatus;
-        if (currentAdminId == null) {
+
+        if (currentAdmin == null) {
             loginStatus = "관리자 로그아웃 상태  ";
         } else {
-            loginStatus = "관리자 로그인 상태 (ID: " + currentAdminId + ")  ";
+            loginStatus = "관리자 로그인 상태 (ID: "
+                    + currentAdmin.getAdminId()
+                    + ", "
+                    + currentAdmin.getName()
+                    + ")  ";
         }
 
         JLabel status = new JLabel(loginStatus);
@@ -87,11 +107,14 @@ public class Main extends JFrame {
         menu.setBackground(new Color(245, 247, 250));
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-        // Todo - 관리자 로그인 if문
+
         // 상품 관리
         JButton productButton = createMenuButton("상품관리");
         productButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
+            if (!checkAdmin()) {
+                return;
+            }
+
             showPanel(new ProductSwing());
         });
         menu.add(productButton);
@@ -112,11 +135,14 @@ public class Main extends JFrame {
         });
         menu.add(orderItemButton);
         menu.add(Box.createVerticalStrut(10));
-        // Todo - 관리자 로그인 if문
+
         // 발주 / 입고
         JButton purchaseButton = createMenuButton("발주 / 입고");
         purchaseButton.addActionListener(e -> {
-            if (!checkAdmin()) return;
+            if (!checkAdmin()) {
+                return;
+            }
+
             showPanel(new PurchaseSwing());
         });
         menu.add(purchaseButton);
@@ -195,12 +221,13 @@ public class Main extends JFrame {
         box.add(complete);
 
         panel.add(box);
+
         return panel;
     }
 
     // 관리자 로그인 여부 확인
     private boolean checkAdmin() {
-        if (currentAdminId == null) {
+        if (currentAdmin == null) {
             JOptionPane.showMessageDialog(
                     this,
                     "관리자 로그인이 필요합니다.",
@@ -223,7 +250,7 @@ public class Main extends JFrame {
     // 프로그램 직접 실행
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Main main = new Main(null);
+            Main main = new Main();
             main.setVisible(true);
         });
     }

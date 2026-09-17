@@ -3,8 +3,6 @@ package com.tenco.dto;
 import lombok.*;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,17 +15,15 @@ public class Order {
     private String paymentType;
     private int totalPrice;
     private Timestamp orderDate;
+    // TODO - 추가
     private String status; // 추가: 주문 상태 (예: 'ORDERED', 'CANCELLED')
 
-    @Builder.Default
-    private List<OrderItem> itemList = new ArrayList<>();
-
-    // 결제 타입 및 총액용 간단 생성자
     public Order(String paymentType, int totalPrice) {
         this.paymentType = paymentType;
         this.totalPrice = totalPrice;
     }
 
+    // TODO - 추가
     // 기존 생성자 (status 없이 사용할 경우)
     public Order(int orderId, String paymentType, int totalPrice, Timestamp orderDate) {
         this.orderId = orderId;
