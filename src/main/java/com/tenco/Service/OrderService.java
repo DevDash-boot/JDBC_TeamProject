@@ -194,7 +194,7 @@ public class OrderService {
     }
     // TODO - 추가
     // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영 (트랜잭션)
-    public boolean updateOrderItemQuantity(int orderItmeId,int orderId, int productId, int oldQuantity, int newQuantity, int price) {
+    public boolean updateOrderItemQuantity(int orderItemId,int orderId, int productId, int oldQuantity, int newQuantity, int price) {
         // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
         int quantityDIff = newQuantity - oldQuantity;
         int priceDiff = quantityDIff * price;
@@ -205,7 +205,7 @@ public class OrderService {
             conn.setAutoCommit(false);
 
             // DAO 를 통한 개별 처리
-            orderDAO.updateOrderItemAndStock(conn, orderItmeId ,orderId, productId, newQuantity, priceDiff, quantityDIff);
+            orderDAO.updateOrderItemAndStock(conn, orderItemId ,orderId, productId, newQuantity, priceDiff, quantityDIff);
 
             conn.commit();
             return true;
