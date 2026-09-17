@@ -405,7 +405,7 @@ public class OrderSwing extends JPanel {
         }
 
         // ★ 핵심 수정: 조회한 order 객체의 itemList를 넘겨주어야 합니다.
-        boolean success = orderService.cancelOrder(orderId, order.getItemList());
+        boolean success = orderService.cancelOrder(orderId);
 
         if (success) {
             JOptionPane.showMessageDialog(this, "주문이 성공적으로 취소되었습니다.");
