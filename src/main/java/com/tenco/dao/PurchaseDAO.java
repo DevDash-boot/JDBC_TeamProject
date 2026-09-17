@@ -130,7 +130,6 @@ public class PurchaseDAO {
 
 
 
-
     // 기능 D. purchaseId로 발주 목록에서 제거.(발주 취소) --> 상품테이블의 stock에서 차감.
     public PurchaseDto deletePurchase(Connection conn , int id) throws SQLException {
 
