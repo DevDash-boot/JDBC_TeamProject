@@ -8,15 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-
-import lombok.*;
-
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString
 public class Admin {
     private int adminId;
     private String loginId;
