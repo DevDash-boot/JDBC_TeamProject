@@ -11,10 +11,23 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class ProductSwing extends JPanel {
+
     private final ProductService productService = new ProductService();
+
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{"상품 ID", "상품명", "가격", "바코드", "유통기한", "재고", "분류"}, 0);
+            new Object[]{
+                    "상품 ID",
+                    "상품명",
+                    "가격",
+                    "바코드",
+                    "유통기한",
+                    "재고",
+                    "분류",
+                    "상태"
+            }, 0);
+
     private final JTable table = new JTable(tableModel);
+
     private final JPanel contentPanel = new JPanel(new BorderLayout());
 
     public ProductSwing() {
@@ -22,7 +35,9 @@ public class ProductSwing extends JPanel {
 
         JPanel menuPanel = new JPanel(new GridLayout(8, 1, 10, 10));
         menuPanel.setPreferredSize(new Dimension(200, 0));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+        menuPanel.setBorder(
+                BorderFactory.createEmptyBorder(20, 10, 20, 10)
+        );
 
         JButton addButton = new JButton("상품 추가");
         JButton nameButton = new JButton("상품명 목록");
@@ -44,10 +59,15 @@ public class ProductSwing extends JPanel {
 
         add(menuPanel, BorderLayout.WEST);
 
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBorder(
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        );
 
         JLabel titleLabel = new JLabel("상품 관리");
-        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+        titleLabel.setFont(
+                new Font("맑은 고딕", Font.BOLD, 24)
+        );
+
         contentPanel.add(titleLabel, BorderLayout.NORTH);
 
         add(contentPanel, BorderLayout.CENTER);
@@ -64,6 +84,7 @@ public class ProductSwing extends JPanel {
 
     // 상품 추가
     private void addProduct() {
+
         JTextField productNameField = new JTextField();
         JTextField priceField = new JTextField();
         JTextField barcodeField = new JTextField();
@@ -71,17 +92,25 @@ public class ProductSwing extends JPanel {
         JTextField stockField = new JTextField();
         JTextField categoryField = new JTextField();
 
-        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
+        JPanel panel = new JPanel(
+                new GridLayout(6, 2, 5, 5)
+        );
+
         panel.add(new JLabel("상품명"));
         panel.add(productNameField);
+
         panel.add(new JLabel("가격"));
         panel.add(priceField);
+
         panel.add(new JLabel("바코드"));
         panel.add(barcodeField);
+
         panel.add(new JLabel("유통기한"));
         panel.add(expirationDateField);
+
         panel.add(new JLabel("재고"));
         panel.add(stockField);
+
         panel.add(new JLabel("분류"));
         panel.add(categoryField);
 
@@ -92,15 +121,31 @@ public class ProductSwing extends JPanel {
                 JOptionPane.OK_CANCEL_OPTION
         );
 
-        if (result != JOptionPane.OK_OPTION) return;
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
 
         try {
-            String productName = productNameField.getText().trim();
-            int price = Integer.parseInt(priceField.getText().trim());
-            String barcode = barcodeField.getText().trim();
-            LocalDate expirationDate = LocalDate.parse(expirationDateField.getText().trim());
-            int stock = Integer.parseInt(stockField.getText().trim());
-            String category = categoryField.getText().trim();
+
+            String productName =
+                    productNameField.getText().trim();
+
+            int price =
+                    Integer.parseInt(priceField.getText().trim());
+
+            String barcode =
+                    barcodeField.getText().trim();
+
+            LocalDate expirationDate =
+                    LocalDate.parse(
+                            expirationDateField.getText().trim()
+                    );
+
+            int stock =
+                    Integer.parseInt(stockField.getText().trim());
+
+            String category =
+                    categoryField.getText().trim();
 
             if (productName.isEmpty()) {
                 showWarning("상품명은 필수입니다.");
@@ -128,33 +173,52 @@ public class ProductSwing extends JPanel {
                     .barcode(barcode)
                     .expirationDate(expirationDate)
                     .stock(stock)
+                    // 재고가 있으면 true, 없으면 false
+                    .status(stock > 0)
                     .category(category)
                     .build();
 
             productService.addProduct(product);
 
-            showMessage("'" + productName + "' 상품이 추가되었습니다.");
+            showMessage(
+                    "'" + productName + "' 상품이 추가되었습니다."
+            );
 
-            // 상품 추가 후 전체 상품 목록 갱신
             refreshProductTable();
 
         } catch (NumberFormatException e) {
-            showWarning("가격과 재고는 숫자로 입력해주세요.");
+
+            showWarning(
+                    "가격과 재고는 숫자로 입력해주세요."
+            );
+
         } catch (java.time.format.DateTimeParseException e) {
-            showWarning("유통기한은 yyyy-MM-dd 형식으로 입력해주세요.");
+
+            showWarning(
+                    "유통기한은 yyyy-MM-dd 형식으로 입력해주세요."
+            );
+
         } catch (SQLException e) {
-            showError("상품 추가 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 추가 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품명 목록 조회
     private void getProductName() {
+
         try {
-            List<Product> productList = productService.getProductName();
+
+            List<Product> productList =
+                    productService.getProductName();
 
             tableModel.setRowCount(0);
 
             for (Product p : productList) {
+
                 tableModel.addRow(new Object[]{
                         p.getProductId(),
                         p.getProductName()
@@ -164,12 +228,17 @@ public class ProductSwing extends JPanel {
             showTable("상품명 목록");
 
         } catch (SQLException e) {
-            showError("상품 목록 조회 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 목록 조회 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품 수정
     private void updateProduct() {
+
         JTextField productIdField = new JTextField();
         JTextField productNameField = new JTextField();
         JTextField priceField = new JTextField();
@@ -178,19 +247,28 @@ public class ProductSwing extends JPanel {
         JTextField stockField = new JTextField();
         JTextField categoryField = new JTextField();
 
-        JPanel panel = new JPanel(new GridLayout(7, 2, 5, 5));
+        JPanel panel = new JPanel(
+                new GridLayout(7, 2, 5, 5)
+        );
+
         panel.add(new JLabel("상품 ID"));
         panel.add(productIdField);
+
         panel.add(new JLabel("상품명"));
         panel.add(productNameField);
+
         panel.add(new JLabel("가격"));
         panel.add(priceField);
+
         panel.add(new JLabel("바코드"));
         panel.add(barcodeField);
+
         panel.add(new JLabel("유통기한"));
         panel.add(expirationDateField);
+
         panel.add(new JLabel("재고"));
         panel.add(stockField);
+
         panel.add(new JLabel("분류"));
         panel.add(categoryField);
 
@@ -201,19 +279,45 @@ public class ProductSwing extends JPanel {
                 JOptionPane.OK_CANCEL_OPTION
         );
 
-        if (result != JOptionPane.OK_OPTION) return;
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
 
         try {
-            int productId = Integer.parseInt(productIdField.getText().trim());
-            String productName = productNameField.getText().trim();
-            int price = Integer.parseInt(priceField.getText().trim());
-            String barcode = barcodeField.getText().trim();
-            LocalDate expirationDate = LocalDate.parse(expirationDateField.getText().trim());
-            int stock = Integer.parseInt(stockField.getText().trim());
-            String category = categoryField.getText().trim();
+
+            int productId =
+                    Integer.parseInt(
+                            productIdField.getText().trim()
+                    );
+
+            String productName =
+                    productNameField.getText().trim();
+
+            int price =
+                    Integer.parseInt(
+                            priceField.getText().trim()
+                    );
+
+            String barcode =
+                    barcodeField.getText().trim();
+
+            LocalDate expirationDate =
+                    LocalDate.parse(
+                            expirationDateField.getText().trim()
+                    );
+
+            int stock =
+                    Integer.parseInt(
+                            stockField.getText().trim()
+                    );
+
+            String category =
+                    categoryField.getText().trim();
 
             if (productId <= 0) {
-                showWarning("상품 ID는 1 이상이어야 합니다.");
+                showWarning(
+                        "상품 ID는 1 이상이어야 합니다."
+                );
                 return;
             }
 
@@ -223,7 +327,9 @@ public class ProductSwing extends JPanel {
             }
 
             if (price <= 0) {
-                showWarning("가격은 1 이상이어야 합니다.");
+                showWarning(
+                        "가격은 1 이상이어야 합니다."
+                );
                 return;
             }
 
@@ -233,7 +339,9 @@ public class ProductSwing extends JPanel {
             }
 
             if (stock < 0) {
-                showWarning("재고는 0 이상이어야 합니다.");
+                showWarning(
+                        "재고는 0 이상이어야 합니다."
+                );
                 return;
             }
 
@@ -245,38 +353,60 @@ public class ProductSwing extends JPanel {
                     .expirationDate(expirationDate)
                     .stock(stock)
                     .category(category)
+                    // 재고가 있으면 1, 없으면 0
+                    .status(stock > 0)
                     .build();
 
             productService.updateProduct(product);
 
-            showMessage("'" + productName + "' 상품이 변경되었습니다.");
+            showMessage(
+                    "'" + productName + "' 상품이 변경되었습니다."
+            );
 
-            // 상품 수정 후 전체 상품 목록 갱신
             refreshProductTable();
 
         } catch (NumberFormatException e) {
-            showWarning("상품 ID, 가격, 재고는 숫자로 입력해주세요.");
+
+            showWarning(
+                    "상품 ID, 가격, 재고는 숫자로 입력해주세요."
+            );
+
         } catch (java.time.format.DateTimeParseException e) {
-            showWarning("유통기한은 yyyy-MM-dd 형식으로 입력해주세요.");
+
+            showWarning(
+                    "유통기한은 yyyy-MM-dd 형식으로 입력해주세요."
+            );
+
         } catch (SQLException e) {
-            showError("상품 수정 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 수정 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품 삭제
     private void deleteProduct() {
+
         String input = JOptionPane.showInputDialog(
                 this,
                 "삭제할 상품 ID를 입력해주세요."
         );
 
-        if (input == null) return;
+        if (input == null) {
+            return;
+        }
 
         try {
-            int productId = Integer.parseInt(input.trim());
+
+            int productId =
+                    Integer.parseInt(input.trim());
 
             if (productId <= 0) {
-                showWarning("상품 ID는 1 이상이어야 합니다.");
+                showWarning(
+                        "상품 ID는 1 이상이어야 합니다."
+                );
                 return;
             }
 
@@ -287,7 +417,9 @@ public class ProductSwing extends JPanel {
                     JOptionPane.YES_NO_OPTION
             );
 
-            if (result != JOptionPane.YES_OPTION) return;
+            if (result != JOptionPane.YES_OPTION) {
+                return;
+            }
 
             Product product = Product.builder()
                     .productId(productId)
@@ -295,22 +427,37 @@ public class ProductSwing extends JPanel {
 
             productService.deleteProduct(product);
 
-            showMessage(productId + "번 상품이 삭제되었습니다.");
+            showMessage(
+                    productId + "번 상품이 삭제되었습니다."
+            );
 
-            // 상품 삭제 후 전체 상품 목록 갱신
             refreshProductTable();
 
         } catch (NumberFormatException e) {
-            showWarning("상품 ID는 숫자로 입력해주세요.");
+
+            showWarning(
+                    "상품 ID는 숫자로 입력해주세요."
+            );
+
         } catch (SQLException e) {
-            showError("상품 삭제 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 삭제 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품 전체 조회
     private void getProduct() {
+
         try {
-            List<Product> productList = productService.getProduct();
+
+            // 재고에 맞게 status 갱신
+            productService.updateStatus();
+
+            List<Product> productList =
+                    productService.getProduct();
 
             tableModel.setRowCount(0);
 
@@ -321,18 +468,25 @@ public class ProductSwing extends JPanel {
             showTable("상품 전체 조회");
 
         } catch (SQLException e) {
-            showError("상품 조회 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 조회 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품명 검색
     private void searchProductByName() {
+
         String productName = JOptionPane.showInputDialog(
                 this,
                 "검색할 상품명을 입력해주세요."
         );
 
-        if (productName == null) return;
+        if (productName == null) {
+            return;
+        }
 
         productName = productName.trim();
 
@@ -342,8 +496,11 @@ public class ProductSwing extends JPanel {
         }
 
         try {
+
             List<Product> productList =
-                    productService.searchProductByName(productName);
+                    productService.searchProductByName(
+                            productName
+                    );
 
             tableModel.setRowCount(0);
 
@@ -358,36 +515,51 @@ public class ProductSwing extends JPanel {
             showTable("상품명 검색 결과");
 
         } catch (SQLException e) {
-            showError("상품명 검색 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품명 검색 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품 ID 검색
     private void searchProductById() {
+
         String input = JOptionPane.showInputDialog(
                 this,
                 "검색할 상품 ID를 입력해주세요."
         );
 
-        if (input == null) return;
+        if (input == null) {
+            return;
+        }
 
         input = input.trim();
 
         if (input.isEmpty()) {
-            showWarning("상품 ID를 입력해주세요.");
+            showWarning(
+                    "상품 ID를 입력해주세요."
+            );
             return;
         }
 
         try {
-            int productId = Integer.parseInt(input);
+
+            int productId =
+                    Integer.parseInt(input);
 
             if (productId <= 0) {
-                showWarning("상품 ID는 1 이상이어야 합니다.");
+                showWarning(
+                        "상품 ID는 1 이상이어야 합니다."
+                );
                 return;
             }
 
             List<Product> productList =
-                    productService.searchProductById(productId);
+                    productService.searchProductById(
+                            productId
+                    );
 
             tableModel.setRowCount(0);
 
@@ -396,21 +568,33 @@ public class ProductSwing extends JPanel {
             }
 
             if (productList.isEmpty()) {
-                showMessage("검색 결과가 없습니다.");
+                showMessage(
+                        "검색 결과가 없습니다."
+                );
             }
 
             showTable("상품 ID 검색 결과");
 
         } catch (NumberFormatException e) {
-            showWarning("상품 ID는 숫자로 입력해주세요.");
+
+            showWarning(
+                    "상품 ID는 숫자로 입력해주세요."
+            );
+
         } catch (SQLException e) {
-            showError("상품 ID 검색 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 ID 검색 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 재고 부족 상품 조회
     private void searchProductByStock() {
+
         try {
+
             List<Product> productList =
                     productService.searchProductByStock();
 
@@ -421,18 +605,25 @@ public class ProductSwing extends JPanel {
             }
 
             if (productList.isEmpty()) {
-                showMessage("재고가 부족한 상품이 없습니다.");
+                showMessage(
+                        "재고가 부족한 상품이 없습니다."
+                );
             }
 
             showTable("재고 부족 상품");
 
         } catch (SQLException e) {
-            showError("재고 부족 상품 조회 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "재고 부족 상품 조회 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 상품 테이블 행 추가
     private void addProductRow(Product p) {
+
         tableModel.addRow(new Object[]{
                 p.getProductId(),
                 p.getProductName(),
@@ -440,14 +631,23 @@ public class ProductSwing extends JPanel {
                 p.getBarcode(),
                 p.getExpirationDate(),
                 p.getStock(),
-                p.getCategory()
+                p.getCategory(),
+
+                // true / false 대신 1 / 0으로 표시
+                p.isStatus() ? 1 : 0
         });
     }
 
     // 상품 전체 목록 새로고침
     private void refreshProductTable() {
+
         try {
-            List<Product> productList = productService.getProduct();
+
+            // 재고에 맞게 status 갱신
+            productService.updateStatus();
+
+            List<Product> productList =
+                    productService.getProduct();
 
             tableModel.setRowCount(0);
 
@@ -458,19 +658,34 @@ public class ProductSwing extends JPanel {
             showTable("상품 전체 조회");
 
         } catch (SQLException e) {
-            showError("상품 목록 갱신 중 오류가 발생했습니다.", e);
+
+            showError(
+                    "상품 목록 갱신 중 오류가 발생했습니다.",
+                    e
+            );
         }
     }
 
     // 테이블 화면 표시
     private void showTable(String titleText) {
+
         contentPanel.removeAll();
 
         JLabel title = new JLabel(titleText);
-        title.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 
-        contentPanel.add(title, BorderLayout.NORTH);
-        contentPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        title.setFont(
+                new Font("맑은 고딕", Font.BOLD, 20)
+        );
+
+        contentPanel.add(
+                title,
+                BorderLayout.NORTH
+        );
+
+        contentPanel.add(
+                new JScrollPane(table),
+                BorderLayout.CENTER
+        );
 
         table.setRowHeight(28);
 
@@ -480,6 +695,7 @@ public class ProductSwing extends JPanel {
 
     // 경고 메시지
     private void showWarning(String message) {
+
         JOptionPane.showMessageDialog(
                 this,
                 message,
@@ -490,6 +706,7 @@ public class ProductSwing extends JPanel {
 
     // 일반 메시지
     private void showMessage(String message) {
+
         JOptionPane.showMessageDialog(
                 this,
                 message,
@@ -499,7 +716,11 @@ public class ProductSwing extends JPanel {
     }
 
     // 오류 메시지
-    private void showError(String message, Exception e) {
+    private void showError(
+            String message,
+            Exception e
+    ) {
+
         JOptionPane.showMessageDialog(
                 this,
                 message + "\n" + e.getMessage(),
