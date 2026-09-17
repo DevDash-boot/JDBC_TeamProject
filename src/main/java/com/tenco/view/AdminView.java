@@ -15,6 +15,10 @@ public class AdminView {
     private Integer currentAdminId = null;
     private String currentAdminName = null;
 
+    // 수정(9/17)
+    public boolean isLoggedIn() {
+        return currentAdminId != null;
+    }
 
     public boolean AdminStart() {
         while (true) {
