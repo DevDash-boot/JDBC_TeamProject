@@ -16,7 +16,7 @@ public class AdminView {
     private String currentAdminName = null;
 
 
-    public void AdminStart() {
+    public boolean AdminStart() {
         while (true) {
             printMenu();
             int choice = readInt("선택: ");
@@ -24,6 +24,9 @@ public class AdminView {
             switch (choice) {
                 case 1:
                     loginMenu();
+                    if (isAdminLoggedIn()) {
+                        return true;
+                    }
                     break;
                 case 2:
                     if (requireAdmin("신규 관리자 등록")) {
@@ -40,10 +43,9 @@ public class AdminView {
                     break;
                 case 0:
                     System.out.println("메인 메뉴로 돌아갑니다");
-                    return;
+                    return false;
                 default:
                     System.out.println("잘못된 입력입니다. 다시 입력해주세요.");
-
             }
         }
     }
@@ -81,9 +83,9 @@ public class AdminView {
             return null;
         }
         System.out.println("\n 관리자 로그인");
-        System.out.println("ID: ");
+        System.out.print("ID: ");
         String loginId = scanner.nextLine().trim();
-        System.out.println("비밀번호: ");
+        System.out.print("비밀번호: ");
         String password = scanner.nextLine();
 
         try {
@@ -106,11 +108,11 @@ public class AdminView {
     // 2. 신규 관리자 등록
     private void registerMenu() {
         System.out.println("\n=== 신규 관리자 등록 ===");
-        System.out.println("ID: ");
+        System.out.print("ID: ");
         String loginId = scanner.nextLine().trim();
-        System.out.println("비밀번호: ");
+        System.out.print("비밀번호: ");
         String password = scanner.nextLine();
-        System.out.println("이름: ");
+        System.out.print("이름: ");
         String name = scanner.nextLine().trim();
 
         Admin admin = Admin.builder()

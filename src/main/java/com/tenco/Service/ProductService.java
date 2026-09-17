@@ -14,8 +14,8 @@ public class ProductService {
     // id 바코드 필수
     public void addProduct(Product product) throws SQLException {
         if (product.getProductName() == null || product.getProductName().trim().isEmpty() ||
-        product.getBarcode() == null || product.getBarcode().trim().isEmpty() ||
-        product.getPrice() == 0){
+                product.getBarcode() == null || product.getBarcode().trim().isEmpty() ||
+                product.getPrice() == 0){
             throw new SQLException("상품명, 가격, 바코드는 필수 입력 항목입니다.");
         }
         productDAO.addProduct(product);
@@ -71,7 +71,7 @@ public class ProductService {
 
     // 7. 아이디로 상품 조회
     public List<Product> searchProductById(int productId) throws SQLException {
-        if (productId == 0) {
+        if (productId <= 0) {
             throw new SQLException("상품의 ID를 입력해주세요");
         }
         return productDAO.searchProductById(productId);

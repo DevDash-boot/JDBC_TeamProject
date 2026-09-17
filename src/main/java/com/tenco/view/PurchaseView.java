@@ -17,7 +17,7 @@ public class PurchaseView {
                 System.out.println("------------------ 관리자 : " + "------------------");
                 System.out.println("====== 발주/입고 관리기능 ======.");
                 System.out.print("1.발주 목록 전체 조회 \t2.상품 ID로 발주 조회.\t3.발주 신청\t4.발주목록에서 제거(발주 취소)\t" +
-                        "  \t5.발주 수량 차감 \t6.메인 화면\n입력 : ");
+                        "5.발주 수량 차감 \t6.메인 화면\n입력 : ");
 
                 try {
                     menu = Integer.parseInt(scanner.nextLine());
@@ -76,16 +76,16 @@ public class PurchaseView {
         }
     }
 
-        // 전체조회를 사용자가 보기 편하게.
-        public void purchaseAllView() throws SQLException {
-            for (PurchaseDto p : purchaseService.getAllPurchases()) {
-                System.out.printf("발주 ID : %d , 상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" ,
-                        p.getPurchaseId(), p.getProductId() , p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
-                System.out.println();
-            }
+    // 전체조회를 사용자가 보기 편하게.
+    public void purchaseAllView() throws SQLException {
+        for (PurchaseDto p : purchaseService.getAllPurchases()) {
+            System.out.printf("발주 ID : %d , 상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" ,
+                    p.getPurchaseId(), p.getProductId() , p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
+            System.out.println();
         }
+    }
 
-     // 단건 조회를 사용자가 보기 편하게.
+    // 단건 조회를 사용자가 보기 편하게.
     public void purchaseSingleView(int id) throws Exception {
         PurchaseDto p = purchaseService.existList(id);
         System.out.printf(" 발주 ID : %d , 상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" ,
@@ -93,3 +93,4 @@ public class PurchaseView {
         }
 
     }
+
