@@ -75,10 +75,10 @@ public class AdminView {
     }
 
     // 1. 관리자 로그인
-    private void loginMenu() {
+    private Admin loginMenu() {
         if (isAdminLoggedIn()) {
             System.out.println("현재 로그인 상태입니다");
-            return;
+            return null;
         }
         System.out.println("\n 관리자 로그인");
         System.out.println("ID: ");
@@ -90,14 +90,17 @@ public class AdminView {
             Admin admin = service.authenticationAdmin(loginId, password);
             if (admin == null) {
                 System.out.println("로그인 실패! ID 또는 비밀번호를 잘못 입력했습니다");
+                return null;
             } else {
                 currentAdminId = admin.getAdminId();
                 currentAdminName = admin.getName();
                 System.out.println(currentAdminName + " 관리자님이 로그인 했습니다!");
+                return admin;
             }
         } catch (SQLException e) {
             System.out.println("오류! " + e.getMessage());
         }
+        return null;
     }
 
     // 2. 신규 관리자 등록

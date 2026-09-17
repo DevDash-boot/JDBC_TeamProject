@@ -91,4 +91,5 @@ public class PurchaseView {
         System.out.printf(" 발주 ID : %d , 상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" ,
                 p.getPurchaseId() , p.getProductId() , p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
         }
+
     }
