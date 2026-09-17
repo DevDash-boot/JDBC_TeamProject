@@ -1,731 +1,202 @@
-package com.tenco.swing;
+package com.tenco.dao;
 
-import com.tenco.Service.ProductService;
 import com.tenco.dto.Product;
+import com.tenco.dto.PurchaseDto;
+import com.tenco.util.util;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-public class ProductSwing extends JPanel {
+public class PurchaseDAO {
 
-    private final ProductService productService = new ProductService();
-
-    private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{
-                    "상품 ID",
-                    "상품명",
-                    "가격",
-                    "바코드",
-                    "유통기한",
-                    "재고",
-                    "분류",
-                    "상태"
-            }, 0);
-
-    private final JTable table = new JTable(tableModel);
-
-    private final JPanel contentPanel = new JPanel(new BorderLayout());
-
-    public ProductSwing() {
-        setLayout(new BorderLayout());
-
-        JPanel menuPanel = new JPanel(new GridLayout(8, 1, 10, 10));
-        menuPanel.setPreferredSize(new Dimension(200, 0));
-        menuPanel.setBorder(
-                BorderFactory.createEmptyBorder(20, 10, 20, 10)
-        );
-
-        JButton addButton = new JButton("상품 추가");
-        JButton nameButton = new JButton("상품명 목록");
-        JButton updateButton = new JButton("상품 수정");
-        JButton deleteButton = new JButton("상품 삭제");
-        JButton allButton = new JButton("상품 전체 조회");
-        JButton searchNameButton = new JButton("상품명 검색");
-        JButton searchBarcodeButton = new JButton("상품 ID 검색");
-        JButton stockButton = new JButton("재고 부족 상품");
-
-        menuPanel.add(addButton);
-        menuPanel.add(nameButton);
-        menuPanel.add(updateButton);
-        menuPanel.add(deleteButton);
-        menuPanel.add(allButton);
-        menuPanel.add(searchNameButton);
-        menuPanel.add(searchBarcodeButton);
-        menuPanel.add(stockButton);
-
-        add(menuPanel, BorderLayout.WEST);
-
-        contentPanel.setBorder(
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        );
-
-        JLabel titleLabel = new JLabel("상품 관리");
-        titleLabel.setFont(
-                new Font("맑은 고딕", Font.BOLD, 24)
-        );
-
-        contentPanel.add(titleLabel, BorderLayout.NORTH);
-
-        add(contentPanel, BorderLayout.CENTER);
-
-        addButton.addActionListener(e -> addProduct());
-        nameButton.addActionListener(e -> getProductName());
-        updateButton.addActionListener(e -> updateProduct());
-        deleteButton.addActionListener(e -> deleteProduct());
-        allButton.addActionListener(e -> getProduct());
-        searchNameButton.addActionListener(e -> searchProductByName());
-        searchBarcodeButton.addActionListener(e -> searchProductById());
-        stockButton.addActionListener(e -> searchProductByStock());
-    }
-
-    // 상품 추가
-    private void addProduct() {
-
-        JTextField productNameField = new JTextField();
-        JTextField priceField = new JTextField();
-        JTextField barcodeField = new JTextField();
-        JTextField expirationDateField = new JTextField();
-        JTextField stockField = new JTextField();
-        JTextField categoryField = new JTextField();
-
-        JPanel panel = new JPanel(
-                new GridLayout(6, 2, 5, 5)
-        );
-
-        panel.add(new JLabel("상품명"));
-        panel.add(productNameField);
-
-        panel.add(new JLabel("가격"));
-        panel.add(priceField);
-
-        panel.add(new JLabel("바코드"));
-        panel.add(barcodeField);
-
-        panel.add(new JLabel("유통기한"));
-        panel.add(expirationDateField);
-
-        panel.add(new JLabel("재고"));
-        panel.add(stockField);
-
-        panel.add(new JLabel("분류"));
-        panel.add(categoryField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "상품 추가",
-                JOptionPane.OK_CANCEL_OPTION
-        );
-
-        if (result != JOptionPane.OK_OPTION) {
-            return;
-        }
-
-        try {
-
-            String productName =
-                    productNameField.getText().trim();
-
-            int price =
-                    Integer.parseInt(priceField.getText().trim());
-
-            String barcode =
-                    barcodeField.getText().trim();
-
-            LocalDate expirationDate =
-                    LocalDate.parse(
-                            expirationDateField.getText().trim()
-                    );
-
-            int stock =
-                    Integer.parseInt(stockField.getText().trim());
-
-            String category =
-                    categoryField.getText().trim();
-
-            if (productName.isEmpty()) {
-                showWarning("상품명은 필수입니다.");
-                return;
+    // 기능 A. 발주 가능한 상품 전체 조회.
+    public List<PurchaseDto> getAllPurchases() throws SQLException {
+        List<PurchaseDto> purchaseList = new ArrayList<>();
+        try (Connection conn = util.getConnection()) {
+            String existSql = """
+                    select p.purchase_id , p.product_id ,  pr.product_name  , p.quantity , p.unit_price , p.total_price
+                    from purchase p join product pr on p.product_id = pr.product_id;                
+                    """;
+            try (PreparedStatement existPstmt = conn.prepareStatement(existSql)) {
+                try (ResultSet rs = existPstmt.executeQuery()) {
+                    while (rs.next()) {
+                        purchaseList.add(PurchaseDto.builder()
+                                .purchaseId(rs.getInt("purchase_id"))
+                                .productId(rs.getInt("product_id"))
+                                .name(rs.getString("product_name"))
+                                .qauntity(rs.getInt("quantity"))
+                                .unitPrice(rs.getInt("unit_price"))
+                                .totlaPrice(rs.getInt("total_price"))
+                                .build());
+                    }
+//                    for (PurchaseDto p : purchaseList) System.out.println(p);
+                    return purchaseList;
+                }
             }
-
-            if (price <= 0) {
-                showWarning("가격은 1 이상이어야 합니다.");
-                return;
-            }
-
-            if (barcode.isEmpty()) {
-                showWarning("바코드는 필수입니다.");
-                return;
-            }
-
-            if (stock < 0) {
-                showWarning("재고는 0 이상이어야 합니다.");
-                return;
-            }
-
-            Product product = Product.builder()
-                    .productName(productName)
-                    .price(price)
-                    .barcode(barcode)
-                    .expirationDate(expirationDate)
-                    .stock(stock)
-                    // 재고가 있으면 true, 없으면 false
-                    .status(stock > 0)
-                    .category(category)
-                    .build();
-
-            productService.addProduct(product);
-
-            showMessage(
-                    "'" + productName + "' 상품이 추가되었습니다."
-            );
-
-            refreshProductTable();
-
-        } catch (NumberFormatException e) {
-
-            showWarning(
-                    "가격과 재고는 숫자로 입력해주세요."
-            );
-
-        } catch (java.time.format.DateTimeParseException e) {
-
-            showWarning(
-                    "유통기한은 yyyy-MM-dd 형식으로 입력해주세요."
-            );
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 추가 중 오류가 발생했습니다.",
-                    e
-            );
         }
     }
 
-    // 상품명 목록 조회
-    private void getProductName() {
 
-        try {
+    // 기능 B. 상품id로 상품이 발주 목록에 있는지.
+    public PurchaseDto existList(int id) throws SQLException {
+        try (Connection conn = util.getConnection()) {
+            PurchaseDto purchaseDto = null;
+            String alreadySql = """                 
+                    select p.* , pr.product_name  
+                    from purchase p join product pr on p.product_id = pr.product_id
+                    where p.product_id = ?
+                    """;
 
-            List<Product> productList =
-                    productService.getProductName();
+            // 상품 테이블에도 실제 존재하는 상품인지 확인.
+            Product product = new ProductDAO().selectProductById(conn , id);
+            if (product == null) throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
 
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-
-                tableModel.addRow(new Object[]{
-                        p.getProductId(),
-                        p.getProductName()
-                });
+            try (PreparedStatement alreadyPstmt = conn.prepareStatement(alreadySql)) {
+                alreadyPstmt.setInt(1, id);
+                try (ResultSet rs = alreadyPstmt.executeQuery()) {
+                    if (rs.next()) {
+                        purchaseDto = PurchaseDto.builder()
+                                .purchaseId(rs.getInt("purchase_id"))
+                                .productId(rs.getInt("product_id"))
+                                .name(rs.getString("product_name"))
+                                .qauntity(rs.getInt("quantity"))
+                                .unitPrice(rs.getInt("unit_price"))
+                                .totlaPrice(rs.getInt("total_price"))
+                                .build();
+                    }
+                    return purchaseDto;
+                }
             }
-
-            showTable("상품명 목록");
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 목록 조회 중 오류가 발생했습니다.",
-                    e
-            );
         }
     }
 
-    // 상품 수정
-    private void updateProduct() {
 
-        JTextField productIdField = new JTextField();
-        JTextField productNameField = new JTextField();
-        JTextField priceField = new JTextField();
-        JTextField barcodeField = new JTextField();
-        JTextField expirationDateField = new JTextField();
-        JTextField stockField = new JTextField();
-        JTextField categoryField = new JTextField();
+    // 기능 C. 이 상품을 몇개 발주할지 + 총 발주 가격? + 실제 존재하는 발주 상품인지. -- 발주 신청. --> 즉시, 상품테이블의 stock에 추가.
+    public void purchaseProduct(Connection conn , int id, int quantity) throws SQLException {
+        int price = 0;
+        // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
 
-        JPanel panel = new JPanel(
-                new GridLayout(7, 2, 5, 5)
-        );
 
-        panel.add(new JLabel("상품 ID"));
-        panel.add(productIdField);
+            // 1 - 1. 발주 목록에 없는 새로 발주할 상품이라면. insert로 purchase테이블에 등록.
 
-        panel.add(new JLabel("상품명"));
-        panel.add(productNameField);
+            // 2 - 1. product테이블의 price를 가져와야하므로 select로 먼저 price저장.
+            String priceSql = """
+                        select price from product 
+                        where product_id = ?
+                        """;
+            try (PreparedStatement pricePstmt = conn.prepareStatement(priceSql)) {
+                pricePstmt.setInt(1 , id);
+                try (ResultSet rs = pricePstmt.executeQuery()) {
+                    if (rs.next()) price = rs.getInt("price");
+                    else throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+                }
+            }
 
-        panel.add(new JLabel("가격"));
-        panel.add(priceField);
+            // 2 - 2. 위에서 price 가져왔으니 활용.
+            String newPurchaseSql = """
+                            insert into purchase(product_id , quantity , unit_price , total_price)
+                            values(? , ? , ? , ?);
+                            """;
 
-        panel.add(new JLabel("바코드"));
-        panel.add(barcodeField);
+            try (PreparedStatement newPurchasePstmt = conn.prepareStatement(newPurchaseSql)) {
+                newPurchasePstmt.setInt(1 , id);
+                newPurchasePstmt.setInt(2 , quantity);
+                newPurchasePstmt.setInt(3 , price);
+                newPurchasePstmt.setInt(4 , quantity * price);
+                int i = newPurchasePstmt.executeUpdate();
+                if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
+            }
 
-        panel.add(new JLabel("유통기한"));
-        panel.add(expirationDateField);
-
-        panel.add(new JLabel("재고"));
-        panel.add(stockField);
-
-        panel.add(new JLabel("분류"));
-        panel.add(categoryField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "상품 수정",
-                JOptionPane.OK_CANCEL_OPTION
-        );
-
-        if (result != JOptionPane.OK_OPTION) {
-            return;
+            // 3. 발주 성공했으면 다시 화면에 총 발주가격 , 발주한 상품 , 수량 다시 보여주기.
+            String totalSql = """
+                    select p.product_id , pr.product_name ,  p.quantity , p.total_price  
+                    from purchase p join product pr on p.product_id = pr.product_id
+                    where pr.product_id = ?                           
+                    """;
+            try (PreparedStatement totalPstmt = conn.prepareCall(totalSql)) {
+                totalPstmt.setInt(1, id);
+                ResultSet rs = totalPstmt.executeQuery();
+                if (rs.next()) {
+                    System.out.printf("발주 상품ID : %d , 발주 상품명 : %s , 발주 상품수량 : %d , 발주 상품 총 가격 : %d\n",
+                            rs.getInt("product_id"), rs.getString("product_name"),
+                            rs.getInt("quantity"), rs.getInt("total_price"));
+                }
+            }
         }
 
-        try {
 
-            int productId =
-                    Integer.parseInt(
-                            productIdField.getText().trim()
-                    );
 
-            String productName =
-                    productNameField.getText().trim();
 
-            int price =
-                    Integer.parseInt(
-                            priceField.getText().trim()
-                    );
+    // 기능 D. purchaseId로 발주 목록에서 제거.(발주 취소) --> 상품테이블의 stock에서 차감.
+    public PurchaseDto deletePurchase(Connection conn , int id) throws SQLException {
 
-            String barcode =
-                    barcodeField.getText().trim();
+            PurchaseDto purchaseDto = new PurchaseDto();
+            String  existPurchaseSql = """
+                    select purchase_id , quantity , product_id from purchase
+                    where purchase_id = ?
+                    """;
+            String deleteSql = """
+                    delete from purchase
+                    where purchase_id = ?
+                    """;
 
-            LocalDate expirationDate =
-                    LocalDate.parse(
-                            expirationDateField.getText().trim()
-                    );
 
-            int stock =
-                    Integer.parseInt(
-                            stockField.getText().trim()
-                    );
+            try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
+                existPstmt.setInt(1 , id);
+                try (ResultSet rs = existPstmt.executeQuery()) {
+                    if(!rs.next()) throw new SQLException(id + "는 목록에 존재하지 않는 ID 입니다.");
 
-            String category =
-                    categoryField.getText().trim();
-
-            if (productId <= 0) {
-                showWarning(
-                        "상품 ID는 1 이상이어야 합니다."
-                );
-                return;
+                    purchaseDto.setQauntity(rs.getInt("quantity"));
+                    purchaseDto.setProductId(rs.getInt("product_id"));
+                }
             }
 
-            if (productName.isEmpty()) {
-                showWarning("상품명은 필수입니다.");
-                return;
+            try (PreparedStatement deletePstmt = conn.prepareStatement(deleteSql)) {
+                deletePstmt.setInt(1 , id);
+                deletePstmt.executeUpdate();
+                return purchaseDto;
             }
+        }
 
-            if (price <= 0) {
-                showWarning(
-                        "가격은 1 이상이어야 합니다."
-                );
-                return;
+
+
+    // 기능 E. 발주 id로 발주 수량 차감. -- 만들기만 함.
+    public int[] substractPurchase(Connection conn , int id , int quantity) throws SQLException {
+            int[] i = new int[2];
+            int price = 0;
+            String substractSql = """
+                    update purchase set quantity = quantity - ? , total_price = total_price - ?
+                    where purchase_id = ? and quantity - ? >= 0
+                    """;
+            String  existPurchaseSql = """
+                    select purchase_id , product_id , unit_price from purchase
+                    where purchase_id = ?
+                    """;
+
+        try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
+            existPstmt.setInt(1 , id);
+            try (ResultSet rs = existPstmt.executeQuery()) {
+                if(!rs.next()) throw new SQLException("ID : " + id + "는 목록에 존재하지 않습니다.");
+                price = rs.getInt("unit_price");
+                i[0] = rs.getInt("product_id");
             }
+        }
 
-            if (barcode.isEmpty()) {
-                showWarning("바코드는 필수입니다.");
-                return;
+            try (PreparedStatement substractPstmt = conn.prepareStatement(substractSql)) {
+                substractPstmt.setInt(1 , quantity);
+                substractPstmt.setInt(2 , price * quantity);
+                substractPstmt.setInt(3 , id);
+                substractPstmt.setInt(4 , quantity);
+                i[1] = substractPstmt.executeUpdate();
+                return i;
             }
-
-            if (stock < 0) {
-                showWarning(
-                        "재고는 0 이상이어야 합니다."
-                );
-                return;
-            }
-
-            Product product = Product.builder()
-                    .productId(productId)
-                    .productName(productName)
-                    .price(price)
-                    .barcode(barcode)
-                    .expirationDate(expirationDate)
-                    .stock(stock)
-                    .category(category)
-                    // 재고가 있으면 1, 없으면 0
-                    .status(stock > 0)
-                    .build();
-
-            productService.updateProduct(product);
-
-            showMessage(
-                    "'" + productName + "' 상품이 변경되었습니다."
-            );
-
-            refreshProductTable();
-
-        } catch (NumberFormatException e) {
-
-            showWarning(
-                    "상품 ID, 가격, 재고는 숫자로 입력해주세요."
-            );
-
-        } catch (java.time.format.DateTimeParseException e) {
-
-            showWarning(
-                    "유통기한은 yyyy-MM-dd 형식으로 입력해주세요."
-            );
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 수정 중 오류가 발생했습니다.",
-                    e
-            );
         }
     }
 
-    // 상품 삭제
-    private void deleteProduct() {
 
-        String input = JOptionPane.showInputDialog(
-                this,
-                "삭제할 상품 ID를 입력해주세요."
-        );
 
-        if (input == null) {
-            return;
-        }
 
-        try {
-
-            int productId =
-                    Integer.parseInt(input.trim());
-
-            if (productId <= 0) {
-                showWarning(
-                        "상품 ID는 1 이상이어야 합니다."
-                );
-                return;
-            }
-
-            int result = JOptionPane.showConfirmDialog(
-                    this,
-                    productId + "번 상품을 삭제하시겠습니까?",
-                    "상품 삭제",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (result != JOptionPane.YES_OPTION) {
-                return;
-            }
-
-            Product product = Product.builder()
-                    .productId(productId)
-                    .build();
-
-            productService.deleteProduct(product);
-
-            showMessage(
-                    productId + "번 상품이 삭제되었습니다."
-            );
-
-            refreshProductTable();
-
-        } catch (NumberFormatException e) {
-
-            showWarning(
-                    "상품 ID는 숫자로 입력해주세요."
-            );
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 삭제 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 상품 전체 조회
-    private void getProduct() {
-
-        try {
-
-            // 재고에 맞게 status 갱신
-            productService.updateStatus();
-
-            List<Product> productList =
-                    productService.getProduct();
-
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-                addProductRow(p);
-            }
-
-            showTable("상품 전체 조회");
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 조회 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 상품명 검색
-    private void searchProductByName() {
-
-        String productName = JOptionPane.showInputDialog(
-                this,
-                "검색할 상품명을 입력해주세요."
-        );
-
-        if (productName == null) {
-            return;
-        }
-
-        productName = productName.trim();
-
-        if (productName.isEmpty()) {
-            showWarning("검색어를 입력해주세요.");
-            return;
-        }
-
-        try {
-
-            List<Product> productList =
-                    productService.searchProductByName(
-                            productName
-                    );
-
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-                addProductRow(p);
-            }
-
-            if (productList.isEmpty()) {
-                showMessage("검색 결과가 없습니다.");
-            }
-
-            showTable("상품명 검색 결과");
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품명 검색 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 상품 ID 검색
-    private void searchProductById() {
-
-        String input = JOptionPane.showInputDialog(
-                this,
-                "검색할 상품 ID를 입력해주세요."
-        );
-
-        if (input == null) {
-            return;
-        }
-
-        input = input.trim();
-
-        if (input.isEmpty()) {
-            showWarning(
-                    "상품 ID를 입력해주세요."
-            );
-            return;
-        }
-
-        try {
-
-            int productId =
-                    Integer.parseInt(input);
-
-            if (productId <= 0) {
-                showWarning(
-                        "상품 ID는 1 이상이어야 합니다."
-                );
-                return;
-            }
-
-            List<Product> productList =
-                    productService.searchProductById(
-                            productId
-                    );
-
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-                addProductRow(p);
-            }
-
-            if (productList.isEmpty()) {
-                showMessage(
-                        "검색 결과가 없습니다."
-                );
-            }
-
-            showTable("상품 ID 검색 결과");
-
-        } catch (NumberFormatException e) {
-
-            showWarning(
-                    "상품 ID는 숫자로 입력해주세요."
-            );
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 ID 검색 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 재고 부족 상품 조회
-    private void searchProductByStock() {
-
-        try {
-
-            List<Product> productList =
-                    productService.searchProductByStock();
-
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-                addProductRow(p);
-            }
-
-            if (productList.isEmpty()) {
-                showMessage(
-                        "재고가 부족한 상품이 없습니다."
-                );
-            }
-
-            showTable("재고 부족 상품");
-
-        } catch (SQLException e) {
-
-            showError(
-                    "재고 부족 상품 조회 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 상품 테이블 행 추가
-    private void addProductRow(Product p) {
-
-        tableModel.addRow(new Object[]{
-                p.getProductId(),
-                p.getProductName(),
-                p.getPrice(),
-                p.getBarcode(),
-                p.getExpirationDate(),
-                p.getStock(),
-                p.getCategory(),
-
-                // true / false 대신 1 / 0으로 표시
-                p.isStatus() ? 1 : 0
-        });
-    }
-
-    // 상품 전체 목록 새로고침
-    private void refreshProductTable() {
-
-        try {
-
-            // 재고에 맞게 status 갱신
-            productService.updateStatus();
-
-            List<Product> productList =
-                    productService.getProduct();
-
-            tableModel.setRowCount(0);
-
-            for (Product p : productList) {
-                addProductRow(p);
-            }
-
-            showTable("상품 전체 조회");
-
-        } catch (SQLException e) {
-
-            showError(
-                    "상품 목록 갱신 중 오류가 발생했습니다.",
-                    e
-            );
-        }
-    }
-
-    // 테이블 화면 표시
-    private void showTable(String titleText) {
-
-        contentPanel.removeAll();
-
-        JLabel title = new JLabel(titleText);
-
-        title.setFont(
-                new Font("맑은 고딕", Font.BOLD, 20)
-        );
-
-        contentPanel.add(
-                title,
-                BorderLayout.NORTH
-        );
-
-        contentPanel.add(
-                new JScrollPane(table),
-                BorderLayout.CENTER
-        );
-
-        table.setRowHeight(28);
-
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
-
-    // 경고 메시지
-    private void showWarning(String message) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "입력 오류",
-                JOptionPane.WARNING_MESSAGE
-        );
-    }
-
-    // 일반 메시지
-    private void showMessage(String message) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "알림",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-    }
-
-    // 오류 메시지
-    private void showError(
-            String message,
-            Exception e
-    ) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                message + "\n" + e.getMessage(),
-                "오류",
-                JOptionPane.ERROR_MESSAGE
-        );
-    }
-}
