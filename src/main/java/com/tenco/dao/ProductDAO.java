@@ -313,7 +313,9 @@ public class ProductDAO {
 
     // 재고 차감 (구매 시)
     public int outStock(Connection conn, int productId, int quantity) throws SQLException {
-        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?";
+        String sql = """
+                UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?
+                """;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);
@@ -324,7 +326,9 @@ public class ProductDAO {
 
     // 재고 복원 (주문취소/수량감소 시)
     public int inStock(Connection conn, int productId, int quantity) throws SQLException {
-        String sql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
+        String sql = """
+                UPDATE product SET stock = stock + ? WHERE product_id = ?
+                """;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);
@@ -334,7 +338,9 @@ public class ProductDAO {
 
     // ProductDAO에 필요한 예시 메서드
     public boolean updateStock(Connection conn, int productId, int amount) throws SQLException {
-        String sql = "UPDATE product SET stock = stock + ? WHERE product_id = ? AND stock + ? >= 0";
+        String sql = """
+                UPDATE product SET stock = stock + ? WHERE product_id = ? AND stock + ? >= 0
+                """;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, amount);
             pstmt.setInt(2, productId);

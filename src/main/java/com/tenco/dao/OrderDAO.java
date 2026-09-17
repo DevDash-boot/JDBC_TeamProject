@@ -11,7 +11,9 @@ public class OrderDAO {
 
     // 1. 주문 생성 (생성된 PK 반환)
     public int insertOrder(Connection conn, Order dto) throws SQLException {
-        String sql = "INSERT INTO orders (payment_type, total_price) VALUES (?,?)";
+        String sql = """
+                INSERT INTO orders (payment_type, total_price) VALUES (?,?)
+                """;
         int generatedId = 0;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -30,7 +32,9 @@ public class OrderDAO {
 
     // 2. 단건 조회
     public Order selectOrderById(Connection conn, int orderId) throws SQLException {
-        String sql = "SELECT order_id, payment_type, total_price, order_date FROM orders WHERE order_id = ?";
+        String sql = """
+                SELECT order_id, payment_type, total_price, order_date FROM orders WHERE order_id = ?
+                """;
         Order dto = null;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -51,7 +55,9 @@ public class OrderDAO {
 
     // 3. 전체 목록 조회
     public List<Order> selectAllOrders(Connection conn) throws SQLException {
-        String sql = "SELECT order_id, payment_type, total_price, order_date FROM orders ORDER BY order_id DESC";
+        String sql = """
+                SELECT order_id, payment_type, total_price, order_date FROM orders ORDER BY order_id DESC
+                """;
         List<Order> list = new ArrayList<>();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -102,11 +108,17 @@ public class OrderDAO {
 
 
         // order_items 테이블 수량 UPDATE
-        String updateItemSql = "UPDATE order_item SET quantity = ? WHERE order_item_id = ?";
+        String updateItemSql = """
+                UPDATE order_item SET quantity = ? WHERE order_item_id = ?
+                """;
         // order 테이블의 total_price UPDATE
-        String updateOrderSql = "UPDATE orders SET total_price = total_price + ? WHERE order_id = ?";
+        String updateOrderSql = """
+                UPDATE orders SET total_price = total_price + ? WHERE order_id = ?
+                """;
         // product 테이블의 stock UPDATE (추가 구매시 차감, 구매 수량 감소시 원복)
-        String updateStockSql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND (stock >= ? OR ? <= 0)";
+        String updateStockSql = """
+                UPDATE product SET stock = stock - ? WHERE product_id = ? AND (stock >= ? OR ? <= 0)
+                """;
 
         try (PreparedStatement itemStmt = conn.prepareStatement(updateItemSql);
              PreparedStatement orderStmt = conn.prepareStatement(updateOrderSql);
@@ -138,7 +150,9 @@ public class OrderDAO {
     }
     // 주문 취소 (Batch Processing 적용)
     public void cancelOrderTransaction(Connection conn, int orderId, List<OrderItem> itemList) throws SQLException {
-        String updateStockSql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
+        String updateStockSql = """
+                UPDATE product SET stock = stock + ? WHERE product_id = ?
+                """;
         // TODO - status  제거
         //String updateOrderSql = "UPDATE orders SET status = 'CANCELLED' WHERE order_id = ?";
 
