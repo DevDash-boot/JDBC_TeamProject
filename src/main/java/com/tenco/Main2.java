@@ -9,7 +9,6 @@ public class Main2 {
 
     public static void main(String[] args) {
         System.out.println("===== 무인편의점 재고 관리 시스템 =====");
-        boolean isAdmin = false;
 
         while (true) {
             printMenu();
@@ -18,13 +17,12 @@ public class Main2 {
             try {
                 switch (choice) {
                     case 1:
-                        if (!isAdmin) {
+                        // 수정(9/17)
+                        if (!adminView.isLoggedIn()) {
                             System.out.println("관리자 로그인 필요");
                             break;
                         }
-                        System.out.println("상품관리 메뉴로 이동합니다.\n");
-                        ProductView productView = new ProductView();
-                        productView.start();
+                        new ProductView().start();
                         break;
 
                     case 2:
@@ -40,23 +38,18 @@ public class Main2 {
                         break;
 
                     case 4:
-                        if (!isAdmin) {
+                        // 수정(9/17)
+                        if (!adminView.isLoggedIn()) {
                             System.out.println("관리자 로그인 필요");
                             break;
                         }
                         System.out.println("발주/입고 메뉴로 이동합니다.\n");
                         new PurchaseView().purchaseView();
                         break;
-
+                    // 수정(9/17)
                     case 5:
                         System.out.println("관리자 메뉴로 이동합니다.\n");
-
-                        boolean result = adminView.AdminStart();
-
-                        if (result) {
-                            isAdmin = true;
-                            System.out.println("관리자 로그인 상태입니다.");
-                        }
+                        adminView.AdminStart();
                         break;
 
                     case 6:
