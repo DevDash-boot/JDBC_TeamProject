@@ -78,3 +78,8 @@ main은 SWING화면, main2는 콘솔창입니다.
 - 지역별 매장 조회
 
 ● 매장 조회 확인
+
+
+---------------------------------
+[무인편의점_재고_관리_시스템.pptx](https://github.com/user-attachments/files/32326791/_._._.pptx)
+
