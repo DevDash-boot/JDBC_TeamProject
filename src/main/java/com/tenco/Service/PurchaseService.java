@@ -42,8 +42,8 @@ public class PurchaseService {
             conn = util.getConnection();
             conn.setAutoCommit(false); // 트랜잭션 시작.
 
-            purchaseDAO.purchaseProduct(conn , id, quantity);
-            productDAO.addAmount(conn , id, quantity);
+            purchaseDAO.purchaseProduct(conn, id, quantity);
+            productDAO.addAmount(conn, id, quantity);
             conn.commit();
 
         } catch (SQLException e) {
@@ -69,7 +69,7 @@ public class PurchaseService {
             conn = util.getConnection();
             conn.setAutoCommit(false);
 
-            PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn , id);
+            PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
             productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
 
             System.out.println("발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  발주ID : " + id);
@@ -101,34 +101,28 @@ public class PurchaseService {
             conn = util.getConnection();
             // 자동 커밋 해제(트랜잭션 시작)
             conn.setAutoCommit(false);
+            // i[0] = product_id    ,     i[1] = 성공 row수.
 
-            if (id <= 0 || quantity <= 0) {
-                throw new SQLException("유효한 ID와 수량을 입력해주세요.");
-            }
-            Connection conn = null;
-            try {
-                conn = util.getConnection();
-                // 자동 커밋 해제(트랜잭션 시작)
-                conn.setAutoCommit(false);
+            // 발주 수량 차감
+            int[] i = purchaseDAO.substractPurchase(conn, id, quantity);
+            if (i[1] <= 0) throw new
+                    SQLException(" 유효한 ID를 입력해주세요. 입력되는 수량은 현재 발주된 상품의 수량을 초과할 수 없습니다. \n");
+            // 상품 재고 차감
+            int j = productDAO.outStock(conn, i[0], quantity);
+            if (j == 0) throw new SQLException("상품 재고 증가 실패");
 
-                // i[0] = product_id    ,     i[1] = 성공 row수.
-
-                // 발주 수량 차감
-                int[] i = purchaseDAO.substractPurchase(conn, id, quantity);
-                if (i[1] <= 0) throw new
-                        SQLException(" 유효한 ID를 입력해주세요. 입력되는 수량은 현재 발주된 상품의 수량을 초과할 수 없습니다. \n");
-                // 상품 재고 차감
-                int j = productDAO.outStock(conn, i[0] , quantity);
-                if (j == 0) throw new SQLException("상품 재고 증가 실패");
-
-                System.out.printf("발주 수량 차감하였습니다. 발주 ID : %d , 상품 ID : %d , 차감 수량 : %d\n" ,
-                        id , i[0] , quantity);
-                // 전부 성공
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
+            System.out.printf("발주 수량 차감하였습니다. 발주 ID : %d , 상품 ID : %d , 차감 수량 : %d\n",
+                    id, i[0], quantity);
+            // 전부 성공
+            conn.commit();
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
             }
         }
     }
-
+}

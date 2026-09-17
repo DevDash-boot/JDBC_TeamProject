@@ -1,6 +1,7 @@
 package com.tenco.dao;
 
 import com.tenco.dto.Order;
+import com.tenco.dto.OrderItem;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -94,4 +95,74 @@ public class OrderDAO {
             return pstmt.executeUpdate();
         }
     }
+
+    // TODO - 추가
+    // 주문 상품 수량 변경 및 재고, 총 금액 반영 (트랜잭션) (Connection 외부 주입 방식)
+    public void updateOrderItemAndStock(Connection conn, int orderId, int productId, int newQuantity, int priceDiff, int quantityDiff) throws SQLException {
+
+
+        // order_items 테이블 수량 UPDATE
+        String updateItemSql = "UPDATE order_item SET quantity = ? WHERE order_id = ? AND product_id = ?";
+        // order 테이블의 total_price UPDATE
+        String updateOrderSql = "UPDATE orders SET total_price = total_price + ? WHERE order_id = ?";
+        // product 테이블의 stock UPDATE (추가 구매시 차감, 구매 수량 감소시 원복)
+        String updateStockSql = "UPDATE product SET stock = stock - ? WHERE product_id = ?";
+
+        try (PreparedStatement itemStmt = conn.prepareStatement(updateItemSql);
+             PreparedStatement orderStmt = conn.prepareStatement(updateOrderSql);
+             PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
+
+            // order_item 변경
+            itemStmt.setInt(1, newQuantity);
+            itemStmt.setInt(2, orderId);
+            itemStmt.setInt(3, productId);
+            if (itemStmt.executeUpdate() == 0) {
+                throw new SQLException("주문 항목 수정 실패 (주문번호/상품 ID 불일치)");
+            }
+
+            // orders 변경
+            orderStmt.setInt(1, priceDiff);
+            orderStmt.setInt(2, orderId);
+            if (orderStmt.executeUpdate() == 0) {
+                throw new SQLException("주문 총 금액 수정 실패 (주문번호 불일치)");
+            }
+
+            // product 변경
+            stockStmt.setInt(1, quantityDiff);
+            stockStmt.setInt(2, productId);
+            if (stockStmt.executeUpdate() == 0) {
+                throw new SQLException("상품 재고 수정 실패 (상품 ID 불일치)");
+            }
+        }
+    }
+    // 주문 취소 (Batch Processing 적용)
+    public void cancelOrderTransaction(Connection conn, int orderId, List<OrderItem> itemList) throws SQLException {
+        String updateStockSql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
+        // TODO - status  제거
+        //String updateOrderSql = "UPDATE orders SET status = 'CANCELLED' WHERE order_id = ?";
+
+        // 1) 재고 원복 (Batch 처리)
+        try (PreparedStatement stockStmt = conn.prepareStatement(updateStockSql)) {
+            for (OrderItem item : itemList) {
+                stockStmt.setInt(1, item.getQuantity());
+                stockStmt.setInt(2, item.getProductId());
+                stockStmt.addBatch();
+            }
+            int[] results = stockStmt.executeBatch();
+            for (int count : results) {
+                if (count == 0) {
+                    throw new SQLException("상품 재고 원복 중 일부 항목 실패");
+                }
+            }
+        }
+        // TODO - status  제거
+//        // 2) 주문 상태 변경
+//        try (PreparedStatement orderStmt = conn.prepareStatement(updateOrderSql)) {
+//            orderStmt.setInt(1, orderId);
+//            if (orderStmt.executeUpdate() == 0) {
+//                throw new SQLException("주문 상태 변경 실패 (주문 ID: " + orderId + ")");
+//            }
+//        }
+    }
+
 }
