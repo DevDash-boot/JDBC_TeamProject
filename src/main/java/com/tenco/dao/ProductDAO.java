@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 상품번호, 상품명, 가격, 바코드, 유통기한, 재고, 카테고리
+ * 상품번호, 상품명, 가격, ID, 유통기한, 재고, 카테고리
  * <p>
  * CRUD
  * 1. 상품 등록
@@ -20,18 +20,16 @@ import java.util.List;
  * 5. 상품 상세 조회
  * 6. 상품명으로 검색
  * ----------------------
- * 7. 바코드로 상품 조회
+ * 7. ID로 상품 조회
  * 8. 재고 부족 상품 조회
  * 9. 재고가 0이면 상태 = false
  */
 
 public class ProductDAO {
 
-
     // 1. 상품 등록
     public int addProduct(Product product) {
         int rows = 0;
-
         String sql = """
                 INSERT INTO product (product_name, price, barcode, expiration_date, stock, category)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -59,7 +57,6 @@ public class ProductDAO {
     // 2. 상품 조회
     public List<Product> getProductName() {
         List<Product> productList = new ArrayList<>();
-
         String sql = """
                 SELECT product_name FROM product
                 """;
@@ -85,10 +82,9 @@ public class ProductDAO {
     // 3. 상품 수정
     public int updateProduct(Product product) {
         int rows = 0;
-
         String sql = """
                 UPDATE product
-                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ? 
+                SET product_name = ?, price = ?, barcode = ?, expiration_date =?,  stock = ?, category = ?, status = ?
                 WHERE product_id = ?
                 """;
 
@@ -100,7 +96,8 @@ public class ProductDAO {
                 pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
                 pstmt.setInt(5, product.getStock());
                 pstmt.setString(6, product.getCategory());
-                pstmt.setInt(7, product.getProductId());
+                pstmt.setBoolean(7, product.isStatus());
+                pstmt.setInt(8, product.getProductId());
 
                 rows = pstmt.executeUpdate();
                 System.out.println(rows + "행이 수정되었습니다.");
@@ -111,7 +108,6 @@ public class ProductDAO {
         }
         return rows;
     }
-
 
     // 4. 상품 삭제
     public int deleteProduct(int productId) {
@@ -133,7 +129,6 @@ public class ProductDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return rows;
     }
 
@@ -191,12 +186,12 @@ public class ProductDAO {
         List<Product> productList = new ArrayList<>();
 
         String sql = """
-                SELECT * FROM product WHERE barcode LIKE ?
+                SELECT * FROM product WHERE product_id = ?
                 """;
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, "%" + productId + "%");
+                pstmt.setInt(1, productId);
                 try (ResultSet rs = pstmt.executeQuery()) {
 
                     while (rs.next()) {
@@ -214,7 +209,6 @@ public class ProductDAO {
     // 8. 재고 부족 상품 조회 << 재고 부족 기준: 10개)
     public List<Product> searchProductByStock() {
         List<Product> productList = new ArrayList<>();
-
         String sql = """
                 SELECT * FROM product WHERE stock <= 10
                 """;
@@ -222,7 +216,6 @@ public class ProductDAO {
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 try (ResultSet rs = pstmt.executeQuery()) {
-
                     while (rs.next()) {
                         productList.add(createProduct(rs));
                     }
@@ -238,7 +231,6 @@ public class ProductDAO {
     // 9. 재고가 0이면 상태 = false => UPDATE?
     public int updateStatus() {
         int rows = 0;
-
         String sql = """
                 UPDATE product SET status = 0 WHERE stock = 0
                 """;
@@ -256,75 +248,21 @@ public class ProductDAO {
     }
 
     // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
-    public void addAmount(int id, int quantity) throws SQLException {
+    public int addAmount(Connection conn , int id , int quantity) throws SQLException {
+        int rows = 0;
         String addSql = """
                 update product set stock = stock + ?
                 where product_id = ?
                 """;
-
-        try (Connection conn = util.getConnection()) {
             try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
-                addPstmt.setInt(1, quantity);
-                addPstmt.setInt(2, id);
+                addPstmt.setInt(1 , quantity);
+                addPstmt.setInt(2 , id);
 
-                int rows = addPstmt.executeUpdate();
-                if (rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+                rows = addPstmt.executeUpdate();
+                if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
             }
+            return rows;
         }
-    }
-
-    // 11. 재고 차감
-    public int outStock(Connection conn, int productId, int quantity) {
-        int rows = 0;
-        String sql = """
-                update product
-                set stock = stock - ?
-                where product_id = ?
-                and stock >= ?;
-                """;
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, quantity);
-            pstmt.setInt(2, productId);
-            pstmt.setInt(3, quantity);
-
-            rows = pstmt.executeUpdate();
-            if (rows == 0) {
-                System.out.println("재고 차감에 실패했습니다.");
-            }
-        } catch (
-                SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return rows;
-    }
-
-    // 재고 증가
-    public int inputStock(OrderItem orderItem) {
-        int rows = 0;
-        String sql = """
-                update product
-                set stock = stock + ?
-                where product_id = ?
-                """;
-        try (Connection conn = util.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, orderItem.getQuantity());
-                pstmt.setInt(2, orderItem.getProductId());
-
-                rows = pstmt.executeUpdate();
-                if (rows == 0) {
-                    System.out.println("재고 증감에 실패했습니다.");
-                }
-            } catch (
-                    SQLException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return rows;
-    }
 
 
     private Product createProduct(ResultSet rs) throws SQLException {
@@ -338,27 +276,48 @@ public class ProductDAO {
                 .category(rs.getString("category"))
                 .status(rs.getBoolean("status"))
                 .build();
-
         return product;
     }
 
     //////////////////////////////////////
     // 트랜잭션용 상품 단건 조회
     public Product selectProductById(Connection conn, int productId) throws SQLException {
-        String sql = "SELECT * FROM product WHERE product_id = ?";
-        Product product = null;
+        String sql = """
+            SELECT product_id, product_name, price, barcode,
+                   expiration_date, stock, category
+            FROM product
+            WHERE product_id = ?
+            """;
+
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);
+
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) product = createProduct(rs);
+                if (rs.next()) {
+                    return Product.builder()
+                            .productId(rs.getInt("product_id"))
+                            .productName(rs.getString("product_name"))
+                            .price(rs.getInt("price"))
+                            .barcode(rs.getString("barcode"))
+                            .expirationDate(
+                                    rs.getDate("expiration_date") != null
+                                            ? rs.getDate("expiration_date").toLocalDate()
+                                            : null
+                            )
+                            .stock(rs.getInt("stock"))
+                            .category(rs.getString("category"))
+                            .build();
+                }
             }
         }
-        return product;
+        return null;
     }
 
     // 재고 차감 (구매 시)
     public int outStock(Connection conn, int productId, int quantity) throws SQLException {
-        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?";
+        String sql = """
+                UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?
+                """;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);
@@ -369,7 +328,9 @@ public class ProductDAO {
 
     // 재고 복원 (주문취소/수량감소 시)
     public int inStock(Connection conn, int productId, int quantity) throws SQLException {
-        String sql = "UPDATE product SET stock = stock + ? WHERE product_id = ?";
+        String sql = """
+                UPDATE product SET stock = stock + ? WHERE product_id = ?
+                """;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);
@@ -377,5 +338,17 @@ public class ProductDAO {
         }
     }
 
+    // ProductDAO에 필요한 예시 메서드
+    public boolean updateStock(Connection conn, int productId, int amount) throws SQLException {
+        String sql = """
+                UPDATE product SET stock = stock + ? WHERE product_id = ? AND stock + ? >= 0
+                """;
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, amount);
+            pstmt.setInt(2, productId);
+            pstmt.setInt(3, amount);
+            return pstmt.executeUpdate() > 0;
+        }
+    }
 
 }

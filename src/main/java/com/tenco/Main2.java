@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class Main2 {
     private static final Scanner scanner = new Scanner(System.in);
+    private static final AdminView adminView = new AdminView();
 
     public static void main(String[] args) {
         System.out.println("===== 무인편의점 재고 관리 시스템 =====");
@@ -49,13 +50,12 @@ public class Main2 {
 
                     case 5:
                         System.out.println("관리자 메뉴로 이동합니다.\n");
-                        AdminView adminView = new AdminView();
-                        isAdmin = adminView.AdminStart();
 
-                        if (isAdmin) {
-                            System.out.println("관리자 로그인 성공!");
-                        } else {
-                            System.out.println("관리자 로그인 실패");
+                        boolean result = adminView.AdminStart();
+
+                        if (result) {
+                            isAdmin = true;
+                            System.out.println("관리자 로그인 상태입니다.");
                         }
                         break;
 

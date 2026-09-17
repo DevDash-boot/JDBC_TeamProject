@@ -37,11 +37,17 @@ public class OrderService {
                 return false;
             }
 
+
             // 2. order_item 저장 및 상품 재고 차감
             for (OrderItem itemDTO : items) {
+                // 수량 입력시 수량에 0이 들어왔는지 확인하는 방어적 코드
+                if (itemDTO.getQuantity() <= 0) {
+                    conn.rollback();
+                    return false;
+                }
+
                 itemDTO.setOrderId(orderId); // 받아은 order_id 세팅
 
-                // TODO - selectProductById 추가 or 수정
                 Product product =productDAO.selectProductById(conn, itemDTO.getProductId());
                 if (product == null || product.getStock() < itemDTO.getQuantity()) {
                     System.out.println("상품 [ID:" +itemDTO.getProductId() +"]의 재고가 부족합니다.");
@@ -50,15 +56,12 @@ public class OrderService {
                 }
 
                 // 주문 상품 저장
-                // TODO - insertOrderItem 추가 or 수정
                 // addOrderItem이랑 겹침(아마)
                 int itemResult = orderItemDAO.insertOrderItem(conn, itemDTO);
                 if (itemResult == 0) {
                     conn.rollback();
                     return false;
                 }
-
-                // TODO - outStock 추가 or 수정
                 int stockResult = productDAO.outStock(conn, itemDTO.getProductId(), itemDTO.getQuantity());
                 if (stockResult == 0) {
                     conn.rollback();
@@ -67,7 +70,6 @@ public class OrderService {
             }
             conn.commit(); // 성공시 커밋
             return true;
-
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -101,7 +103,6 @@ public class OrderService {
     }
 
     // 3. 특정 주문의 상품 목록 조회
-    // TODO - orderItem의 selectOrderItem과 겹침
     public List<OrderItem> getOrderItemsByOrderId(int orderId) {
         try (Connection conn = util.getConnection()) {
             return orderItemDAO.selectItemByOrderId(conn, orderId);
@@ -136,19 +137,129 @@ public class OrderService {
         try {
             conn = util.getConnection();
             conn.setAutoCommit(false);
-
+            // 1. 주문 상품 조회
             List<OrderItem> items = orderItemDAO.selectItemByOrderId(conn, orderId);
-            for (OrderItem item : items) {
-                productDAO.inStock(conn, item.getProductId(), item.getQuantity()); // 재고 복원
+            if (items.isEmpty()) {
+                conn.rollback();
+                return false;
             }
-            // order_item 삭제 or orders에 상태 컬럼 추가해서 CANCELED로 변경 (설계 선택)
+
+            // 2. 재고 복원
+            for (OrderItem item : items) {
+                int result = productDAO.inStock(conn, item.getProductId(), item.getQuantity());
+                if (result == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 3. order_item 삭제
+            int itemResult = orderItemDAO.deleteByOrderId(conn, orderId);
+
+            if (itemResult == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // 4. orders 삭제
+            int orderResult = orderDAO.cancelOrder(conn, orderId);
+
+            if (orderResult == 0) {
+                conn.rollback();
+                return false;
+            }
+            // 5. 전부 성공
             conn.commit();
             return true;
         } catch (SQLException e) {
-            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
             return false;
         } finally {
-            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+    // TODO - 추가
+    // 완료된 주문의 상품 수량 변경 및 재고/총금액 반영 (트랜잭션)
+    public boolean updateOrderItemQuantity(int orderItemId,int orderId, int productId, int oldQuantity, int newQuantity, int price) {
+        // 수량 차이 계산 (양수: 추가 재고 차감 / 음수: 재고 환원)
+        int quantityDIff = newQuantity - oldQuantity;
+        int priceDiff = quantityDIff * price;
+
+        Connection conn = null;
+        try {
+            conn = util.getConnection();
+            conn.setAutoCommit(false);
+
+            // DAO 를 통한 개별 처리
+            orderDAO.updateOrderItemAndStock(conn, orderItemId ,orderId, productId, newQuantity, priceDiff, quantityDIff);
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            rollbackQuietly(conn);
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeQuietly(conn);
+        }
+    }
+    // TODO - 사용하지않는 주문취소 메서드 제거
+    // 주문 취소 처리 (재고 복구 + 주문 상태 CANCELLED) (트랜잭션)
+//    public boolean cancelOrder(int orderId, List<OrderItem> itemList) {
+//        Connection conn = null;
+//        try {
+//            conn = util.getConnection();
+//            conn.setAutoCommit(false);
+//
+//            // 각 상품 재고 복구
+//            orderDAO.cancelOrderTransaction(conn, orderId, itemList);
+//
+//            conn.commit();
+//            return true;
+//        } catch (SQLException e) {
+//            rollbackQuietly(conn);
+//            e.printStackTrace();
+//            return false;
+//        } finally {
+//            closeQuietly(conn);
+//        }
+//    }
+
+    // --- 중복 Methods ---
+    // 트랜잭션 롤백 중복 부분
+    private void rollbackQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // 트랜잭션 자원해제 중복 부분
+    private void closeQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

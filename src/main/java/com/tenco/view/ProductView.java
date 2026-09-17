@@ -40,9 +40,6 @@ public class ProductView {
                     case 7: searchProductById(); break;
                     case 8: searchProductByStock(); break;
                     case 9:
-                        System.out.println("프로그램을 종료합니다.");
-                        util.close();
-                        sc.close();
                         return;
                     default:
                         System.out.println("1~9 사이의 숫자를 입력하세요");
@@ -90,7 +87,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("유통기한 (예시: xxxx-xx-xx): ");
+        System.out.print("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
         System.out.print("재고: ");
@@ -152,7 +149,7 @@ public class ProductView {
             return;
         }
 
-        System.out.println("유통기한 (예시: xxxx-xx-xx): ");
+        System.out.print("유통기한 (예시: xxxx-xx-xx): ");
         LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
         System.out.print("재고: ");
@@ -175,15 +172,19 @@ public class ProductView {
         System.out.println("'" + productName + "' 상품이 변경되었습니다.");
     }
 
-    private void deleteProduct() throws SQLException {
+    private void deleteProduct() {
         System.out.print("삭제할 상품 ID: ");
         int productId = sc.nextInt();
         sc.nextLine();
         Product product = Product.builder()
                 .productId(productId)
                 .build();
-        service.deleteProduct(product);
-        System.out.println(productId + "번 상품이 삭제되었습니다.");
+        try {
+            service.deleteProduct(product);
+            System.out.println(productId + "번 상품이 삭제되었습니다.");
+        } catch (SQLException | RuntimeException e) {
+            System.out.println("오류: " + e.getMessage());
+        }
     }
 
     private void getProduct() throws SQLException {
@@ -278,7 +279,7 @@ public class ProductView {
             }
         }
     }
-    
+
     private int readInt(String prompt) {
         while (true) {
             System.out.println(prompt);

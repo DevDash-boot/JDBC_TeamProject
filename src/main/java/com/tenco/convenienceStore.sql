@@ -8,7 +8,7 @@ CREATE TABLE product (
     product_name VARCHAR(100) NOT NULL,
     price INT NOT NULL,
     barcode VARCHAR(50) NOT NULL UNIQUE,
-    expiration_date DATE,
+    expiration_date DATE NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     category VARCHAR(50) NOT NULL,
     status BOOLEAN NOT NULL DEFAULT TRUE
@@ -21,6 +21,9 @@ CREATE TABLE orders (
     total_price INT NOT NULL,
     order_date DATE NOT NULL
 );
+
+ALTER TABLE orders 
+MODIFY order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 -- 3. 주문 상품 테이블(고객이 주문한 것을 취소, 수정하는 부분)
 CREATE TABLE order_item (
@@ -68,13 +71,13 @@ VALUES
 ('삼각김밥', 1500, '880100000001', '2026-09-15', 20, '식품', TRUE),
 ('콜라', 2000, '880100000002', '2027-03-10', 30, '음료', TRUE),
 ('생수', 1000, '880100000003', '2028-01-20', 50, '음료', TRUE),
-('감자칩', 1800, '880100000004', '2027-06-15', 15, '과자', TRUE),
+('감자칩', 1800, '880100000004', '2027-06-15', 28, '과자', TRUE),
 ('초코바', 1200, '880100000005', '2027-08-10', 25, '과자', TRUE),
-('샌드위치', 3500, '880100000006', '2026-09-13', 8, '식품', TRUE),
+('샌드위치', 3500, '880100000006', '2026-09-13', 18, '식품', TRUE),
 ('캔커피', 2500, '880100000007', '2027-02-20', 12, '음료', TRUE),
-('컵라면', 1500, '880100000008', '2027-05-30', 3, '식품', TRUE),
+('컵라면', 1500, '880100000008', '2027-05-30', 23, '식품', TRUE),
 ('초콜릿', 2000, '880100000009', '2027-11-20', 18, '과자', TRUE),
-('우유', 2200, '880100000010', '2026-09-14', 10, '음료', TRUE),
+('우유', 2200, '880100000010', '2026-09-14', 22, '음료', TRUE),
 ('젤리', 1200, '880100000011', '2021-05-14', 0, '과자', FALSE);
 
 -- 주문
@@ -102,12 +105,12 @@ VALUES
 -- 발주 / 입고
 INSERT INTO purchase(product_id, quantity, unit_price, total_price)
 VALUES
-(8, 20, 1000, 20000),
-(6, 10, 2500, 25000),
-(4, 120, 1200, 144000),
-(3, 30, 500, 15000),
-(1, 20, 1000, 20000),
-(10, 20, 1500, 30000);
+    (8, 20, 1500, 30000),
+    (6, 10, 3500, 35000),
+    (4, 20, 1800, 216000),
+    (3, 30, 1000, 30000),
+    (1, 20, 1500, 30000),
+    (10, 20, 2200, 44000);
 
 select * from order_item;
 select * from orders;
