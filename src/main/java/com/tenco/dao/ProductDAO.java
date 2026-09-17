@@ -40,13 +40,17 @@ public class ProductDAO {
                 pstmt.setString(1, product.getProductName());
                 pstmt.setInt(2, product.getPrice());
                 pstmt.setString(3, product.getBarcode());
-                pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+                // 수정(9/17)
+                if (product.getExpirationDate() == null) {
+                    pstmt.setNull(4, java.sql.Types.DATE);
+                } else {
+                    pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+                }
                 pstmt.setInt(5, product.getStock());
                 pstmt.setString(6, product.getCategory());
 
                 rows = pstmt.executeUpdate();
             }
-            System.out.println(rows + "행이 추가되었습니다.");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -93,14 +97,18 @@ public class ProductDAO {
                 pstmt.setString(1, product.getProductName());
                 pstmt.setInt(2, product.getPrice());
                 pstmt.setString(3, product.getBarcode());
-                pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+                // 수정(9/17)
+                if (product.getExpirationDate() == null) {
+                    pstmt.setNull(4, java.sql.Types.DATE);
+                } else {
+                    pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+                }
                 pstmt.setInt(5, product.getStock());
                 pstmt.setString(6, product.getCategory());
-                pstmt.setBoolean(7, product.isStatus());
+                pstmt.setBoolean(7, product.getStock() > 0); // 수정(9/17)
                 pstmt.setInt(8, product.getProductId());
 
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -123,11 +131,13 @@ public class ProductDAO {
                 pstmt.setInt(1, productId);
 
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 삭제되었습니다.");
             }
 
+        }   // 수정(9/17)
+        catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalStateException("주문 또는 발주 이력이 있는 상품은 삭제할 수 없습니다.", e);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("상품 삭제 중 DB 오류", e);
         }
         return rows;
     }
@@ -231,14 +241,14 @@ public class ProductDAO {
     // 9. 재고가 0이면 상태 = false => UPDATE?
     public int updateStatus() {
         int rows = 0;
+        // 수정(9/17)
         String sql = """
-                UPDATE product SET status = 0 WHERE stock = 0
+                UPDATE product SET status = (stock > 0)
                 """;
 
         try (Connection conn = util.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 rows = pstmt.executeUpdate();
-                System.out.println(rows + "행이 수정되었습니다.");
             }
 
         } catch (SQLException e) {
@@ -248,30 +258,31 @@ public class ProductDAO {
     }
 
     // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
-    public int addAmount(Connection conn , int id , int quantity) throws SQLException {
+    public int addAmount(Connection conn, int id, int quantity) throws SQLException {
         int rows = 0;
         String addSql = """
                 update product set stock = stock + ?
                 where product_id = ?
                 """;
-            try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
-                addPstmt.setInt(1 , quantity);
-                addPstmt.setInt(2 , id);
+        try (PreparedStatement addPstmt = conn.prepareStatement(addSql)) {
+            addPstmt.setInt(1, quantity);
+            addPstmt.setInt(2, id);
 
-                rows = addPstmt.executeUpdate();
-                if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
-            }
-            return rows;
+            rows = addPstmt.executeUpdate();
+            if (rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
         }
+        return rows;
+    }
 
 
     private Product createProduct(ResultSet rs) throws SQLException {
+        Date d = rs.getDate("expiration_date"); // 수정(9/17)
         Product product = Product.builder()
                 .productId(rs.getInt("product_id"))
                 .productName(rs.getString("product_name"))
                 .price(rs.getInt("price"))
                 .barcode(rs.getString("barcode"))
-                .expirationDate(rs.getDate("expiration_date").toLocalDate())
+                .expirationDate(d == null ? null : d.toLocalDate()) // 수정(9/17)
                 .stock(rs.getInt("stock"))
                 .category(rs.getString("category"))
                 .status(rs.getBoolean("status"))
@@ -279,31 +290,30 @@ public class ProductDAO {
         return product;
     }
 
-    //////////////////////////////////////
+    /// ///////////////////////////////////
     // 트랜잭션용 상품 단건 조회
     public Product selectProductById(Connection conn, int productId) throws SQLException {
         String sql = """
-            SELECT product_id, product_name, price, barcode,
-                   expiration_date, stock, category
-            FROM product
-            WHERE product_id = ?
-            """;
+                SELECT product_id, product_name, price, barcode,
+                       expiration_date, stock, category
+                FROM product
+                WHERE product_id = ?
+                """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
+                    // 수정(9/17)
+                    Date d = rs.getDate("expiration_date");
+
                     return Product.builder()
                             .productId(rs.getInt("product_id"))
                             .productName(rs.getString("product_name"))
                             .price(rs.getInt("price"))
                             .barcode(rs.getString("barcode"))
-                            .expirationDate(
-                                    rs.getDate("expiration_date") != null
-                                            ? rs.getDate("expiration_date").toLocalDate()
-                                            : null
-                            )
+                            .expirationDate(d == null ? null : d.toLocalDate())
                             .stock(rs.getInt("stock"))
                             .category(rs.getString("category"))
                             .build();
