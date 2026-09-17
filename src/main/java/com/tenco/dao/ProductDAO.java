@@ -246,7 +246,8 @@ public class ProductDAO {
     }
 
     // 10. 발주신청시 상품 수량 추가. --> 발주(purchase) 테이블에서만 사용.
-    public void addAmount(Connection conn, int id, int quantity) throws SQLException {
+    public int addAmount(Connection conn , int id , int quantity) throws SQLException {
+        int rows = 0;
         String addSql = """
                 update product set stock = stock + ?
                 where product_id = ?
@@ -255,8 +256,10 @@ public class ProductDAO {
             addPstmt.setInt(1, quantity);
             addPstmt.setInt(2, id);
 
-            int rows = addPstmt.executeUpdate();
-            if (rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+                rows = addPstmt.executeUpdate();
+                if(rows <= 0) throw new SQLException("존재하지 않는 상품 ID입니다.");
+            }
+            return rows;
         }
     }
 
@@ -311,7 +314,7 @@ public class ProductDAO {
 
     // 재고 차감 (구매 시)
     public int outStock(Connection conn, int productId, int quantity) throws SQLException {
-        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock >= ?";
+        String sql = "UPDATE product SET stock = stock - ? WHERE product_id = ? AND stock > ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);

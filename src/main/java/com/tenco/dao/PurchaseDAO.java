@@ -41,7 +41,7 @@ public class PurchaseDAO {
     }
 
 
-    // 기능 B. 상품id로 상품이 발주 목록에 있는지.
+    // 기능 B. 발주id로 상품이 발주 목록에 있는지.
     public PurchaseDto existList(int id) throws SQLException {
         try (Connection conn = util.getConnection()) {
             PurchaseDto purchaseDto = null;
@@ -76,11 +76,9 @@ public class PurchaseDAO {
 
 
     // 기능 C. 이 상품을 몇개 발주할지 + 총 발주 가격? + 실제 존재하는 발주 상품인지. -- 발주 신청. --> 즉시, 상품테이블의 stock에 추가.
-    public void purchaseProduct(Connection conn , int id, int quantity) throws SQLException {
+    public int purchaseProduct(Connection conn , int id, int quantity) throws SQLException {
         int price = 0;
-        // 새로 발주하는 상품이라면 추가(insert) , 기존에 있던 발주상품이라면 수정(update)
-
-
+            int i = 0;
             // 1 - 1. 발주 목록에 없는 새로 발주할 상품이라면. insert로 purchase테이블에 등록.
 
             // 2 - 1. product테이블의 price를 가져와야하므로 select로 먼저 price저장.
@@ -107,8 +105,7 @@ public class PurchaseDAO {
                 newPurchasePstmt.setInt(2 , quantity);
                 newPurchasePstmt.setInt(3 , price);
                 newPurchasePstmt.setInt(4 , quantity * price);
-                int i = newPurchasePstmt.executeUpdate();
-                if(i > 0) System.out.println(i + "건이 새로 발주 목록에 추가되었습니다. ---  id : " + id);
+                 i = newPurchasePstmt.executeUpdate();
             }
 
             // 3. 발주 성공했으면 다시 화면에 총 발주가격 , 발주한 상품 , 수량 다시 보여주기.
@@ -117,7 +114,7 @@ public class PurchaseDAO {
                     from purchase p join product pr on p.product_id = pr.product_id
                     where pr.product_id = ?                           
                     """;
-            try (PreparedStatement totalPstmt = conn.prepareCall(totalSql)) {
+            try (PreparedStatement totalPstmt = conn.prepareStatement(totalSql)) {
                 totalPstmt.setInt(1, id);
                 ResultSet rs = totalPstmt.executeQuery();
                 if (rs.next()) {
@@ -125,6 +122,7 @@ public class PurchaseDAO {
                             rs.getInt("product_id"), rs.getString("product_name"),
                             rs.getInt("quantity"), rs.getInt("total_price"));
                 }
+                return i;
             }
         }
 
@@ -147,7 +145,7 @@ public class PurchaseDAO {
             try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
                 existPstmt.setInt(1 , id);
                 try (ResultSet rs = existPstmt.executeQuery()) {
-                    if(!rs.next()) throw new SQLException(id + "는 목록에 존재하지 않는 ID 입니다.");
+                    if(!rs.next()) throw new SQLException();
 
                     purchaseDto.setQauntity(rs.getInt("quantity"));
                     purchaseDto.setProductId(rs.getInt("product_id"));
