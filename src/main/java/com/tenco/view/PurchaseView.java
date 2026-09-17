@@ -9,7 +9,6 @@ import java.util.Scanner;
 public class PurchaseView {
     PurchaseService purchaseService = new PurchaseService();
     Scanner scanner = new Scanner(System.in);
-
     // TODO 관리자 받아서 관리자 이름 보이게
     public void purchaseView()  {
         Integer menu = null;
@@ -23,7 +22,7 @@ public class PurchaseView {
                 try {
                     menu = Integer.parseInt(scanner.nextLine());
                 } catch (NumberFormatException e) {
-                    System.out.println("정수를 입력하세요 (1 ~ 5)");
+                    System.out.println("정수를 입력하세요 (1 ~ 6)");
                     continue;
                 }
 
@@ -91,5 +90,7 @@ public class PurchaseView {
         PurchaseDto p = purchaseService.existList(id);
         System.out.printf(" 발주 ID : %d , 상품 ID : %d , 상품명 : %s , 발주 수량 : %d , 개당 상품가격 : %d , 총 발주가격 : %d\n" ,
                 p.getPurchaseId() , p.getProductId() , p.getName() , p.getQauntity() , p.getUnitPrice() , p.getTotlaPrice());
+        }
+
     }
 }
