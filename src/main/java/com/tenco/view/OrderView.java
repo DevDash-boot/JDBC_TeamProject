@@ -123,6 +123,8 @@ public class OrderView {
 
             // 수량 입력
             int quantity;
+            // 취소 여부 확인
+            boolean cancelled = false;
             System.out.println("구매 수량 입력 : ");
             while (true) {
                 try {
@@ -130,6 +132,7 @@ public class OrderView {
 
                     if (quantity == 0) {
                         System.out.println(" -> 상품 선택을 취소했습니다.");
+                        cancelled = true;
                         break; // 수량 입력 루프 탈출
                     }
 
@@ -148,7 +151,10 @@ public class OrderView {
                 } catch (NumberFormatException e) {
                     System.out.println("숫자를 입력해주세요");
                 }
+            } if (cancelled) {
+                continue; // 취소여부가 확인이 되었으면 위의 경로를 통하지 않고 바로 다음 상품 ID 입력으로 돌아간다
             }
+
 
             // 중복 상품 합산 처리
             Optional<OrderItem> existItem = items.stream()
@@ -291,7 +297,7 @@ public class OrderView {
             return;
         }
 
-        // // TODO - status  제거
+        // TODO - status  제거
 //        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
 //            System.out.println("취소된 주문의 상품 수량은 변경할 수 없습니다.");
 //            return;
@@ -380,8 +386,10 @@ public class OrderView {
             return;
         }
 
+        int orderItemId = targetItem.getOrderItemId();
+
         // 트랜잭션(주문 수량에 맞춰서 상품의 재고 업데이트해야됨)
-        boolean isSuccess = orderService.updateOrderItemQuantity(orderId, productId, targetItem.getQuantity(), newQuantity, targetItem.getOrderPrice());
+        boolean isSuccess = orderService.updateOrderItemQuantity(orderItemId ,orderId, productId, targetItem.getQuantity(), newQuantity, targetItem.getOrderPrice());
 
         if (isSuccess) {
             System.out.println("주문 상품 수량 변경 선공");

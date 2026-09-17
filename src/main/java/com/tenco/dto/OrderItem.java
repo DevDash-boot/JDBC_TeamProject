@@ -1,11 +1,10 @@
 package com.tenco.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Getter
+@Setter
 @Builder
 @Data
 @AllArgsConstructor
