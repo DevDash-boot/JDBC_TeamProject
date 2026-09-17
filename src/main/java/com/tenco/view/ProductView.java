@@ -45,9 +45,9 @@ public class ProductView {
                         System.out.println("1~9 사이의 숫자를 입력하세요");
                 }
 
-            } catch (SQLException e) {
-                System.out.println("오류: " + e.getMessage());
-            }
+            } catch (SQLException | RuntimeException e) {   // 수정(9/17)
+            System.out.println("오류: " + e.getMessage());
+        }
         }
     }
 
