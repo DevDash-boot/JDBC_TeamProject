@@ -34,33 +34,29 @@ public class PurchaseView {
 
                     case 2:
                         System.out.print("조회할 발주 ID를 입력해주세요 : ");
-                        int selectId = scanner.nextInt();
-                        scanner.nextLine();
+                        int selectId = Integer.parseInt(scanner.nextLine());
                         purchaseSingleView(selectId);
                         break;
 
                     case 3:
                         System.out.print("발주 신청할 상품 ID : ");
-                        int addId = scanner.nextInt();
+                        int addId = Integer.parseInt(scanner.nextLine());
                         System.out.print("발주할 수랑 (최대 20개) : ");
-                        int quantity = scanner.nextInt();
-                        scanner.nextLine();
+                        int quantity = Integer.parseInt(scanner.nextLine());
                         purchaseService.purcahseProduct(addId, quantity);
                         break;
 
                     case 4:
                         System.out.print("발주 목록에서 제거할 발주 ID : ");
-                        int deleteId = scanner.nextInt();
-                        scanner.nextLine();
+                        int deleteId = Integer.parseInt(scanner.nextLine());
                         purchaseService.deletePurchase(deleteId);
                         break;
 
                     case 5:
                         System.out.print("차감시킬 발주 ID : ");
-                        int subId = scanner.nextInt();
+                        int subId = Integer.parseInt(scanner.nextLine());
                         System.out.print("차감시킬 수량 : ");
-                        int amount = scanner.nextInt();
-                        scanner.nextLine();
+                        int amount = Integer.parseInt(scanner.nextLine());
                         purchaseService.substractPurchase(subId , amount);
                         break;
 
