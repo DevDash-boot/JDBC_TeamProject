@@ -41,9 +41,11 @@ public class PurchaseService {
         try {
             conn = util.getConnection();
             conn.setAutoCommit(false); // 트랜잭션 시작.
-
-            if(purchaseDAO.purchaseProduct(conn, id, quantity) <= 0) {
-                throw new SQLException();
+            int i = purchaseDAO.purchaseProduct(conn, id, quantity);
+            if(i == -1 ) {
+                throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+            } else if (i == 0) {
+                throw new SQLException("발주 등록에 실패하였습니다.");
             }
 
             if(productDAO.addAmount(conn, id, quantity) <= 0) {
@@ -77,11 +79,10 @@ public class PurchaseService {
 
 
                  PurchaseDto purchaseDto = purchaseDAO.deletePurchase(conn, id);
-
+                if (purchaseDto == null) throw new SQLException( "발주ID가 " + id + "인 발주상품은 목록에 없습니다." );
 
                 int i = productDAO.outStock(conn, purchaseDto.getProductId(), purchaseDto.getQauntity());
                 if(i == 0) throw new SQLException("발주 취소시 상품 재고가 음수가 됩니다.");
-
 
 
             System.out.println("발주목록에서 삭제 되었습니다. 발주취소 되었습니다. ---  발주ID : " + id);
@@ -115,7 +116,7 @@ public class PurchaseService {
             conn = util.getConnection();
             // 자동 커밋 해제(트랜잭션 시작)
             conn.setAutoCommit(false);
-            // i[0] = product_id    ,     i[1] = 성공 row수.
+            // i[0] = product_id    ,    i[1] = 성공 row수.
 
             // 발주 수량 차감
             int[] i = purchaseDAO.substractPurchase(conn, id, quantity);

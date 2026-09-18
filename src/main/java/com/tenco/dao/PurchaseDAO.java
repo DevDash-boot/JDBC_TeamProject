@@ -70,7 +70,7 @@ public class PurchaseDAO {
 
 
                     Product product = new ProductDAO().selectProductById(conn , purchaseDto.getProductId());
-                    if (product == null) throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+                    if (product == null) throw new SQLException();
 
                     return purchaseDto;
                 }
@@ -93,8 +93,8 @@ public class PurchaseDAO {
             try (PreparedStatement pricePstmt = conn.prepareStatement(priceSql)) {
                 pricePstmt.setInt(1 , id);
                 try (ResultSet rs = pricePstmt.executeQuery()) {
-                    if (rs.next()) price = rs.getInt("price");
-                    else throw new SQLException("ID가 " + id + "인 상품은 아예 존재하지 않습니다.");
+                    if (!rs.next()) return -1;
+                    price = rs.getInt("price");
                 }
             }
 
@@ -116,7 +116,9 @@ public class PurchaseDAO {
             String totalSql = """
                     select p.product_id , pr.product_name ,  p.quantity , p.total_price  
                     from purchase p join product pr on p.product_id = pr.product_id
-                    where pr.product_id = ?                           
+                    where pr.product_id = ?
+                    order by p.purchase_id desc
+                    limit 1                           
                     """;
             try (PreparedStatement totalPstmt = conn.prepareStatement(totalSql)) {
                 totalPstmt.setInt(1, id);
@@ -149,7 +151,7 @@ public class PurchaseDAO {
             try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
                 existPstmt.setInt(1 , id);
                 try (ResultSet rs = existPstmt.executeQuery()) {
-                    if(!rs.next()) throw new SQLException("ID가 " + id + "인 상품은 발주목록에 없습니다.");
+                    if(!rs.next()) return null;
 
                     purchaseDto.setQauntity(rs.getInt("quantity"));
                     purchaseDto.setProductId(rs.getInt("product_id"));
@@ -181,7 +183,7 @@ public class PurchaseDAO {
         try (PreparedStatement existPstmt = conn.prepareStatement(existPurchaseSql)) {
             existPstmt.setInt(1 , id);
             try (ResultSet rs = existPstmt.executeQuery()) {
-                if(!rs.next()) throw new SQLException("ID : " + id + "는 목록에 존재하지 않습니다.");
+                if(!rs.next()) throw new SQLException("ID : " + id + "는 발주목록에 존재하지 않습니다.");
                 price = rs.getInt("unit_price");
                 i[0] = rs.getInt("product_id");
             }
