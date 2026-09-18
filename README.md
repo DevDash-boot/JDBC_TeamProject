@@ -81,4 +81,4 @@ main은 SWING화면, main2는 콘솔창입니다.
 
 
 ---------------------------------
-[무인편의점 재고 관리 시스템.pptx](https://github.com/user-attachments/files/32362293/default.pptx)
+[무인편의점 재고 관리 시스템.pptx](https://github.com/user-attachments/files/32365936/default.pptx)
